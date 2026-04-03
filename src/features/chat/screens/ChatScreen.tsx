@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import {
   View,
   Text,
@@ -9,7 +9,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
-  Animated as RNAnimated,
+  Animated,
   Modal,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -56,6 +56,60 @@ function formatTime(dateStr: string): string {
   return `${hours}:${mins}`;
 }
 
+function AnimatedBubble({
+  children,
+  shouldAnimate,
+  messageId,
+  animatingIds,
+}: {
+  children: React.ReactNode;
+  shouldAnimate: boolean;
+  messageId: string;
+  animatingIds: React.MutableRefObject<Set<string>>;
+}) {
+  const scale = useRef(new Animated.Value(shouldAnimate ? 0.3 : 1)).current;
+  const translateY = useRef(new Animated.Value(shouldAnimate ? 20 : 0)).current;
+  const opacity = useRef(new Animated.Value(shouldAnimate ? 0 : 1)).current;
+
+  useEffect(() => {
+    if (shouldAnimate) {
+      Animated.parallel([
+        Animated.spring(scale, {
+          toValue: 1,
+          useNativeDriver: true,
+          damping: 12,
+          stiffness: 200,
+          mass: 0.8,
+        }),
+        Animated.spring(translateY, {
+          toValue: 0,
+          useNativeDriver: true,
+          damping: 14,
+          stiffness: 180,
+        }),
+        Animated.timing(opacity, {
+          toValue: 1,
+          duration: 150,
+          useNativeDriver: true,
+        }),
+      ]).start(() => {
+        animatingIds.current.delete(messageId);
+      });
+    }
+  }, [shouldAnimate]);
+
+  return (
+    <Animated.View
+      style={{
+        transform: [{ scale }, { translateY }],
+        opacity,
+      }}
+    >
+      {children}
+    </Animated.View>
+  );
+}
+
 export default function ChatScreen() {
   const route = useRoute<any>();
   const navigation = useNavigation();
@@ -72,8 +126,10 @@ export default function ChatScreen() {
   const [otherTyping, setOtherTyping] = useState(false);
   const [otherSeenAt, setOtherSeenAt] = useState<string | null>(null);
   const [reactionTarget, setReactionTarget] = useState<{ messageId: string; y: number } | null>(null);
+  const [optimisticMessages, setOptimisticMessages] = useState<Message[]>([]);
   const flatListRef = useRef<FlatList>(null);
   const typingTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const animatingIds = useRef<Set<string>>(new Set());
 
   const { data: messages = [], refetch } = useQuery({
     queryKey: ["messages", taskId],
@@ -167,13 +223,48 @@ export default function ChatScreen() {
     const trimmed = text.trim();
     if (!trimmed || sending) return;
     setSending(true);
+
+    // Optimistic: show message immediately with temp ID
+    const tempId = `temp-${Date.now()}`;
+    const optimistic: Message = {
+      id: tempId,
+      taskId,
+      senderId: user?.id ?? "",
+      content: trimmed,
+      createdAt: new Date().toISOString(),
+    };
+    animatingIds.current.add(tempId);
+    setOptimisticMessages((prev) => [...prev, optimistic]);
+    setText("");
+
     try {
       await sendMessage(taskId, trimmed);
-      setText("");
+      // Remove optimistic message once real data arrives
+      setOptimisticMessages((prev) => prev.filter((m) => m.id !== tempId));
       refetch();
-    } catch (e) {}
+    } catch (e) {
+      // Remove on error too
+      setOptimisticMessages((prev) => prev.filter((m) => m.id !== tempId));
+    }
     setSending(false);
-  }, [text, sending, taskId, refetch]);
+  }, [text, sending, taskId, refetch, user?.id]);
+
+  // Merge real + optimistic messages
+  const allMessages = useMemo(() => {
+    const realIds = new Set(messages.map((m) => m.id));
+    const pending = optimisticMessages.filter((m) => !realIds.has(m.id));
+    return [...messages, ...pending];
+  }, [messages, optimisticMessages]);
+
+  // Track new message IDs for animation
+  const prevMessageCount = useRef(0);
+  useEffect(() => {
+    if (allMessages.length > prevMessageCount.current) {
+      const newMsgs = allMessages.slice(prevMessageCount.current);
+      newMsgs.forEach((m) => animatingIds.current.add(m.id));
+    }
+    prevMessageCount.current = allMessages.length;
+  }, [allMessages.length]);
 
   const handleReaction = useCallback(async (messageId: string, emoji: string) => {
     setReactionTarget(null);
@@ -201,6 +292,8 @@ export default function ChatScreen() {
       const isMine = item.senderId === user?.id;
       const showSeen = item.id === lastSeenMessageId;
       const reactions = reactionsMap.get(item.id) ?? [];
+      const shouldAnimate = animatingIds.current.has(item.id);
+      const isOptimistic = item.id.startsWith("temp-");
 
       // Group reactions by emoji
       const emojiCounts = new Map<string, { count: number; myReaction: boolean }>();
@@ -212,67 +305,69 @@ export default function ChatScreen() {
       }
 
       return (
-        <View style={{ marginBottom: reactions.length > 0 ? 18 : 12 }}>
-          <Pressable
-            onLongPress={() => setReactionTarget({ messageId: item.id, y: 0 })}
-            delayLongPress={300}
-          >
-            <View
-              style={[
-                styles.messageBubbleWrap,
-                isMine ? styles.messageBubbleWrapRight : styles.messageBubbleWrapLeft,
-              ]}
+        <AnimatedBubble shouldAnimate={shouldAnimate} messageId={item.id} animatingIds={animatingIds}>
+          <View style={{ marginBottom: reactions.length > 0 ? 18 : 12, opacity: isOptimistic ? 0.7 : 1 }}>
+            <Pressable
+              onLongPress={() => !isOptimistic && setReactionTarget({ messageId: item.id, y: 0 })}
+              delayLongPress={300}
             >
               <View
                 style={[
-                  styles.messageBubble,
-                  isMine ? styles.messageBubbleMine : styles.messageBubbleOther,
+                  styles.messageBubbleWrap,
+                  isMine ? styles.messageBubbleWrapRight : styles.messageBubbleWrapLeft,
                 ]}
               >
-                <Text
+                <View
                   style={[
-                    styles.messageText,
-                    isMine ? styles.messageTextMine : styles.messageTextOther,
+                    styles.messageBubble,
+                    isMine ? styles.messageBubbleMine : styles.messageBubbleOther,
                   ]}
                 >
-                  {item.content}
-                </Text>
-              </View>
-
-              {/* Reaction pills below the bubble */}
-              {emojiCounts.size > 0 && (
-                <View style={[styles.reactionsRow, isMine ? { justifyContent: "flex-end" } : {}]}>
-                  {Array.from(emojiCounts.entries()).map(([emoji, { count, myReaction }]) => (
-                    <Pressable
-                      key={emoji}
-                      onPress={() => handleReaction(item.id, emoji)}
-                      style={[styles.reactionPill, myReaction && styles.reactionPillMine]}
-                    >
-                      <Text style={styles.reactionEmoji}>{emoji}</Text>
-                      {count > 1 && <Text style={styles.reactionCount}>{count}</Text>}
-                    </Pressable>
-                  ))}
+                  <Text
+                    style={[
+                      styles.messageText,
+                      isMine ? styles.messageTextMine : styles.messageTextOther,
+                    ]}
+                  >
+                    {item.content}
+                  </Text>
                 </View>
+
+                {/* Reaction pills below the bubble */}
+                {emojiCounts.size > 0 && (
+                  <View style={[styles.reactionsRow, isMine ? { justifyContent: "flex-end" } : {}]}>
+                    {Array.from(emojiCounts.entries()).map(([emoji, { count, myReaction }]) => (
+                      <Pressable
+                        key={emoji}
+                        onPress={() => handleReaction(item.id, emoji)}
+                        style={[styles.reactionPill, myReaction && styles.reactionPillMine]}
+                      >
+                        <Text style={styles.reactionEmoji}>{emoji}</Text>
+                        {count > 1 && <Text style={styles.reactionCount}>{count}</Text>}
+                      </Pressable>
+                    ))}
+                  </View>
+                )}
+              </View>
+            </Pressable>
+
+            {/* Timestamp + seen avatar row */}
+            <View style={{ flexDirection: "row", alignItems: "center", marginTop: 2, paddingHorizontal: 4 }}>
+              {isMine && <View style={{ flex: 1 }} />}
+              <Text style={[styles.timestamp, { textAlign: isMine ? "right" : "left" }]}>
+                {formatTime(item.createdAt)}
+              </Text>
+              {showSeen && (
+                <>
+                  <View style={{ flex: isMine ? 0 : 1 }} />
+                  <View style={[styles.seenAvatar, { backgroundColor: avatarColor, marginLeft: 4 }]}>
+                    <Text style={styles.seenAvatarText}>{otherName.charAt(0).toUpperCase()}</Text>
+                  </View>
+                </>
               )}
             </View>
-          </Pressable>
-
-          {/* Timestamp + seen avatar row */}
-          <View style={{ flexDirection: "row", alignItems: "center", marginTop: 2, paddingHorizontal: 4 }}>
-            {isMine && <View style={{ flex: 1 }} />}
-            <Text style={[styles.timestamp, { textAlign: isMine ? "right" : "left" }]}>
-              {formatTime(item.createdAt)}
-            </Text>
-            {showSeen && (
-              <>
-                <View style={{ flex: isMine ? 0 : 1 }} />
-                <View style={[styles.seenAvatar, { backgroundColor: avatarColor, marginLeft: 4 }]}>
-                  <Text style={styles.seenAvatarText}>{otherName.charAt(0).toUpperCase()}</Text>
-                </View>
-              </>
-            )}
           </View>
-        </View>
+        </AnimatedBubble>
       );
     },
     [user?.id, lastSeenMessageId, avatarColor, otherName, reactionsMap, handleReaction],
@@ -323,7 +418,7 @@ export default function ChatScreen() {
       {/* Messages */}
       <FlatList
         ref={flatListRef}
-        data={[...messages].reverse()}
+        data={[...allMessages].reverse()}
         renderItem={renderMessage}
         keyExtractor={(item) => item.id}
         inverted
