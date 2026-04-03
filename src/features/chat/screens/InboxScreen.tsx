@@ -64,12 +64,15 @@ export default function InboxScreen() {
     }, [refetch]),
   );
 
-  // Subscribe to typing indicators for all conversations
+  // Subscribe to typing indicators + new messages for all conversations
   useEffect(() => {
     if (!conversations.length || !user) return;
 
-    const channels = conversations.map((conv) => {
-      const ch = supabase.channel(`typing-${conv.taskId}`);
+    const channels: any[] = [];
+
+    // Typing channels
+    conversations.forEach((conv) => {
+      const ch = supabase.channel(`typing-inbox-${conv.taskId}`);
       ch.on("broadcast", { event: "typing" }, ({ payload }) => {
         if (payload.userId !== user.id) {
           setTypingTasks((prev) => new Set(prev).add(conv.taskId));
@@ -87,14 +90,27 @@ export default function InboxScreen() {
           );
         }
       }).subscribe();
-      return ch;
+      channels.push(ch);
     });
+
+    // Listen for any new messages across all conversations
+    const msgChannel = supabase
+      .channel("inbox-messages")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "messages" },
+        () => {
+          refetch();
+        },
+      )
+      .subscribe();
+    channels.push(msgChannel);
 
     return () => {
       channels.forEach((ch) => supabase.removeChannel(ch));
       typingTimeouts.current.forEach((t) => clearTimeout(t));
     };
-  }, [conversations.length, user]);
+  }, [conversations.length, user, refetch]);
 
   const handlePress = useCallback(
     (conv: Conversation) => {
