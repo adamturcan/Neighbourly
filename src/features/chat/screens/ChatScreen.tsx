@@ -137,6 +137,7 @@ export default function ChatScreen() {
   const [otherTyping, setOtherTyping] = useState(false);
   const [otherSeenAt, setOtherSeenAt] = useState<string | null>(null);
   const [reactionTarget, setReactionTarget] = useState<{ messageId: string; y: number } | null>(null);
+  const [viewingImage, setViewingImage] = useState<string | null>(null);
   const [optimisticMessages, setOptimisticMessages] = useState<Message[]>([]);
   const flatListRef = useRef<FlatList>(null);
   const typingTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -414,13 +415,15 @@ export default function ChatScreen() {
                 ]}
               >
                 {item.content.startsWith("[img]") ? (
-                  <View style={styles.imageBubble}>
-                    <Image
-                      source={{ uri: item.content.replace("[img]", "") }}
-                      style={styles.chatImage}
-                      resizeMode="cover"
-                    />
-                  </View>
+                  <Pressable onPress={() => setViewingImage(item.content.replace("[img]", ""))}>
+                    <View style={styles.imageBubble}>
+                      <Image
+                        source={{ uri: item.content.replace("[img]", "") }}
+                        style={styles.chatImage}
+                        resizeMode="cover"
+                      />
+                    </View>
+                  </Pressable>
                 ) : (
                   <View
                     style={[
@@ -603,6 +606,28 @@ export default function ChatScreen() {
           </View>
         </Pressable>
       </Modal>
+
+      {/* Fullscreen image viewer */}
+      <Modal
+        visible={viewingImage !== null}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setViewingImage(null)}
+      >
+        <View style={styles.imageViewerOverlay}>
+          <Pressable style={styles.imageViewerClose} onPress={() => setViewingImage(null)}>
+            <MaterialCommunityIcons name="close" size={24} color="#fff" />
+          </Pressable>
+          {viewingImage && (
+            <Image
+              source={{ uri: viewingImage }}
+              style={styles.imageViewerImage}
+              resizeMode="contain"
+            />
+          )}
+          <Pressable style={styles.imageViewerTap} onPress={() => setViewingImage(null)} />
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -758,4 +783,35 @@ const styles = StyleSheet.create({
     alignItems: "center", justifyContent: "center",
   },
   seenAvatarText: { color: "#fff", fontSize: 7, fontWeight: "700" },
+  // Fullscreen image viewer
+  imageViewerOverlay: {
+    flex: 1,
+    backgroundColor: "#000",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  imageViewerClose: {
+    position: "absolute",
+    top: 60,
+    right: 20,
+    zIndex: 10,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "rgba(255,255,255,0.2)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  imageViewerImage: {
+    width: "100%",
+    height: "80%",
+  },
+  imageViewerTap: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: -1,
+  },
 });
