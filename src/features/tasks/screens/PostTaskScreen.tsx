@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -9,6 +9,10 @@ import {
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
+  Animated,
+  useWindowDimensions,
+  NativeSyntheticEvent,
+  NativeScrollEvent,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
@@ -27,10 +31,14 @@ const CATEGORIES = [
 ];
 
 const PRICE_PRESETS = [20, 45, 60, 80, 100];
-type Step = 1 | 2 | 3;
+const TOTAL_STEPS = 3;
 
 export default function PostTaskScreen() {
-  const [step, setStep] = useState<Step>(1);
+  const { width } = useWindowDimensions();
+  const pagerRef = useRef<ScrollView>(null);
+  const scrollX = useRef(new Animated.Value(0)).current;
+  const [step, setStep] = useState(0); // 0-indexed for pager
+
   const [category, setCategory] = useState("");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -40,13 +48,32 @@ export default function PostTaskScreen() {
 
   const selectedCat = CATEGORIES.find((c) => c.key === category);
 
+  const goToPage = useCallback((page: number) => {
+    pagerRef.current?.scrollTo({ x: page * width, animated: true });
+  }, [width]);
+
+  const onMomentumEnd = useCallback((e: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const page = Math.round(e.nativeEvent.contentOffset.x / width);
+    setStep(page);
+  }, [width]);
+
+  // Block forward swipe if validation fails
+  const onScrollBeginDrag = useCallback(() => {
+    // We allow free swiping back but block forward via the button
+  }, []);
+
   const handleNext = () => {
-    if (step === 1 && !category) { Alert.alert("Pick a category"); return; }
-    if (step === 2) {
+    if (step === 0 && !category) { Alert.alert("Pick a category"); return; }
+    if (step === 1) {
       if (title.trim().length < 3) { Alert.alert("Title too short", "At least 3 characters"); return; }
       if (description.trim().length < 5) { Alert.alert("Add a description", "At least 5 characters"); return; }
     }
-    setStep((s) => Math.min(s + 1, 3) as Step);
+    goToPage(step + 1);
+  };
+
+  const handleBack = () => {
+    if (step <= 0) return;
+    goToPage(step - 1);
   };
 
   const handleSubmit = async () => {
@@ -55,177 +82,195 @@ export default function PostTaskScreen() {
     try {
       await createTask({ title: title.trim(), description: description.trim(), category, budget: Number(budget), payment_type: paymentType, lat: 48.1482, lng: 17.1067 });
       Alert.alert("Task posted!", "Helpers nearby will see your task.");
-      setStep(1); setCategory(""); setTitle(""); setDescription(""); setBudget(""); setPaymentType("cash");
+      setCategory(""); setTitle(""); setDescription(""); setBudget(""); setPaymentType("cash");
+      goToPage(0);
     } catch (e: any) { Alert.alert("Error", e.message); }
     setSubmitting(false);
   };
 
+  // Progress bar interpolation: smooth fill as you swipe
+  const progressWidth = (index: number) => {
+    return scrollX.interpolate({
+      inputRange: [
+        (index - 1) * width,
+        index * width,
+        (index + 1) * width,
+      ],
+      outputRange: ["0%", "100%", "100%"],
+      extrapolate: "clamp",
+    });
+  };
+
   return (
-    <SafeAreaView style={s.safe}>
+    <SafeAreaView style={st.safe}>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
         {/* Nav */}
-        <View style={s.nav}>
-          {step > 1 ? (
-            <Pressable onPress={() => setStep((prev) => (prev - 1) as Step)} hitSlop={8}>
+        <View style={st.nav}>
+          {step > 0 ? (
+            <Pressable onPress={handleBack} hitSlop={8}>
               <MaterialCommunityIcons name="chevron-left" size={26} color="#000" />
             </Pressable>
           ) : <View style={{ width: 26 }} />}
-          <Text style={s.navTitle}>New Task</Text>
+          <Text style={st.navTitle}>New Task</Text>
           <View style={{ width: 26 }} />
         </View>
 
-        {/* Progress */}
-        <View style={s.progressRow}>
-          {[1, 2, 3].map((i) => (
-            <View key={i} style={[s.progressSeg, { backgroundColor: i <= step ? COLORS.red : "#E5E5EA" }]} />
+        {/* Animated progress bar — fills smoothly with swipe */}
+        <View style={st.progressRow}>
+          {Array.from({ length: TOTAL_STEPS }).map((_, i) => (
+            <View key={i} style={st.progressTrack}>
+              <Animated.View style={[st.progressFill, { width: progressWidth(i) }]} />
+            </View>
           ))}
         </View>
 
-        <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 20 }} keyboardShouldPersistTaps="handled">
-
-          {/* ========== STEP 1 ========== */}
-          {step === 1 && (
-            <View>
-              <Text style={s.heading}>What do you{"\n"}need help with?</Text>
-              <Text style={s.sub}>Choose a category</Text>
-              <View style={{ gap: 6 }}>
-                {CATEGORIES.map((cat) => {
-                  const on = category === cat.key;
-                  return (
-                    <Pressable key={cat.key} onPress={() => setCategory(cat.key)}
-                      style={[s.catRow, on && { backgroundColor: "#FEF2F2", borderColor: COLORS.red }]}>
-                      <View style={[s.catIcon, { backgroundColor: on ? COLORS.red : cat.bg }]}>
-                        <MaterialCommunityIcons name={cat.icon} size={20} color={on ? "#fff" : cat.fg} />
-                      </View>
-                      <View style={{ flex: 1 }}>
-                        <Text style={[s.catLabel, on && { color: COLORS.red }]}>{cat.label}</Text>
-                        <Text style={s.catDesc}>{cat.desc}</Text>
-                      </View>
-                      {on && <MaterialCommunityIcons name="check-circle" size={20} color={COLORS.red} />}
-                    </Pressable>
-                  );
-                })}
-              </View>
-            </View>
+        {/* Horizontal pager */}
+        <Animated.ScrollView
+          ref={pagerRef}
+          horizontal
+          pagingEnabled
+          scrollEnabled={false} // Only navigate via buttons (prevents skipping validation)
+          showsHorizontalScrollIndicator={false}
+          onScroll={Animated.event(
+            [{ nativeEvent: { contentOffset: { x: scrollX } } }],
+            { useNativeDriver: false },
           )}
-
-          {/* ========== STEP 2 ========== */}
-          {step === 2 && (
-            <View>
-              {/* Category chip */}
-              {selectedCat && (
-                <View style={s.chip}>
-                  <MaterialCommunityIcons name={selectedCat.icon} size={14} color={COLORS.red} />
-                  <Text style={s.chipText}>{selectedCat.label}</Text>
-                </View>
-              )}
-              <Text style={s.heading}>Describe your task</Text>
-              <View style={{ gap: 16, marginTop: 20 }}>
-                <View>
-                  <Text style={s.inputLabel}>Title</Text>
-                  <TextInput value={title} onChangeText={setTitle} placeholder="e.g. Deep clean my apartment"
-                    style={s.input} placeholderTextColor="#C7C7CC" />
-                </View>
-                <View>
-                  <Text style={s.inputLabel}>Description</Text>
-                  <TextInput value={description} onChangeText={setDescription} placeholder="Add details — when, where, what's needed…"
-                    multiline numberOfLines={4} style={[s.input, { minHeight: 110, textAlignVertical: "top", lineHeight: 22 }]} placeholderTextColor="#C7C7CC" />
-                </View>
-                <View>
-                  <Text style={s.inputLabel}>Photos <Text style={{ color: "#C7C7CC", fontWeight: "400" }}>(optional)</Text></Text>
-                  <Pressable style={s.photoAdd}>
-                    <MaterialCommunityIcons name="camera-plus-outline" size={22} color="#A1A1AA" />
-                    <Text style={{ fontSize: 9, color: "#A1A1AA", fontWeight: "500" }}>Add</Text>
+          scrollEventThrottle={16}
+          onMomentumScrollEnd={onMomentumEnd}
+          style={{ flex: 1 }}
+        >
+          {/* ========== PAGE 1: Category ========== */}
+          <ScrollView style={{ width }} contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 20 }} keyboardShouldPersistTaps="handled">
+            <Text style={st.heading}>What do you{"\n"}need help with?</Text>
+            <Text style={st.sub}>Choose a category</Text>
+            <View style={{ gap: 6 }}>
+              {CATEGORIES.map((cat) => {
+                const on = category === cat.key;
+                return (
+                  <Pressable key={cat.key} onPress={() => setCategory(cat.key)}
+                    style={[st.catRow, on && { backgroundColor: "#FEF2F2", borderColor: COLORS.red }]}>
+                    <View style={[st.catIcon, { backgroundColor: on ? COLORS.red : cat.bg }]}>
+                      <MaterialCommunityIcons name={cat.icon} size={20} color={on ? "#fff" : cat.fg} />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={[st.catLabel, on && { color: COLORS.red }]}>{cat.label}</Text>
+                      <Text style={st.catDesc}>{cat.desc}</Text>
+                    </View>
+                    {on && <MaterialCommunityIcons name="check-circle" size={20} color={COLORS.red} />}
                   </Pressable>
-                </View>
-              </View>
+                );
+              })}
             </View>
-          )}
+          </ScrollView>
 
-          {/* ========== STEP 3 ========== */}
-          {step === 3 && (
-            <View>
-              {/* Summary */}
-              {selectedCat && (
-                <View style={s.summary}>
-                  <View style={s.summaryIcon}>
-                    <MaterialCommunityIcons name={selectedCat.icon} size={16} color="#fff" />
-                  </View>
-                  <View>
-                    <Text style={{ fontSize: 13, fontWeight: "600", color: "#000" }} numberOfLines={1}>{title || "Your task"}</Text>
-                    <Text style={{ fontSize: 11, color: "#A1A1AA" }}>{selectedCat.label}</Text>
-                  </View>
-                </View>
-              )}
-
-              <Text style={s.heading}>Budget & details</Text>
-
-              {/* Budget input */}
-              <View style={{ marginTop: 20 }}>
-                <Text style={s.inputLabel}>Your budget</Text>
-                <View style={s.budgetRow}>
-                  <Text style={{ fontSize: 20, fontWeight: "700", color: "#C7C7CC" }}>€</Text>
-                  <TextInput value={budget} onChangeText={setBudget} placeholder="0" keyboardType="numeric"
-                    style={{ fontSize: 20, fontWeight: "700", color: "#000", flex: 1 }} placeholderTextColor="#C7C7CC" />
-                </View>
+          {/* ========== PAGE 2: Details ========== */}
+          <ScrollView style={{ width }} contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 20 }} keyboardShouldPersistTaps="handled">
+            {selectedCat && (
+              <View style={st.chip}>
+                <MaterialCommunityIcons name={selectedCat.icon} size={14} color={COLORS.red} />
+                <Text style={st.chipText}>{selectedCat.label}</Text>
               </View>
-
-              {/* Presets */}
-              <View style={{ flexDirection: "row", gap: 6, marginTop: 8, marginBottom: 20 }}>
-                {PRICE_PRESETS.map((p) => {
-                  const on = Number(budget) === p;
-                  return (
-                    <Pressable key={p} onPress={() => setBudget(String(p))}
-                      style={[s.preset, on && { borderColor: COLORS.red, backgroundColor: "#FEF2F2" }]}>
-                      <Text style={[s.presetText, on && { color: COLORS.red }]}>€{p}</Text>
-                    </Pressable>
-                  );
-                })}
+            )}
+            <Text style={st.heading}>Describe your task</Text>
+            <View style={{ gap: 16, marginTop: 20 }}>
+              <View>
+                <Text style={st.inputLabel}>Title</Text>
+                <TextInput value={title} onChangeText={setTitle} placeholder="e.g. Deep clean my apartment"
+                  style={st.input} placeholderTextColor="#C7C7CC" />
               </View>
-
-              {/* Settings group */}
-              <View style={s.settingsGroup}>
-                <Pressable onPress={() => setPaymentType(paymentType === "cash" ? "digital" : "cash")} style={[s.settingsRow, s.settingsBorder]}>
-                  <View style={s.settingsLeft}>
-                    <MaterialCommunityIcons name="cash-multiple" size={20} color="#A1A1AA" />
-                    <Text style={s.settingsLabel}>Payment</Text>
-                  </View>
-                  <View style={s.settingsRight}>
-                    <Text style={s.settingsValue}>{paymentType === "cash" ? "Cash" : "Digital"}</Text>
-                    <MaterialCommunityIcons name="chevron-right" size={18} color="#D1D1D6" />
-                  </View>
+              <View>
+                <Text style={st.inputLabel}>Description</Text>
+                <TextInput value={description} onChangeText={setDescription} placeholder="Add details — when, where, what's needed…"
+                  multiline numberOfLines={4} style={[st.input, { minHeight: 110, textAlignVertical: "top", lineHeight: 22 }]} placeholderTextColor="#C7C7CC" />
+              </View>
+              <View>
+                <Text style={st.inputLabel}>Photos <Text style={{ color: "#C7C7CC", fontWeight: "400" }}>(optional)</Text></Text>
+                <Pressable style={st.photoAdd}>
+                  <MaterialCommunityIcons name="camera-plus-outline" size={22} color="#A1A1AA" />
+                  <Text style={{ fontSize: 9, color: "#A1A1AA", fontWeight: "500" }}>Add</Text>
                 </Pressable>
-                <View style={[s.settingsRow, s.settingsBorder]}>
-                  <View style={s.settingsLeft}>
-                    <MaterialCommunityIcons name="clock-outline" size={20} color="#A1A1AA" />
-                    <Text style={s.settingsLabel}>When</Text>
-                  </View>
-                  <View style={s.settingsRight}>
-                    <Text style={s.settingsValue}>As soon as possible</Text>
-                    <MaterialCommunityIcons name="chevron-right" size={18} color="#D1D1D6" />
-                  </View>
+              </View>
+            </View>
+          </ScrollView>
+
+          {/* ========== PAGE 3: Budget ========== */}
+          <ScrollView style={{ width }} contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 20 }} keyboardShouldPersistTaps="handled">
+            {selectedCat && (
+              <View style={st.summary}>
+                <View style={st.summaryIcon}>
+                  <MaterialCommunityIcons name={selectedCat.icon} size={16} color="#fff" />
                 </View>
-                <View style={s.settingsRow}>
-                  <View style={s.settingsLeft}>
-                    <MaterialCommunityIcons name="map-marker-outline" size={20} color="#A1A1AA" />
-                    <Text style={s.settingsLabel}>Location</Text>
-                  </View>
-                  <View style={s.settingsRight}>
-                    <Text style={s.settingsValue}>Current location</Text>
-                    <MaterialCommunityIcons name="chevron-right" size={18} color="#D1D1D6" />
-                  </View>
+                <View>
+                  <Text style={{ fontSize: 13, fontWeight: "600", color: "#000" }} numberOfLines={1}>{title || "Your task"}</Text>
+                  <Text style={{ fontSize: 11, color: "#A1A1AA" }}>{selectedCat.label}</Text>
+                </View>
+              </View>
+            )}
+
+            <Text style={st.heading}>Budget & details</Text>
+
+            <View style={{ marginTop: 20 }}>
+              <Text style={st.inputLabel}>Your budget</Text>
+              <View style={st.budgetRow}>
+                <Text style={{ fontSize: 20, fontWeight: "700", color: "#C7C7CC" }}>€</Text>
+                <TextInput value={budget} onChangeText={setBudget} placeholder="0" keyboardType="numeric"
+                  style={{ fontSize: 20, fontWeight: "700", color: "#000", flex: 1 }} placeholderTextColor="#C7C7CC" />
+              </View>
+            </View>
+
+            <View style={{ flexDirection: "row", gap: 6, marginTop: 8, marginBottom: 20 }}>
+              {PRICE_PRESETS.map((p) => {
+                const on = Number(budget) === p;
+                return (
+                  <Pressable key={p} onPress={() => setBudget(String(p))}
+                    style={[st.preset, on && { borderColor: COLORS.red, backgroundColor: "#FEF2F2" }]}>
+                    <Text style={[st.presetText, on && { color: COLORS.red }]}>€{p}</Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+
+            <View style={st.settingsGroup}>
+              <Pressable onPress={() => setPaymentType(paymentType === "cash" ? "digital" : "cash")} style={[st.settingsRow, st.settingsBorder]}>
+                <View style={st.settingsLeft}>
+                  <MaterialCommunityIcons name="cash-multiple" size={20} color="#A1A1AA" />
+                  <Text style={st.settingsLabel}>Payment</Text>
+                </View>
+                <View style={st.settingsRight}>
+                  <Text style={st.settingsValue}>{paymentType === "cash" ? "Cash" : "Digital"}</Text>
+                  <MaterialCommunityIcons name="chevron-right" size={18} color="#D1D1D6" />
+                </View>
+              </Pressable>
+              <View style={[st.settingsRow, st.settingsBorder]}>
+                <View style={st.settingsLeft}>
+                  <MaterialCommunityIcons name="clock-outline" size={20} color="#A1A1AA" />
+                  <Text style={st.settingsLabel}>When</Text>
+                </View>
+                <View style={st.settingsRight}>
+                  <Text style={st.settingsValue}>As soon as possible</Text>
+                  <MaterialCommunityIcons name="chevron-right" size={18} color="#D1D1D6" />
+                </View>
+              </View>
+              <View style={st.settingsRow}>
+                <View style={st.settingsLeft}>
+                  <MaterialCommunityIcons name="map-marker-outline" size={20} color="#A1A1AA" />
+                  <Text style={st.settingsLabel}>Location</Text>
+                </View>
+                <View style={st.settingsRight}>
+                  <Text style={st.settingsValue}>Current location</Text>
+                  <MaterialCommunityIcons name="chevron-right" size={18} color="#D1D1D6" />
                 </View>
               </View>
             </View>
-          )}
-        </ScrollView>
+          </ScrollView>
+        </Animated.ScrollView>
 
         {/* Bottom CTA */}
-        <View style={s.bottomBar}>
-          <Pressable onPress={step < 3 ? handleNext : handleSubmit} disabled={submitting || (step === 1 && !category)}
-            style={[s.cta, (step === 1 && !category) && { backgroundColor: "#D1D1D6" }]}>
-            <Text style={s.ctaText}>
-              {submitting ? "Posting…" : step < 3 ? "Continue" : budget ? `Post task` : "Post task"}
+        <View style={st.bottomBar}>
+          <Pressable onPress={step < 2 ? handleNext : handleSubmit} disabled={submitting || (step === 0 && !category)}
+            style={[st.cta, (step === 0 && !category) && { backgroundColor: "#D1D1D6" }]}>
+            <Text style={st.ctaText}>
+              {submitting ? "Posting…" : step < 2 ? "Continue" : "Post task"}
             </Text>
           </Pressable>
         </View>
@@ -234,42 +279,38 @@ export default function PostTaskScreen() {
   );
 }
 
-const s = StyleSheet.create({
+const st = StyleSheet.create({
   safe: { flex: 1, backgroundColor: "#fff" },
   nav: { flexDirection: "row", alignItems: "center", paddingHorizontal: 16, height: 44 },
   navTitle: { flex: 1, textAlign: "center", fontSize: 15, fontWeight: "600", color: "#000" },
+
   progressRow: { flexDirection: "row", gap: 6, paddingHorizontal: 16, paddingTop: 4, paddingBottom: 12 },
-  progressSeg: { flex: 1, height: 3, borderRadius: 2 },
+  progressTrack: { flex: 1, height: 3, borderRadius: 2, backgroundColor: "#E5E5EA", overflow: "hidden" as const },
+  progressFill: { height: 3, borderRadius: 2, backgroundColor: COLORS.red },
+
   heading: { fontSize: 22, fontWeight: "700", color: "#000", lineHeight: 28, marginTop: 4 },
   sub: { fontSize: 13, color: "#A1A1AA", marginTop: 2, marginBottom: 16 },
 
-  // Category list
   catRow: { flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 12, paddingVertical: 10, borderRadius: 12, borderWidth: 1, borderColor: "#E5E5EA", backgroundColor: "#fff" },
   catIcon: { width: 36, height: 36, borderRadius: 10, alignItems: "center", justifyContent: "center" },
   catLabel: { fontSize: 14, fontWeight: "600", color: "#000" },
   catDesc: { fontSize: 11, color: "#A1A1AA", marginTop: 1 },
 
-  // Chip
   chip: { flexDirection: "row", alignItems: "center", gap: 4, backgroundColor: "#FEF2F2", borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4, alignSelf: "flex-start", marginBottom: 12 },
   chipText: { fontSize: 12, fontWeight: "600", color: COLORS.red },
 
-  // Inputs
   inputLabel: { fontSize: 12, fontWeight: "500", color: "#71717A", marginBottom: 6 },
   input: { backgroundColor: "#FAFAFA", borderWidth: 1, borderColor: "#E5E5EA", borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: 14, color: "#000", fontWeight: "500" },
 
-  // Photo
   photoAdd: { width: 68, height: 68, borderRadius: 12, borderWidth: 1, borderStyle: "dashed" as const, borderColor: "#D1D1D6", backgroundColor: "#FAFAFA", alignItems: "center", justifyContent: "center", gap: 2 },
 
-  // Summary
   summary: { flexDirection: "row", alignItems: "center", gap: 10, backgroundColor: "#FAFAFA", borderRadius: 12, paddingHorizontal: 12, paddingVertical: 10, marginBottom: 16 },
   summaryIcon: { width: 32, height: 32, borderRadius: 8, backgroundColor: COLORS.red, alignItems: "center", justifyContent: "center" },
 
-  // Budget
   budgetRow: { flexDirection: "row", alignItems: "center", gap: 4, backgroundColor: "#FAFAFA", borderWidth: 1, borderColor: "#E5E5EA", borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12 },
   preset: { height: 32, paddingHorizontal: 14, borderRadius: 8, borderWidth: 1, borderColor: "#E5E5EA", alignItems: "center", justifyContent: "center" },
   presetText: { fontSize: 12, fontWeight: "600", color: "#71717A" },
 
-  // Settings
   settingsGroup: { backgroundColor: "#F5F5F5", borderRadius: 12, overflow: "hidden" as const },
   settingsRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", backgroundColor: "#fff", paddingHorizontal: 14, paddingVertical: 12 },
   settingsBorder: { borderBottomWidth: 0.5, borderBottomColor: "#E5E5EA" },
@@ -278,7 +319,6 @@ const s = StyleSheet.create({
   settingsLabel: { fontSize: 14, fontWeight: "500", color: "#000" },
   settingsValue: { fontSize: 13, fontWeight: "500", color: "#A1A1AA" },
 
-  // Bottom
   bottomBar: { paddingHorizontal: 16, paddingVertical: 8, borderTopWidth: 0.5, borderTopColor: "#F0F0F0", backgroundColor: "#fff" },
   cta: { backgroundColor: COLORS.red, borderRadius: 14, paddingVertical: 16, alignItems: "center" },
   ctaText: { color: "#fff", fontSize: 15, fontWeight: "600" },
