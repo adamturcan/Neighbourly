@@ -60,7 +60,10 @@ export default function ChatScreen() {
   const queryClient = useQueryClient();
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
+  const [otherTyping, setOtherTyping] = useState(false);
   const flatListRef = useRef<FlatList>(null);
+  const typingTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const typingChannelRef = useRef<any>(null);
 
   const { data: messages = [], refetch } = useQuery({
     queryKey: ["messages", taskId],
@@ -98,6 +101,41 @@ export default function ChatScreen() {
       supabase.removeChannel(channel);
     };
   }, [taskId, refetch]);
+
+  // Typing indicator broadcast
+  useEffect(() => {
+    if (!taskId || !user) return;
+
+    const typingChannel = supabase.channel(`typing-${taskId}`);
+    typingChannel
+      .on("broadcast", { event: "typing" }, ({ payload }) => {
+        if (payload.userId !== user.id) {
+          setOtherTyping(true);
+          if (typingTimeout.current) clearTimeout(typingTimeout.current);
+          typingTimeout.current = setTimeout(() => setOtherTyping(false), 3000);
+        }
+      })
+      .subscribe();
+
+    typingChannelRef.current = typingChannel;
+    return () => {
+      supabase.removeChannel(typingChannel);
+      if (typingTimeout.current) clearTimeout(typingTimeout.current);
+    };
+  }, [taskId, user]);
+
+  const broadcastTyping = useCallback(() => {
+    typingChannelRef.current?.send({
+      type: "broadcast",
+      event: "typing",
+      payload: { userId: user?.id },
+    });
+  }, [user]);
+
+  const handleTextChange = useCallback((val: string) => {
+    setText(val);
+    broadcastTyping();
+  }, [broadcastTyping]);
 
   const handleSend = useCallback(async () => {
     const trimmed = text.trim();
@@ -219,6 +257,18 @@ export default function ChatScreen() {
         showsVerticalScrollIndicator={false}
       />
 
+      {/* Typing indicator */}
+      {otherTyping && (
+        <View style={styles.typingWrap}>
+          <View style={styles.typingBubble}>
+            <View style={styles.typingDot} />
+            <View style={styles.typingDot} />
+            <View style={styles.typingDot} />
+          </View>
+          <Text style={styles.typingText}>{otherName} is typing…</Text>
+        </View>
+      )}
+
       {/* Input bar */}
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : undefined}
@@ -238,7 +288,7 @@ export default function ChatScreen() {
               placeholder="Type a message..."
               placeholderTextColor="#9CA3AF"
               value={text}
-              onChangeText={setText}
+              onChangeText={handleTextChange}
               multiline
               maxLength={2000}
             />
@@ -428,5 +478,32 @@ const styles = StyleSheet.create({
   },
   sendBtnDisabled: {
     opacity: 0.5,
+  },
+  typingWrap: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+  },
+  typingBubble: {
+    flexDirection: "row",
+    gap: 3,
+    backgroundColor: "#F1F1F1",
+    borderRadius: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    borderBottomLeftRadius: 4,
+  },
+  typingDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: "#9CA3AF",
+  },
+  typingText: {
+    fontSize: 11,
+    color: "#9CA3AF",
+    fontWeight: "500",
   },
 });

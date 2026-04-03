@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect, useState, useRef } from "react";
 import {
   View,
   Text,
@@ -15,6 +15,8 @@ import { listConversations } from "../../../shared/lib/api";
 import type { Conversation } from "../../../shared/lib/api";
 import { COLORS, CATEGORY_COLORS } from "../../../shared/lib/constants";
 import { TAB_BAR_HEIGHT } from "../../../navigation/RootNavigator";
+import { useAuth } from "../../auth/store/useAuth";
+import { supabase } from "../../../shared/lib/supabase";
 
 const AVATAR_COLORS = [
   "#E31B23",
@@ -43,6 +45,9 @@ function timeAgo(dateStr: string | null): string {
 
 export default function InboxScreen() {
   const navigation = useNavigation<any>();
+  const { user } = useAuth();
+  const [typingTasks, setTypingTasks] = useState<Set<string>>(new Set());
+  const typingTimeouts = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
   const {
     data: conversations = [],
@@ -59,6 +64,38 @@ export default function InboxScreen() {
     }, [refetch]),
   );
 
+  // Subscribe to typing indicators for all conversations
+  useEffect(() => {
+    if (!conversations.length || !user) return;
+
+    const channels = conversations.map((conv) => {
+      const ch = supabase.channel(`typing-${conv.taskId}`);
+      ch.on("broadcast", { event: "typing" }, ({ payload }) => {
+        if (payload.userId !== user.id) {
+          setTypingTasks((prev) => new Set(prev).add(conv.taskId));
+          const existing = typingTimeouts.current.get(conv.taskId);
+          if (existing) clearTimeout(existing);
+          typingTimeouts.current.set(
+            conv.taskId,
+            setTimeout(() => {
+              setTypingTasks((prev) => {
+                const next = new Set(prev);
+                next.delete(conv.taskId);
+                return next;
+              });
+            }, 3000),
+          );
+        }
+      }).subscribe();
+      return ch;
+    });
+
+    return () => {
+      channels.forEach((ch) => supabase.removeChannel(ch));
+      typingTimeouts.current.forEach((t) => clearTimeout(t));
+    };
+  }, [conversations.length, user]);
+
   const handlePress = useCallback(
     (conv: Conversation) => {
       navigation.navigate("Discover", {
@@ -74,35 +111,51 @@ export default function InboxScreen() {
       const avatarColor = AVATAR_COLORS[index % AVATAR_COLORS.length];
       const catColor =
         CATEGORY_COLORS[item.taskCategory] ?? CATEGORY_COLORS.other;
+      const isUnread = item.lastMessageSenderId != null && item.lastMessageSenderId !== user?.id;
+      const isTyping = typingTasks.has(item.taskId);
 
       return (
         <Pressable
-          style={styles.row}
+          style={[styles.row, isUnread && styles.rowUnread]}
           onPress={() => handlePress(item)}
         >
           {/* Avatar */}
-          <View style={[styles.avatar, { backgroundColor: avatarColor }]}>
-            <Text style={styles.avatarText}>
-              {item.otherUserName.charAt(0).toUpperCase()}
-            </Text>
+          <View style={{ position: "relative" }}>
+            <View style={[styles.avatar, { backgroundColor: avatarColor }]}>
+              <Text style={styles.avatarText}>
+                {item.otherUserName.charAt(0).toUpperCase()}
+              </Text>
+            </View>
+            {isTyping && (
+              <View style={styles.onlineDot} />
+            )}
           </View>
 
           {/* Content */}
           <View style={styles.rowContent}>
             <View style={styles.rowTop}>
-              <Text style={styles.name} numberOfLines={1}>
+              <Text style={[styles.name, isUnread && styles.nameUnread]} numberOfLines={1}>
                 {item.otherUserName}
               </Text>
-              <Text style={styles.time}>
+              <Text style={[styles.time, isUnread && { color: COLORS.red }]}>
                 {timeAgo(item.lastMessageAt)}
               </Text>
             </View>
 
-            {item.lastMessage && (
-              <Text style={styles.preview} numberOfLines={1}>
-                {item.lastMessage}
+            {isTyping ? (
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 4, marginTop: 2 }}>
+                <View style={styles.typingDotsRow}>
+                  <View style={styles.tDot} />
+                  <View style={styles.tDot} />
+                  <View style={styles.tDot} />
+                </View>
+                <Text style={{ fontSize: 11, color: "#22C55E", fontWeight: "500" }}>typing…</Text>
+              </View>
+            ) : item.lastMessage ? (
+              <Text style={[styles.preview, isUnread && styles.previewUnread]} numberOfLines={1}>
+                {item.lastMessageSenderId === user?.id ? `You: ${item.lastMessage}` : item.lastMessage}
               </Text>
-            )}
+            ) : null}
 
             <View style={styles.rowBottom}>
               <View
@@ -117,10 +170,17 @@ export default function InboxScreen() {
               </Text>
             </View>
           </View>
+
+          {/* Unread badge */}
+          {isUnread && (
+            <View style={styles.unreadBadge}>
+              <View style={styles.unreadDot} />
+            </View>
+          )}
         </Pressable>
       );
     },
-    [handlePress],
+    [handlePress, user?.id, typingTasks],
   );
 
   return (
@@ -253,5 +313,46 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#9CA3AF",
     flex: 1,
+  },
+  // Unread styles
+  rowUnread: {
+    backgroundColor: "#FEF2F2",
+  },
+  nameUnread: {
+    fontWeight: "800",
+  },
+  previewUnread: {
+    color: "#000",
+    fontWeight: "600",
+  },
+  unreadBadge: {
+    marginLeft: 8,
+  },
+  unreadDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: COLORS.red,
+  },
+  onlineDot: {
+    position: "absolute",
+    bottom: 0,
+    right: 0,
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    backgroundColor: "#22C55E",
+    borderWidth: 2.5,
+    borderColor: "#fff",
+  },
+  typingDotsRow: {
+    flexDirection: "row",
+    gap: 2,
+  },
+  tDot: {
+    width: 5,
+    height: 5,
+    borderRadius: 2.5,
+    backgroundColor: "#22C55E",
   },
 });

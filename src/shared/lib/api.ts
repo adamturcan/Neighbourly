@@ -402,6 +402,7 @@ export type Conversation = {
   otherUserName: string;
   lastMessage: string | null;
   lastMessageAt: string | null;
+  lastMessageSenderId: string | null;
 };
 
 export type Message = {
@@ -447,14 +448,14 @@ export async function listConversations(): Promise<Conversation[]> {
   const taskIds = tasks.map((t: any) => t.id);
   const { data: messages } = await supabase
     .from("messages")
-    .select("task_id, content, created_at")
+    .select("task_id, content, created_at, sender_id")
     .in("task_id", taskIds)
     .order("created_at", { ascending: false });
 
-  const latestMessageMap = new Map<string, { content: string; created_at: string }>();
+  const latestMessageMap = new Map<string, { content: string; created_at: string; sender_id: string }>();
   for (const msg of messages ?? []) {
     if (!latestMessageMap.has(msg.task_id)) {
-      latestMessageMap.set(msg.task_id, { content: msg.content, created_at: msg.created_at });
+      latestMessageMap.set(msg.task_id, { content: msg.content, created_at: msg.created_at, sender_id: msg.sender_id });
     }
   }
 
@@ -471,6 +472,7 @@ export async function listConversations(): Promise<Conversation[]> {
       otherUserName: profileMap.get(otherId) ?? "User",
       lastMessage: latest?.content ?? null,
       lastMessageAt: latest?.created_at ?? t.created_at ?? null,
+      lastMessageSenderId: latest?.sender_id ?? null,
     } as Conversation;
   }).sort((a, b) => {
     const aTime = a.lastMessageAt ?? "";
