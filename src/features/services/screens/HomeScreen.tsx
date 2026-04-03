@@ -42,13 +42,13 @@ export default function HomeScreen() {
     data: services = [],
     isLoading: loadingServices,
     refetch: refetchServices,
-  } = useQuery({ queryKey: ["services", "nearby"], queryFn: () => listServices() });
+  } = useQuery({ queryKey: ["services", "nearby"], queryFn: () => listServices(), staleTime: 30000, placeholderData: (prev: any) => prev });
 
   const {
     data: tasks = [],
     isLoading: loadingTasks,
     refetch: refetchTasks,
-  } = useQuery({ queryKey: ["tasks", "open"], queryFn: () => listTasks() });
+  } = useQuery({ queryKey: ["tasks", "open"], queryFn: () => listTasks(), staleTime: 30000, placeholderData: (prev: any) => prev });
 
   useFocusEffect(
     React.useCallback(() => {

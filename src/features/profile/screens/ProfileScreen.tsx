@@ -42,6 +42,7 @@ export default function ProfileScreen() {
     queryFn: listMyTasks,
     enabled: !!user,
     placeholderData: (prev) => prev,
+    staleTime: 30000,
   });
 
   const { data: myOffers = [], refetch: refetchOffers } = useQuery({
@@ -49,6 +50,7 @@ export default function ProfileScreen() {
     queryFn: listMyOffers,
     enabled: !!user,
     placeholderData: (prev) => prev,
+    staleTime: 30000,
   });
 
   const { data: reviews = [], refetch: refetchReviews } = useQuery({
@@ -56,6 +58,7 @@ export default function ProfileScreen() {
     queryFn: () => fetchReviewsForUser(user!.id),
     enabled: !!user,
     placeholderData: (prev) => prev,
+    staleTime: 30000,
   });
 
   useFocusEffect(

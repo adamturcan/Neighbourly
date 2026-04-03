@@ -57,6 +57,8 @@ export default function InboxScreen() {
   } = useQuery({
     queryKey: ["conversations"],
     queryFn: listConversations,
+    staleTime: 30000,
+    placeholderData: (prev: any) => prev,
   });
 
   useFocusEffect(

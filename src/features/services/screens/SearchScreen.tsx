@@ -25,6 +25,8 @@ export default function SearchScreen() {
           item.categories.some((c) => c.toLowerCase().includes(s)),
       );
     },
+    staleTime: 30000,
+    placeholderData: (prev: any) => prev,
   });
 
   return (
