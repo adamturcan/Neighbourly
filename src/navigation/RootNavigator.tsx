@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { View, Pressable, Text, StyleSheet, Animated } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { getFocusedRouteNameFromRoute } from "@react-navigation/native";
@@ -10,6 +10,9 @@ import SearchScreen from "../features/services/screens/SearchScreen";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { COLORS } from "../shared/lib/constants";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { listConversations } from "../shared/lib/api";
+import { supabase } from "../shared/lib/supabase";
+import { useAuth } from "../features/auth/store/useAuth";
 
 const Tab = createBottomTabNavigator();
 
@@ -25,6 +28,35 @@ const HIDDEN_ROUTES = ["ChatScreen"];
 
 function FloatingTabBar({ state, navigation, descriptors }: any) {
   const insets = useSafeAreaInsets();
+  const { user } = useAuth();
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  // Fetch unread count
+  const fetchUnread = async () => {
+    if (!user) return;
+    try {
+      const convos = await listConversations();
+      const count = convos.filter((c) => {
+        const fromOther = c.lastMessageSenderId != null && c.lastMessageSenderId !== user.id;
+        return fromOther && (!c.myLastReadAt || !c.lastMessageAt || new Date(c.lastMessageAt).getTime() > new Date(c.myLastReadAt).getTime());
+      }).length;
+      setUnreadCount(count);
+    } catch {}
+  };
+
+  // Fetch on mount + listen for new messages
+  useEffect(() => {
+    fetchUnread();
+    const ch = supabase
+      .channel("tabbar-messages")
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, () => fetchUnread())
+      .on("postgres_changes", { event: "*", schema: "public", table: "read_receipts" }, () => fetchUnread())
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [user]);
+
+  // Also refresh when switching tabs
+  useEffect(() => { fetchUnread(); }, [state.index]);
 
   // Hide tab bar on certain nested screens (e.g. ChatScreen)
   const focusedRoute = state.routes[state.index];
@@ -79,14 +111,23 @@ function FloatingTabBar({ state, navigation, descriptors }: any) {
             );
           }
 
+          const isInbox = index === 3;
+
           return (
             <Pressable key={route.key} onPress={onPress} style={[tb.tab, focused && tb.tabActive]}>
               <Animated.View style={{ transform: [{ scale: scaleAnims[index] }] }}>
-                <MaterialCommunityIcons
-                  name={focused ? tab.iconFilled : tab.icon}
-                  size={22}
-                  color={focused ? COLORS.red : "#9CA3AF"}
-                />
+                <View>
+                  <MaterialCommunityIcons
+                    name={focused ? tab.iconFilled : tab.icon}
+                    size={22}
+                    color={focused ? COLORS.red : "#9CA3AF"}
+                  />
+                  {isInbox && unreadCount > 0 && (
+                    <View style={tb.badge}>
+                      <Text style={tb.badgeText}>{unreadCount > 9 ? "9+" : unreadCount}</Text>
+                    </View>
+                  )}
+                </View>
               </Animated.View>
               <Text style={[tb.label, focused && tb.labelActive]}>
                 {tab.label}
@@ -179,5 +220,24 @@ const tb = StyleSheet.create({
     shadowRadius: 12,
     shadowOffset: { width: 0, height: 4 },
     elevation: 6,
+  },
+  badge: {
+    position: "absolute",
+    top: -4,
+    right: -8,
+    minWidth: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: COLORS.red,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 4,
+    borderWidth: 2,
+    borderColor: "#fff",
+  },
+  badgeText: {
+    color: "#fff",
+    fontSize: 9,
+    fontWeight: "700",
   },
 });
