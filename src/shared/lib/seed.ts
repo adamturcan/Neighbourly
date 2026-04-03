@@ -20,15 +20,15 @@ export const helpers: User[] = Array.from({ length: 30 }).map((_, i) => ({
 
 const imgs = {
   mowing:
-    "https://images.unsplash.com/photo-1523345863768-17bfa9f3d814?q=80&w=1400&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1592417817098-8fd3d9eb14a5?q=80&w=1400&auto=format&fit=crop",
   cleaning:
-    "https://images.unsplash.com/photo-1581574209460-7bdd93839a0b?q=80&w=1400&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1628177142898-93e36e4e3a50?q=80&w=1400&auto=format&fit=crop",
   tutoring:
     "https://images.unsplash.com/photo-1543269865-cbf427effbad?q=80&w=1400&auto=format&fit=crop",
   moving:
     "https://images.unsplash.com/photo-1516383607781-913a19294fd1?q=80&w=1400&auto=format&fit=crop",
   plumbing:
-    "https://images.unsplash.com/photo-1581579188871-c6b9b9c49b08?q=80&w=1400&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1585704032915-c3400ca199e7?q=80&w=1400&auto=format&fit=crop",
   gardening:
     "https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?q=80&w=1400&auto=format&fit=crop",
 };

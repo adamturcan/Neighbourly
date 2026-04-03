@@ -25,10 +25,10 @@ begin
   -- Insert services
   insert into public.services (provider_id, title, categories, photo_url, price_from, lat, lng, rating, jobs_done) values
     (dev_uid, 'Lawn mowing & edging', array['gardening','chores'],
-     'https://images.unsplash.com/photo-1523345863768-17bfa9f3d814?q=80&w=1400&auto=format&fit=crop',
+     'https://images.unsplash.com/photo-1592417817098-8fd3d9eb14a5?q=80&w=1400&auto=format&fit=crop',
      15, 48.1482 + 0.005, 17.1067 + 0.003, 4.8, 23),
     (dev_uid, 'Deep apartment cleaning', array['chores'],
-     'https://images.unsplash.com/photo-1581574209460-7bdd93839a0b?q=80&w=1400&auto=format&fit=crop',
+     'https://images.unsplash.com/photo-1628177142898-93e36e4e3a50?q=80&w=1400&auto=format&fit=crop',
      25, 48.1482 - 0.003, 17.1067 + 0.007, 4.6, 41),
     (dev_uid, 'Math tutoring (HS/Uni)', array['tutoring'],
      'https://images.unsplash.com/photo-1543269865-cbf427effbad?q=80&w=1400&auto=format&fit=crop',
@@ -37,7 +37,7 @@ begin
      'https://images.unsplash.com/photo-1516383607781-913a19294fd1?q=80&w=1400&auto=format&fit=crop',
      30, 48.1482 - 0.006, 17.1067 - 0.002, 4.3, 57),
     (dev_uid, 'Quick plumbing fixes', array['plumbing','maintenance'],
-     'https://images.unsplash.com/photo-1581579188871-c6b9b9c49b08?q=80&w=1400&auto=format&fit=crop',
+     'https://images.unsplash.com/photo-1585704032915-c3400ca199e7?q=80&w=1400&auto=format&fit=crop',
      25, 48.1482 + 0.002, 17.1067 + 0.009, 4.7, 33),
     (dev_uid, 'Garden care & trimming', array['gardening'],
      'https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?q=80&w=1400&auto=format&fit=crop',
