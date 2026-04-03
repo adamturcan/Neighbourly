@@ -2,7 +2,7 @@ import React from "react";
 import { View, Text, Pressable, ScrollView, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../../auth/store/useAuth";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { listMyTasks, listMyOffers, fetchReviewsForUser } from "../../../shared/lib/api";
 import { useNavigation, useFocusEffect, CommonActions } from "@react-navigation/native";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
@@ -36,32 +36,34 @@ function timeAgo(dateStr: string): string {
 export default function ProfileScreen() {
   const { profile, user, signOut } = useAuth();
   const nav = useNavigation<any>();
-  const queryClient = useQueryClient();
 
-  const { data: myTasks = [] } = useQuery({
+  const { data: myTasks = [], refetch: refetchTasks } = useQuery({
     queryKey: ["tasks", "mine"],
     queryFn: listMyTasks,
     enabled: !!user,
+    placeholderData: (prev) => prev,
   });
 
-  const { data: myOffers = [] } = useQuery({
+  const { data: myOffers = [], refetch: refetchOffers } = useQuery({
     queryKey: ["offers", "mine"],
     queryFn: listMyOffers,
     enabled: !!user,
+    placeholderData: (prev) => prev,
   });
 
-  const { data: reviews = [] } = useQuery({
+  const { data: reviews = [], refetch: refetchReviews } = useQuery({
     queryKey: ["reviews", user?.id],
     queryFn: () => fetchReviewsForUser(user!.id),
     enabled: !!user,
+    placeholderData: (prev) => prev,
   });
 
   useFocusEffect(
     React.useCallback(() => {
-      queryClient.invalidateQueries({ queryKey: ["tasks", "mine"] });
-      queryClient.invalidateQueries({ queryKey: ["offers", "mine"] });
-      queryClient.invalidateQueries({ queryKey: ["reviews", user?.id] });
-    }, [queryClient, user?.id]),
+      refetchTasks();
+      refetchOffers();
+      refetchReviews();
+    }, [refetchTasks, refetchOffers, refetchReviews]),
   );
 
   const postedTasks = myTasks.filter((t) => t.requesterId === user?.id);
