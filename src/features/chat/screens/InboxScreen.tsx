@@ -72,7 +72,7 @@ export default function InboxScreen() {
 
     // Typing channels
     conversations.forEach((conv) => {
-      const ch = supabase.channel(`typing-${conv.taskId}`);
+      const ch = supabase.channel(`typing-inbox-${conv.taskId}`);
       ch.on("broadcast", { event: "typing" }, ({ payload }) => {
         if (payload.userId !== user.id) {
           setTypingTasks((prev) => new Set(prev).add(conv.taskId));

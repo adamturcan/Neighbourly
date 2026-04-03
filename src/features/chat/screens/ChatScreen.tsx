@@ -67,6 +67,7 @@ export default function ChatScreen() {
   const flatListRef = useRef<FlatList>(null);
   const typingTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const typingChannelRef = useRef<any>(null);
+  const inboxTypingChannelRef = useRef<any>(null);
 
   const { data: messages = [], refetch } = useQuery({
     queryKey: ["messages", taskId],
@@ -148,18 +149,22 @@ export default function ChatScreen() {
       .subscribe();
 
     typingChannelRef.current = typingChannel;
+
+    // Also subscribe to the inbox typing channel so we can broadcast to it
+    const inboxTypingChannel = supabase.channel(`typing-inbox-${taskId}`).subscribe();
+    inboxTypingChannelRef.current = inboxTypingChannel;
+
     return () => {
       supabase.removeChannel(typingChannel);
+      supabase.removeChannel(inboxTypingChannel);
       if (typingTimeout.current) clearTimeout(typingTimeout.current);
     };
   }, [taskId, user]);
 
   const broadcastTyping = useCallback(() => {
-    typingChannelRef.current?.send({
-      type: "broadcast",
-      event: "typing",
-      payload: { userId: user?.id },
-    });
+    const payload = { userId: user?.id };
+    typingChannelRef.current?.send({ type: "broadcast", event: "typing", payload });
+    inboxTypingChannelRef.current?.send({ type: "broadcast", event: "typing", payload });
   }, [user]);
 
   const handleTextChange = useCallback((val: string) => {
