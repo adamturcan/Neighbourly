@@ -3,11 +3,12 @@ import { View, Text, Pressable, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../../auth/store/useAuth";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { listMyTasks } from "../../../shared/lib/api";
-import { useNavigation, useFocusEffect } from "@react-navigation/native";
+import { listMyTasks, listMyOffers } from "../../../shared/lib/api";
+import { useNavigation, useFocusEffect, CommonActions } from "@react-navigation/native";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import type { Task } from "../../../shared/types";
 import { TAB_BAR_HEIGHT } from "../../../navigation/RootNavigator";
+import { COLORS } from "../../../shared/lib/constants";
 
 const STATUS_COLORS: Record<string, string> = {
   open: "#22C55E",
@@ -15,71 +16,87 @@ const STATUS_COLORS: Record<string, string> = {
   in_progress: "#F59E0B",
   completed: "#6B7280",
   disputed: "#EF4444",
+  pending: "#F59E0B",
+  accepted: "#22C55E",
+  rejected: "#EF4444",
 };
 
 export default function ProfileScreen() {
   const { profile, user, signOut } = useAuth();
   const nav = useNavigation<any>();
-
   const queryClient = useQueryClient();
+
   const { data: myTasks = [] } = useQuery({
     queryKey: ["tasks", "mine"],
     queryFn: listMyTasks,
     enabled: !!user,
   });
 
-  // Refetch when tab is focused
+  const { data: myOffers = [] } = useQuery({
+    queryKey: ["offers", "mine"],
+    queryFn: listMyOffers,
+    enabled: !!user,
+  });
+
   useFocusEffect(
     React.useCallback(() => {
       queryClient.invalidateQueries({ queryKey: ["tasks", "mine"] });
+      queryClient.invalidateQueries({ queryKey: ["offers", "mine"] });
     }, [queryClient]),
   );
 
   const postedTasks = myTasks.filter((t) => t.requesterId === user?.id);
   const helperTasks = myTasks.filter((t) => t.helperId === user?.id);
 
+  const goToTask = (taskId: string) => {
+    nav.dispatch(
+      CommonActions.navigate({
+        name: "Discover",
+        params: { screen: "TaskDetail", params: { taskId } },
+      }),
+    );
+  };
+
   return (
-    <SafeAreaView className="flex-1 bg-white">
-      <ScrollView className="flex-1" contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 32, paddingBottom: TAB_BAR_HEIGHT + 24, gap: 24 }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 32, paddingBottom: TAB_BAR_HEIGHT + 24, gap: 24 }}>
         {/* Profile header */}
-        <View className="items-center gap-3">
-          <View className="w-20 h-20 rounded-full bg-surface-dim items-center justify-center">
+        <View style={{ alignItems: "center", gap: 10 }}>
+          <View style={{ width: 80, height: 80, borderRadius: 40, backgroundColor: "#F1F5F9", alignItems: "center", justifyContent: "center" }}>
             <MaterialCommunityIcons name="account" size={40} color="#6B7280" />
           </View>
-          <Text className="text-2xl font-extrabold text-black">
+          <Text style={{ fontSize: 24, fontWeight: "800", color: "#000" }}>
             {profile?.full_name ?? "User"}
           </Text>
-          <Text className="text-text-muted capitalize">
+          <Text style={{ fontSize: 14, color: "#A1A1AA", textTransform: "capitalize" }}>
             {profile?.role ?? "member"}
           </Text>
         </View>
 
         {/* Stats */}
-        <View className="flex-row justify-center gap-8">
-          <View className="items-center">
-            <Text className="text-xl font-bold">
-              {profile?.rating?.toFixed(1) ?? "–"}
-            </Text>
-            <Text className="text-xs text-text-muted">Rating</Text>
+        <View style={{ flexDirection: "row", justifyContent: "center", gap: 32 }}>
+          <View style={{ alignItems: "center" }}>
+            <Text style={{ fontSize: 20, fontWeight: "700" }}>{profile?.rating?.toFixed(1) ?? "–"}</Text>
+            <Text style={{ fontSize: 11, color: "#A1A1AA" }}>Rating</Text>
           </View>
-          <View className="items-center">
-            <Text className="text-xl font-bold">{profile?.jobs_done ?? 0}</Text>
-            <Text className="text-xs text-text-muted">Jobs</Text>
+          <View style={{ alignItems: "center" }}>
+            <Text style={{ fontSize: 20, fontWeight: "700" }}>{profile?.jobs_done ?? 0}</Text>
+            <Text style={{ fontSize: 11, color: "#A1A1AA" }}>Jobs</Text>
           </View>
-          <View className="items-center">
-            <Text className="text-xl font-bold">{postedTasks.length}</Text>
-            <Text className="text-xs text-text-muted">Posted</Text>
+          <View style={{ alignItems: "center" }}>
+            <Text style={{ fontSize: 20, fontWeight: "700" }}>{postedTasks.length}</Text>
+            <Text style={{ fontSize: 11, color: "#A1A1AA" }}>Posted</Text>
           </View>
         </View>
 
         {/* Skills */}
         {profile?.skills && profile.skills.length > 0 && (
-          <View className="gap-2">
-            <Text className="font-bold text-black">Skills</Text>
-            <View className="flex-row flex-wrap gap-2">
+          <View style={{ gap: 8 }}>
+            <Text style={{ fontWeight: "600", color: "#000" }}>Skills</Text>
+            <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6 }}>
               {profile.skills.map((s) => (
-                <View key={s} className="bg-red-100 rounded-full px-3 py-1.5">
-                  <Text className="text-brand-red font-bold text-sm">{s}</Text>
+                <View key={s} style={{ backgroundColor: "#FEF2F2", borderRadius: 999, paddingHorizontal: 12, paddingVertical: 6 }}>
+                  <Text style={{ color: COLORS.red, fontWeight: "600", fontSize: 13 }}>{s}</Text>
                 </View>
               ))}
             </View>
@@ -88,86 +105,125 @@ export default function ProfileScreen() {
 
         {/* My Tasks (posted) */}
         {postedTasks.length > 0 && (
-          <TaskSection
-            title="My tasks"
-            tasks={postedTasks}
-            onPress={(t) =>
-              nav.getParent()?.navigate("Discover", {
-                screen: "TaskDetail",
-                params: { taskId: t.id },
-              })
-            }
-          />
+          <View style={{ gap: 10 }}>
+            <Text style={{ fontSize: 17, fontWeight: "700", color: "#000" }}>My tasks</Text>
+            {postedTasks.map((t) => (
+              <TaskRow key={t.id} task={t} onPress={() => goToTask(t.id)} />
+            ))}
+          </View>
+        )}
+
+        {/* My Offers */}
+        {myOffers.length > 0 && (
+          <View style={{ gap: 10 }}>
+            <Text style={{ fontSize: 17, fontWeight: "700", color: "#000" }}>My offers</Text>
+            {myOffers.map((o) => (
+              <Pressable
+                key={o.id}
+                onPress={() => goToTask(o.taskId)}
+                style={{
+                  padding: 14,
+                  borderRadius: 12,
+                  backgroundColor: "#FAFAFA",
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 12,
+                }}
+              >
+                <View style={{ flex: 1 }}>
+                  <Text style={{ fontWeight: "600", color: "#000", fontSize: 14 }} numberOfLines={1}>
+                    {(o as any).task_title ?? "Task"}
+                  </Text>
+                  <Text style={{ fontSize: 12, color: "#A1A1AA", marginTop: 2 }}>
+                    €{o.amount} · {(o as any).task_category ?? ""}
+                  </Text>
+                </View>
+                <View
+                  style={{
+                    paddingHorizontal: 8,
+                    paddingVertical: 3,
+                    borderRadius: 999,
+                    backgroundColor: (STATUS_COLORS[(o as any).status ?? "pending"] ?? "#6B7280") + "18",
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontSize: 11,
+                      fontWeight: "700",
+                      color: STATUS_COLORS[(o as any).status ?? "pending"] ?? "#6B7280",
+                      textTransform: "capitalize",
+                    }}
+                  >
+                    {(o as any).status ?? "pending"}
+                  </Text>
+                </View>
+              </Pressable>
+            ))}
+          </View>
         )}
 
         {/* Helping on */}
         {helperTasks.length > 0 && (
-          <TaskSection
-            title="Helping on"
-            tasks={helperTasks}
-            onPress={(t) =>
-              nav.getParent()?.navigate("Discover", {
-                screen: "TaskDetail",
-                params: { taskId: t.id },
-              })
-            }
-          />
+          <View style={{ gap: 10 }}>
+            <Text style={{ fontSize: 17, fontWeight: "700", color: "#000" }}>Helping on</Text>
+            {helperTasks.map((t) => (
+              <TaskRow key={t.id} task={t} onPress={() => goToTask(t.id)} />
+            ))}
+          </View>
         )}
 
         {/* Logout */}
         <Pressable
           onPress={signOut}
-          className="border border-gray-300 rounded-2xl py-4 items-center mt-4"
+          style={{ borderWidth: 1, borderColor: "#E5E5EA", borderRadius: 14, paddingVertical: 16, alignItems: "center", marginTop: 8 }}
         >
-          <Text className="text-brand-red font-bold text-base">Sign out</Text>
+          <Text style={{ color: COLORS.red, fontWeight: "600", fontSize: 15 }}>Sign out</Text>
         </Pressable>
       </ScrollView>
     </SafeAreaView>
   );
 }
 
-function TaskSection({
-  title,
-  tasks,
-  onPress,
-}: {
-  title: string;
-  tasks: Task[];
-  onPress: (t: Task) => void;
-}) {
+function TaskRow({ task, onPress }: { task: Task; onPress: () => void }) {
   return (
-    <View className="gap-3">
-      <Text className="text-lg font-bold text-black">{title}</Text>
-      {tasks.map((t) => (
-        <Pressable
-          key={t.id}
-          onPress={() => onPress(t)}
-          className="p-4 rounded-2xl bg-surface-dim flex-row items-center gap-3"
+    <Pressable
+      onPress={onPress}
+      style={{
+        padding: 14,
+        borderRadius: 12,
+        backgroundColor: "#FAFAFA",
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 12,
+      }}
+    >
+      <View style={{ flex: 1 }}>
+        <Text style={{ fontWeight: "600", color: "#000", fontSize: 14 }} numberOfLines={1}>
+          {task.title}
+        </Text>
+        <Text style={{ fontSize: 12, color: "#A1A1AA", marginTop: 2 }}>
+          €{task.budget} · {task.category}
+        </Text>
+      </View>
+      <View
+        style={{
+          paddingHorizontal: 8,
+          paddingVertical: 3,
+          borderRadius: 999,
+          backgroundColor: (STATUS_COLORS[task.status] ?? "#6B7280") + "18",
+        }}
+      >
+        <Text
+          style={{
+            fontSize: 11,
+            fontWeight: "700",
+            color: STATUS_COLORS[task.status] ?? "#6B7280",
+            textTransform: "capitalize",
+          }}
         >
-          <View className="flex-1">
-            <Text className="font-bold text-black" numberOfLines={1}>
-              {t.title}
-            </Text>
-            <Text className="text-sm text-text-muted mt-0.5">
-              €{t.budget} · {t.category}
-            </Text>
-          </View>
-          <View
-            className="px-2.5 py-1 rounded-full"
-            style={{
-              backgroundColor:
-                (STATUS_COLORS[t.status] ?? "#6B7280") + "20",
-            }}
-          >
-            <Text
-              className="text-xs font-bold capitalize"
-              style={{ color: STATUS_COLORS[t.status] ?? "#6B7280" }}
-            >
-              {t.status.replace("_", " ")}
-            </Text>
-          </View>
-        </Pressable>
-      ))}
-    </View>
+          {task.status.replace("_", " ")}
+        </Text>
+      </View>
+    </Pressable>
   );
 }

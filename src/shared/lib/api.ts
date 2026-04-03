@@ -209,6 +209,26 @@ function mapOffer(row: DbOffer): Offer {
   };
 }
 
+export async function listMyOffers(): Promise<(Offer & { task_title?: string; task_category?: string })[]> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return [];
+
+  const { data, error } = await supabase
+    .from("offers")
+    .select("*, tasks(title, category)")
+    .eq("helper_id", user.id)
+    .order("created_at", { ascending: false });
+
+  if (error) throw error;
+  return (data ?? []).map((row: any) => ({
+    ...mapOffer(row),
+    task_title: row.tasks?.title,
+    task_category: row.tasks?.category,
+  }));
+}
+
 export async function listOffers(taskId: string): Promise<Offer[]> {
   const { data, error } = await supabase
     .from("offers")

@@ -85,6 +85,8 @@ export default function TaskDetailScreen() {
   if (!task) return null;
 
   const isOwner = task.requesterId === user?.id;
+  const myOffer = offers.find((o) => o.helperId === user?.id);
+  const hasOffered = !!myOffer;
 
   const handleMakeOffer = async () => {
     if (!offerAmount || Number(offerAmount) <= 0) {
@@ -171,10 +173,19 @@ export default function TaskDetailScreen() {
           </Text>
         </View>
 
-        {/* Make offer (for non-owners on open tasks) */}
+        {/* Make offer / show existing offer (for non-owners on open tasks) */}
         {task.status === "open" && !isOwner && (
           <View style={{ gap: 12 }}>
-            {!showOfferForm ? (
+            {hasOffered ? (
+              <View style={{ backgroundColor: "#F0FDF4", borderRadius: 12, padding: 14, flexDirection: "row", alignItems: "center", gap: 10 }}>
+                <MaterialCommunityIcons name="check-circle" size={22} color="#22C55E" />
+                <View style={{ flex: 1 }}>
+                  <Text style={{ fontWeight: "600", color: "#000" }}>You offered €{myOffer!.amount}</Text>
+                  {myOffer!.message && <Text style={{ fontSize: 13, color: "#71717A", marginTop: 1 }}>{myOffer!.message}</Text>}
+                </View>
+                <Text style={{ fontSize: 12, fontWeight: "600", color: "#22C55E", textTransform: "capitalize" }}>Pending</Text>
+              </View>
+            ) : !showOfferForm ? (
               <Pressable
                 onPress={() => setShowOfferForm(true)}
                 style={{ backgroundColor: COLORS.red, borderRadius: 14, paddingVertical: 16, alignItems: "center" }}
