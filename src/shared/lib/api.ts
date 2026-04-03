@@ -121,8 +121,9 @@ export async function listTasks(): Promise<Task[]> {
 
 export async function listMyTasks(): Promise<Task[]> {
   const {
-    data: { user },
-  } = await supabase.auth.getUser();
+    data: { session },
+  } = await supabase.auth.getSession();
+  const user = session?.user;
   if (!user) return [];
 
   const { data, error } = await supabase
@@ -159,8 +160,9 @@ export async function createTask(input: {
   scheduled_at?: string;
 }): Promise<Task> {
   const {
-    data: { user },
-  } = await supabase.auth.getUser();
+    data: { session },
+  } = await supabase.auth.getSession();
+  const user = session?.user;
   if (!user) throw new Error("Not authenticated");
 
   const { data, error } = await supabase
@@ -211,8 +213,9 @@ function mapOffer(row: DbOffer): Offer {
 
 export async function listMyOffers(): Promise<(Offer & { task_title?: string; task_category?: string })[]> {
   const {
-    data: { user },
-  } = await supabase.auth.getUser();
+    data: { session },
+  } = await supabase.auth.getSession();
+  const user = session?.user;
   if (!user) return [];
 
   const { data, error } = await supabase
@@ -246,8 +249,9 @@ export async function createOffer(input: {
   message?: string;
 }): Promise<Offer> {
   const {
-    data: { user },
-  } = await supabase.auth.getUser();
+    data: { session },
+  } = await supabase.auth.getSession();
+  const user = session?.user;
   if (!user) throw new Error("Not authenticated");
 
   const { data, error } = await supabase
@@ -360,8 +364,9 @@ export async function leaveReview(input: {
   comment?: string;
 }): Promise<Review> {
   const {
-    data: { user },
-  } = await supabase.auth.getUser();
+    data: { session },
+  } = await supabase.auth.getSession();
+  const user = session?.user;
   if (!user) throw new Error("Not authenticated");
 
   const { data, error } = await supabase
@@ -415,8 +420,9 @@ export async function fetchReviewStatus(taskId: string): Promise<{
   canReview: boolean;
 }> {
   const {
-    data: { user },
-  } = await supabase.auth.getUser();
+    data: { session },
+  } = await supabase.auth.getSession();
+  const user = session?.user;
   if (!user) return { myReview: null, canReview: false };
 
   const { data: reviews } = await supabase
@@ -499,8 +505,9 @@ export type Message = {
 
 export async function listConversations(): Promise<Conversation[]> {
   const {
-    data: { user },
-  } = await supabase.auth.getUser();
+    data: { session },
+  } = await supabase.auth.getSession();
+  const user = session?.user;
   if (!user) return [];
 
   // Get tasks where user is creator or helper with relevant statuses
@@ -596,8 +603,9 @@ export async function listMessages(taskId: string): Promise<Message[]> {
 
 export async function sendMessage(taskId: string, content: string): Promise<Message> {
   const {
-    data: { user },
-  } = await supabase.auth.getUser();
+    data: { session },
+  } = await supabase.auth.getSession();
+  const user = session?.user;
   if (!user) throw new Error("Not authenticated");
 
   const { data, error } = await supabase
@@ -626,8 +634,9 @@ export async function sendMessage(taskId: string, content: string): Promise<Mess
 
 export async function markAsRead(taskId: string): Promise<void> {
   const {
-    data: { user },
-  } = await supabase.auth.getUser();
+    data: { session },
+  } = await supabase.auth.getSession();
+  const user = session?.user;
   if (!user) return;
 
   await supabase
@@ -676,8 +685,9 @@ export async function getReactionsForMessages(messageIds: string[]): Promise<Map
 
 export async function toggleReaction(messageId: string, emoji: string): Promise<void> {
   const {
-    data: { user },
-  } = await supabase.auth.getUser();
+    data: { session },
+  } = await supabase.auth.getSession();
+  const user = session?.user;
   if (!user) throw new Error("Not authenticated");
 
   // Check if user already reacted to this message
