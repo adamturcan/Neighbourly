@@ -9,6 +9,7 @@ import SearchScreen from "../features/services/screens/SearchScreen";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { COLORS } from "../shared/lib/constants";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import SwipeableTabView from "../shared/components/SwipeableTabView";
 
 const Tab = createBottomTabNavigator();
 
@@ -72,11 +73,11 @@ export default function MainTabs() {
       tabBar={(props) => <FloatingTabBar {...props} />}
       screenOptions={{ headerShown: false }}
     >
-      <Tab.Screen name="Discover" component={HomeStack} />
-      <Tab.Screen name="Search" component={SearchScreen} />
-      <Tab.Screen name="Post" component={PostTaskScreen} />
-      <Tab.Screen name="Inbox" component={InboxScreen} />
-      <Tab.Screen name="Profile" component={ProfileScreen} />
+      <Tab.Screen name="Discover">{() => <SwipeableTabView><HomeStack /></SwipeableTabView>}</Tab.Screen>
+      <Tab.Screen name="Search">{() => <SwipeableTabView><SearchScreen /></SwipeableTabView>}</Tab.Screen>
+      <Tab.Screen name="Post">{() => <SwipeableTabView><PostTaskScreen /></SwipeableTabView>}</Tab.Screen>
+      <Tab.Screen name="Inbox">{() => <SwipeableTabView><InboxScreen /></SwipeableTabView>}</Tab.Screen>
+      <Tab.Screen name="Profile">{() => <SwipeableTabView><ProfileScreen /></SwipeableTabView>}</Tab.Screen>
     </Tab.Navigator>
   );
 }
