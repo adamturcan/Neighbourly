@@ -239,32 +239,41 @@ export default function ChatScreen() {
 
     try {
       await sendMessage(taskId, trimmed);
-      // Remove optimistic message once real data arrives
-      setOptimisticMessages((prev) => prev.filter((m) => m.id !== tempId));
+      // Don't remove optimistic yet — let the refetch bring real data,
+      // then allMessages merge will deduplicate by content+time
       refetch();
     } catch (e) {
-      // Remove on error too
       setOptimisticMessages((prev) => prev.filter((m) => m.id !== tempId));
     }
     setSending(false);
   }, [text, sending, taskId, refetch, user?.id]);
 
-  // Merge real + optimistic messages
+  // Merge real + optimistic, deduplicating so there's no flash
   const allMessages = useMemo(() => {
-    const realIds = new Set(messages.map((m) => m.id));
-    const pending = optimisticMessages.filter((m) => !realIds.has(m.id));
+    // Keep optimistic messages that don't have a matching real message yet
+    const pending = optimisticMessages.filter((opt) => {
+      // Match by content + sender (real message arrived if content matches)
+      return !messages.some(
+        (m) => m.senderId === opt.senderId && m.content === opt.content &&
+          Math.abs(new Date(m.createdAt).getTime() - new Date(opt.createdAt).getTime()) < 10000,
+      );
+    });
     return [...messages, ...pending];
   }, [messages, optimisticMessages]);
 
-  // Track new message IDs for animation
-  const prevMessageCount = useRef(0);
+  // Clean up optimistic messages that have been matched
   useEffect(() => {
-    if (allMessages.length > prevMessageCount.current) {
-      const newMsgs = allMessages.slice(prevMessageCount.current);
-      newMsgs.forEach((m) => animatingIds.current.add(m.id));
+    if (optimisticMessages.length === 0) return;
+    const stillPending = optimisticMessages.filter((opt) => {
+      return !messages.some(
+        (m) => m.senderId === opt.senderId && m.content === opt.content &&
+          Math.abs(new Date(m.createdAt).getTime() - new Date(opt.createdAt).getTime()) < 10000,
+      );
+    });
+    if (stillPending.length !== optimisticMessages.length) {
+      setOptimisticMessages(stillPending);
     }
-    prevMessageCount.current = allMessages.length;
-  }, [allMessages.length]);
+  }, [messages, optimisticMessages]);
 
   const handleReaction = useCallback(async (messageId: string, emoji: string) => {
     setReactionTarget(null);
@@ -292,8 +301,9 @@ export default function ChatScreen() {
       const isMine = item.senderId === user?.id;
       const showSeen = item.id === lastSeenMessageId;
       const reactions = reactionsMap.get(item.id) ?? [];
-      const shouldAnimate = animatingIds.current.has(item.id);
       const isOptimistic = item.id.startsWith("temp-");
+      // Only animate optimistic (new send) messages, not server confirmations
+      const shouldAnimate = isOptimistic && animatingIds.current.has(item.id);
 
       // Group reactions by emoji
       const emojiCounts = new Map<string, { count: number; myReaction: boolean }>();
@@ -306,7 +316,7 @@ export default function ChatScreen() {
 
       return (
         <AnimatedBubble shouldAnimate={shouldAnimate} messageId={item.id} animatingIds={animatingIds}>
-          <View style={{ marginBottom: reactions.length > 0 ? 18 : 12, opacity: isOptimistic ? 0.7 : 1 }}>
+          <View style={{ marginBottom: reactions.length > 0 ? 18 : 12 }}>
             <Pressable
               onLongPress={() => !isOptimistic && setReactionTarget({ messageId: item.id, y: 0 })}
               delayLongPress={300}
