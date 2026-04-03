@@ -12,6 +12,8 @@ import {
   Animated,
   Modal,
   Keyboard,
+  PanResponder,
+  Dimensions,
 } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRoute, useNavigation, useIsFocused } from "@react-navigation/native";
@@ -57,6 +59,51 @@ function formatTime(dateStr: string): string {
   const hours = d.getHours().toString().padStart(2, "0");
   const mins = d.getMinutes().toString().padStart(2, "0");
   return `${hours}:${mins}`;
+}
+
+function ImageViewer({ uri, onClose }: { uri: string; onClose: () => void }) {
+  const translateY = useRef(new Animated.Value(0)).current;
+  const opacity = useRef(new Animated.Value(1)).current;
+  const screenH = Dimensions.get("window").height;
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: (_, g) => Math.abs(g.dy) > 10,
+      onPanResponderMove: (_, g) => {
+        translateY.setValue(g.dy);
+        opacity.setValue(1 - Math.min(Math.abs(g.dy) / (screenH * 0.3), 0.8));
+      },
+      onPanResponderRelease: (_, g) => {
+        if (Math.abs(g.dy) > 100 || Math.abs(g.vy) > 0.5) {
+          const toValue = g.dy > 0 ? screenH : -screenH;
+          Animated.parallel([
+            Animated.timing(translateY, { toValue, duration: 200, useNativeDriver: true }),
+            Animated.timing(opacity, { toValue: 0, duration: 200, useNativeDriver: true }),
+          ]).start(onClose);
+        } else {
+          Animated.parallel([
+            Animated.spring(translateY, { toValue: 0, useNativeDriver: true, damping: 15 }),
+            Animated.timing(opacity, { toValue: 1, duration: 150, useNativeDriver: true }),
+          ]).start();
+        }
+      },
+    }),
+  ).current;
+
+  return (
+    <Animated.View style={[styles.imageViewerOverlay, { opacity }]}>
+      <Pressable style={styles.imageViewerClose} onPress={onClose}>
+        <MaterialCommunityIcons name="close" size={24} color="#fff" />
+      </Pressable>
+      <Animated.View
+        style={{ transform: [{ translateY }], width: "100%", height: "80%", justifyContent: "center" }}
+        {...panResponder.panHandlers}
+      >
+        <Image source={{ uri }} style={styles.imageViewerImage} resizeMode="contain" />
+      </Animated.View>
+    </Animated.View>
+  );
 }
 
 function AnimatedBubble({
@@ -608,26 +655,16 @@ export default function ChatScreen() {
       </Modal>
 
       {/* Fullscreen image viewer */}
-      <Modal
-        visible={viewingImage !== null}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setViewingImage(null)}
-      >
-        <View style={styles.imageViewerOverlay}>
-          <Pressable style={styles.imageViewerClose} onPress={() => setViewingImage(null)}>
-            <MaterialCommunityIcons name="close" size={24} color="#fff" />
-          </Pressable>
-          {viewingImage && (
-            <Image
-              source={{ uri: viewingImage }}
-              style={styles.imageViewerImage}
-              resizeMode="contain"
-            />
-          )}
-          <Pressable style={styles.imageViewerTap} onPress={() => setViewingImage(null)} />
-        </View>
-      </Modal>
+      {viewingImage !== null && (
+        <Modal
+          visible
+          transparent
+          animationType="fade"
+          onRequestClose={() => setViewingImage(null)}
+        >
+          <ImageViewer uri={viewingImage} onClose={() => setViewingImage(null)} />
+        </Modal>
+      )}
     </SafeAreaView>
   );
 }
@@ -805,13 +842,5 @@ const styles = StyleSheet.create({
   imageViewerImage: {
     width: "100%",
     height: "80%",
-  },
-  imageViewerTap: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    zIndex: -1,
   },
 });
