@@ -1,14 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
-  FlatList,
   Pressable,
   Alert,
   TextInput,
   ScrollView,
 } from "react-native";
-import { useRoute } from "@react-navigation/native";
+import { useRoute, useFocusEffect } from "@react-navigation/native";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   getTask,
@@ -20,6 +19,7 @@ import {
 import { useAuth } from "../../auth/store/useAuth";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { COLORS } from "../../../shared/lib/constants";
+import { supabase } from "../../../shared/lib/supabase";
 
 const STATUS_COLORS: Record<string, string> = {
   open: "#22C55E",
@@ -47,6 +47,35 @@ export default function TaskDetailScreen() {
     enabled: !!taskId,
   });
 
+  // Refetch on focus
+  useFocusEffect(
+    React.useCallback(() => {
+      refetchTask();
+      refetchOffers();
+    }, [refetchTask, refetchOffers]),
+  );
+
+  // Real-time subscription for new offers
+  useEffect(() => {
+    if (!taskId) return;
+
+    const channel = supabase
+      .channel(`offers-${taskId}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "offers", filter: `task_id=eq.${taskId}` },
+        () => {
+          refetchOffers();
+          refetchTask();
+        },
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [taskId, refetchOffers, refetchTask]);
+
   // Offer form state
   const [showOfferForm, setShowOfferForm] = useState(false);
   const [offerAmount, setOfferAmount] = useState("");
@@ -56,7 +85,6 @@ export default function TaskDetailScreen() {
   if (!task) return null;
 
   const isOwner = task.requesterId === user?.id;
-  const isHelper = task.helperId === user?.id;
 
   const handleMakeOffer = async () => {
     if (!offerAmount || Number(offerAmount) <= 0) {
@@ -65,11 +93,7 @@ export default function TaskDetailScreen() {
     }
     setSubmitting(true);
     try {
-      await createOffer({
-        taskId,
-        amount: Number(offerAmount),
-        message: offerMessage || undefined,
-      });
+      await createOffer({ taskId, amount: Number(offerAmount), message: offerMessage || undefined });
       setShowOfferForm(false);
       setOfferAmount("");
       setOfferMessage("");
@@ -109,85 +133,86 @@ export default function TaskDetailScreen() {
   };
 
   return (
-    <ScrollView className="flex-1 bg-white" contentContainerClassName="pb-8">
-      <View className="p-4 gap-4">
+    <ScrollView style={{ flex: 1, backgroundColor: "#fff" }} contentContainerStyle={{ paddingBottom: 40 }}>
+      <View style={{ padding: 16, gap: 16 }}>
         {/* Status badge */}
-        <View className="flex-row items-center gap-2">
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
           <View
-            className="px-3 py-1 rounded-full"
-            style={{ backgroundColor: (STATUS_COLORS[task.status] ?? "#6B7280") + "20" }}
+            style={{
+              paddingHorizontal: 10,
+              paddingVertical: 4,
+              borderRadius: 999,
+              backgroundColor: (STATUS_COLORS[task.status] ?? "#6B7280") + "18",
+            }}
           >
             <Text
-              className="text-xs font-bold capitalize"
-              style={{ color: STATUS_COLORS[task.status] ?? "#6B7280" }}
+              style={{
+                fontSize: 12,
+                fontWeight: "700",
+                color: STATUS_COLORS[task.status] ?? "#6B7280",
+                textTransform: "capitalize",
+              }}
             >
               {task.status.replace("_", " ")}
             </Text>
           </View>
-          <Text className="text-text-muted text-sm">{task.category}</Text>
+          <Text style={{ fontSize: 13, color: "#A1A1AA" }}>{task.category}</Text>
         </View>
 
         {/* Title & description */}
-        <Text className="text-2xl font-extrabold text-black">{task.title}</Text>
-        <Text className="text-base text-text-subtle leading-6">
-          {task.description}
-        </Text>
+        <Text style={{ fontSize: 24, fontWeight: "800", color: "#000" }}>{task.title}</Text>
+        <Text style={{ fontSize: 15, color: "#71717A", lineHeight: 22 }}>{task.description}</Text>
 
         {/* Budget */}
-        <View className="flex-row items-center gap-2">
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
           <MaterialCommunityIcons name="cash" size={20} color={COLORS.red} />
-          <Text className="text-lg font-bold text-black">
+          <Text style={{ fontSize: 18, fontWeight: "700", color: "#000" }}>
             {task.budget ? `€${task.budget}` : "Budget TBD"}
           </Text>
         </View>
 
-        {/* Action buttons based on role & status */}
+        {/* Make offer (for non-owners on open tasks) */}
         {task.status === "open" && !isOwner && (
-          <View className="gap-3">
+          <View style={{ gap: 12 }}>
             {!showOfferForm ? (
               <Pressable
                 onPress={() => setShowOfferForm(true)}
-                className="bg-brand-red rounded-2xl py-4 items-center"
+                style={{ backgroundColor: COLORS.red, borderRadius: 14, paddingVertical: 16, alignItems: "center" }}
               >
-                <Text className="text-white font-bold text-base">
-                  Make an offer
-                </Text>
+                <Text style={{ color: "#fff", fontWeight: "600", fontSize: 15 }}>Make an offer</Text>
               </Pressable>
             ) : (
-              <View className="bg-surface-dim rounded-2xl p-4 gap-3">
-                <Text className="font-bold text-black">Your offer</Text>
+              <View style={{ backgroundColor: "#FAFAFA", borderRadius: 12, padding: 16, gap: 12 }}>
+                <Text style={{ fontWeight: "600", color: "#000" }}>Your offer</Text>
                 <TextInput
                   placeholder="Amount (€)"
                   value={offerAmount}
                   onChangeText={setOfferAmount}
                   keyboardType="numeric"
-                  className="bg-white rounded-xl px-4 py-3 text-base"
-                  placeholderTextColor="#6B7280"
+                  style={{ backgroundColor: "#fff", borderRadius: 10, paddingHorizontal: 14, paddingVertical: 12, fontSize: 14, borderWidth: 1, borderColor: "#E5E5EA" }}
+                  placeholderTextColor="#C7C7CC"
                 />
                 <TextInput
                   placeholder="Message (optional)"
                   value={offerMessage}
                   onChangeText={setOfferMessage}
                   multiline
-                  className="bg-white rounded-xl px-4 py-3 text-base min-h-[80px]"
-                  placeholderTextColor="#6B7280"
-                  textAlignVertical="top"
+                  style={{ backgroundColor: "#fff", borderRadius: 10, paddingHorizontal: 14, paddingVertical: 12, fontSize: 14, minHeight: 70, textAlignVertical: "top", borderWidth: 1, borderColor: "#E5E5EA" }}
+                  placeholderTextColor="#C7C7CC"
                 />
-                <View className="flex-row gap-3">
+                <View style={{ flexDirection: "row", gap: 10 }}>
                   <Pressable
                     onPress={() => setShowOfferForm(false)}
-                    className="flex-1 border border-gray-300 rounded-xl py-3 items-center"
+                    style={{ flex: 1, borderWidth: 1, borderColor: "#E5E5EA", borderRadius: 10, paddingVertical: 12, alignItems: "center" }}
                   >
-                    <Text className="font-bold text-text-muted">Cancel</Text>
+                    <Text style={{ fontWeight: "600", color: "#71717A" }}>Cancel</Text>
                   </Pressable>
                   <Pressable
                     onPress={handleMakeOffer}
                     disabled={submitting}
-                    className="flex-1 bg-brand-red rounded-xl py-3 items-center"
+                    style={{ flex: 1, backgroundColor: COLORS.red, borderRadius: 10, paddingVertical: 12, alignItems: "center" }}
                   >
-                    <Text className="text-white font-bold">
-                      {submitting ? "Sending…" : "Send"}
-                    </Text>
+                    <Text style={{ color: "#fff", fontWeight: "600" }}>{submitting ? "Sending…" : "Send"}</Text>
                   </Pressable>
                 </View>
               </View>
@@ -195,32 +220,38 @@ export default function TaskDetailScreen() {
           </View>
         )}
 
+        {/* Complete button */}
         {task.status === "in_progress" && isOwner && (
           <Pressable
             onPress={handleComplete}
-            className="bg-green-600 rounded-2xl py-4 items-center"
+            style={{ backgroundColor: "#22C55E", borderRadius: 14, paddingVertical: 16, alignItems: "center" }}
           >
-            <Text className="text-white font-bold text-base">
-              Mark as completed
-            </Text>
+            <Text style={{ color: "#fff", fontWeight: "600", fontSize: 15 }}>Mark as completed</Text>
           </Pressable>
         )}
 
-        {/* Offers section (visible to task owner) */}
+        {/* Offers list (visible to task owner) */}
         {isOwner && offers.length > 0 && (
-          <View className="gap-3 mt-2">
-            <Text className="text-lg font-bold text-black">
+          <View style={{ gap: 10, marginTop: 4 }}>
+            <Text style={{ fontSize: 17, fontWeight: "700", color: "#000" }}>
               Offers ({offers.length})
             </Text>
             {offers.map((offer) => (
               <View
                 key={offer.id}
-                className="p-4 rounded-2xl bg-surface-dim flex-row justify-between items-center"
+                style={{
+                  padding: 14,
+                  borderRadius: 12,
+                  backgroundColor: "#FAFAFA",
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
               >
-                <View className="flex-1 pr-3">
-                  <Text className="font-bold text-base">€{offer.amount}</Text>
+                <View style={{ flex: 1, paddingRight: 12 }}>
+                  <Text style={{ fontWeight: "700", fontSize: 16 }}>€{offer.amount}</Text>
                   {offer.message && (
-                    <Text className="text-text-subtle mt-1" numberOfLines={2}>
+                    <Text style={{ color: "#71717A", marginTop: 2, fontSize: 13 }} numberOfLines={2}>
                       {offer.message}
                     </Text>
                   )}
@@ -228,14 +259,21 @@ export default function TaskDetailScreen() {
                 {task.status === "open" && (
                   <Pressable
                     onPress={() => handleAcceptOffer(offer.id)}
-                    className="bg-brand-red py-2.5 px-4 rounded-xl"
+                    style={{ backgroundColor: COLORS.red, paddingVertical: 10, paddingHorizontal: 16, borderRadius: 10 }}
                   >
-                    <Text className="text-white font-bold">Accept</Text>
+                    <Text style={{ color: "#fff", fontWeight: "600" }}>Accept</Text>
                   </Pressable>
                 )}
               </View>
             ))}
           </View>
+        )}
+
+        {/* Show offer count for non-owners */}
+        {!isOwner && offers.length > 0 && (
+          <Text style={{ fontSize: 13, color: "#A1A1AA" }}>
+            {offers.length} offer{offers.length !== 1 ? "s" : ""} on this task
+          </Text>
         )}
       </View>
     </ScrollView>
