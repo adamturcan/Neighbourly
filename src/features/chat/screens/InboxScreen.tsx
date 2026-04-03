@@ -99,7 +99,18 @@ export default function InboxScreen() {
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "messages" },
-        () => {
+        (payload: any) => {
+          // Clear typing indicator for this conversation since they sent a message
+          const msgTaskId = payload.new?.task_id;
+          if (msgTaskId) {
+            const existing = typingTimeouts.current.get(msgTaskId);
+            if (existing) clearTimeout(existing);
+            setTypingTasks((prev) => {
+              const next = new Set(prev);
+              next.delete(msgTaskId);
+              return next;
+            });
+          }
           refetch();
         },
       )
