@@ -2,9 +2,9 @@ import React from "react";
 import { View, Text, Pressable, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../../auth/store/useAuth";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { listMyTasks } from "../../../shared/lib/api";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import type { Task } from "../../../shared/types";
 import { TAB_BAR_HEIGHT } from "../../../navigation/RootNavigator";
@@ -21,11 +21,19 @@ export default function ProfileScreen() {
   const { profile, user, signOut } = useAuth();
   const nav = useNavigation<any>();
 
+  const queryClient = useQueryClient();
   const { data: myTasks = [] } = useQuery({
     queryKey: ["tasks", "mine"],
     queryFn: listMyTasks,
     enabled: !!user,
   });
+
+  // Refetch when tab is focused
+  useFocusEffect(
+    React.useCallback(() => {
+      queryClient.invalidateQueries({ queryKey: ["tasks", "mine"] });
+    }, [queryClient]),
+  );
 
   const postedTasks = myTasks.filter((t) => t.requesterId === user?.id);
   const helperTasks = myTasks.filter((t) => t.helperId === user?.id);

@@ -14,9 +14,9 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { listServices, listTasks } from "../../../shared/lib/api";
 import { TAB_BAR_HEIGHT } from "../../../navigation/RootNavigator";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import ServiceCard from "../components/ServiceCard";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import JobCard from "../../tasks/components/JobCard";
 import LocationBar from "../../../shared/components/LocationBar";
 import LocationPickerSheet from "../../../shared/components/LocationPickerSheet";
@@ -89,6 +89,15 @@ export default function HomeScreen() {
     isLoading: loadingTasks,
     refetch: refetchTasks,
   } = useQuery({ queryKey: ["tasks", "open"], queryFn: () => listTasks() });
+
+  // Refetch when tab is focused
+  const qc = useQueryClient();
+  useFocusEffect(
+    React.useCallback(() => {
+      qc.invalidateQueries({ queryKey: ["services"] });
+      qc.invalidateQueries({ queryKey: ["tasks", "open"] });
+    }, [qc]),
+  );
 
   const BASIC_SECTIONS: Array<{ key: string; label: string; cat: string }> = [
     { key: "cleaning", label: "Upratovanie & dom", cat: "chores" },
