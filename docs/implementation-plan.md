@@ -54,7 +54,7 @@
 
 ---
 
-## Phase 1: Foundation & Auth (Supabase) — IN PROGRESS
+## Phase 1: Foundation & Auth (Supabase) ✅ COMPLETED (2026-04-03)
 
 **Why:** Everything depends on user identity. No auth = no task ownership, no chat, no payments.
 
@@ -93,13 +93,15 @@
 - [x] Auth-gated navigation: unauthenticated → AuthStack, no profile → Onboarding, ready → MainTabs
 - [x] Auto-create `profiles` row on first sign-in (Supabase trigger in migration)
 
-### 1.4 - Replace mock repo with Supabase queries
-- [ ] Create `src/shared/lib/api.ts` with typed Supabase query functions
-- [ ] Replace every `repo.ts` call with real Supabase queries
-- [ ] Update React Query hooks to use new API functions
-- [ ] Delete `seed.ts` and `repo.ts` once fully migrated
-- [ ] Test all data flows on Simulator
-- _Note: Blocked until Supabase project is created and `.env` is configured_
+### 1.4 - Replace mock repo with Supabase queries ✅
+- [x] Create `src/shared/lib/api.ts` with typed Supabase query functions
+- [x] Replace every `repo.ts` call with real Supabase queries
+- [x] Update React Query hooks to use new API functions
+- [x] Created `services` table migration (`002_services.sql`)
+- [x] Created `supabase/seed.sql` for populating test data
+- [x] All screens now import from `api.ts` — zero imports from `repo.ts`
+- [x] Test all data flows on Simulator
+- [ ] Delete `seed.ts` and `repo.ts` — _kept for reference, no longer imported_
 
 ---
 
@@ -309,7 +311,7 @@
 | Order | Phase | Status | Depends On |
 |-------|-------|--------|------------|
 | 1 | Phase 0: Restructure & NativeWind | ✅ Done | Nothing |
-| 2 | Phase 1: Auth & Supabase | 🔧 In Progress | Phase 0 |
+| 2 | Phase 1: Auth & Supabase | ✅ Done | Phase 0 |
 | 3 | Phase 2: Task Lifecycle | ⬜ | Phase 1 |
 | 4 | Phase 3: Maps & Location | ⬜ | Phase 1 |
 | 5 | Phase 4: Chat & Notifications | ⬜ | Phase 2 |

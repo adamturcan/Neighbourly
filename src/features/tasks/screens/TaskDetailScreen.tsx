@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, FlatList, Pressable, Alert } from "react-native";
 import { useRoute } from "@react-navigation/native";
-import { Repo } from "../../../shared/lib/repo";
+import { getTask, listOffers, acceptOffer } from "../../../shared/lib/api";
 
 export default function TaskDetailScreen() {
   const route = useRoute<any>();
@@ -11,8 +11,8 @@ export default function TaskDetailScreen() {
   const [offers, setOffers] = React.useState<any[]>([]);
 
   React.useEffect(() => {
-    Repo.getTask(taskId).then(setTask);
-    Repo.listOffers(taskId).then(setOffers);
+    getTask(taskId).then(setTask);
+    listOffers(taskId).then(setOffers);
   }, [taskId]);
 
   if (!task) return null;
@@ -40,7 +40,7 @@ export default function TaskDetailScreen() {
             </View>
             <Pressable
               onPress={async () => {
-                await Repo.acceptOffer({ taskId, offerId: item.id });
+                await acceptOffer({ taskId, offerId: item.id });
                 Alert.alert("Offer accepted!");
               }}
               className="bg-brand-red py-2.5 px-3.5 rounded-xl"

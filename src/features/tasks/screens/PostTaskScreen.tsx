@@ -1,27 +1,34 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, Pressable, Alert } from "react-native";
-import { Repo } from "../../../shared/lib/repo";
+import { createTask } from "../../../shared/lib/api";
 
 export default function PostTaskScreen() {
-  const [title, setTitle] = useState("Help me move a desk");
-  const [budget, setBudget] = useState("40");
+  const [title, setTitle] = useState("");
+  const [budget, setBudget] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   const onSubmit = async () => {
+    if (!title.trim()) {
+      Alert.alert("Title required");
+      return;
+    }
     setSubmitting(true);
-    await Repo.createTask({
-      title,
-      description: "Short description…",
-      category: "moving",
-      budget: Number(budget),
-      requesterId: "me",
-      lat: 48.1482,
-      lng: 17.1067,
-      when: new Date().toISOString(),
-      photos: [],
-    } as any);
+    try {
+      await createTask({
+        title,
+        description: "Short description…",
+        category: "moving",
+        budget: Number(budget) || 0,
+        lat: 48.1482,
+        lng: 17.1067,
+      });
+      Alert.alert("Task posted!");
+      setTitle("");
+      setBudget("");
+    } catch (e: any) {
+      Alert.alert("Error", e.message);
+    }
     setSubmitting(false);
-    Alert.alert("Task posted (mock)!");
   };
 
   return (

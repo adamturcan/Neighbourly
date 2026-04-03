@@ -4,7 +4,7 @@ import { Image } from "expo-image";
 import MapView, { Marker } from "react-native-maps";
 import { useRoute } from "@react-navigation/native";
 import { useQuery } from "@tanstack/react-query";
-import { getService } from "../../../shared/lib/repo";
+import { getService } from "../../../shared/lib/api";
 import { COLORS } from "../../../shared/lib/constants";
 
 type RouteParams = { serviceId: string };

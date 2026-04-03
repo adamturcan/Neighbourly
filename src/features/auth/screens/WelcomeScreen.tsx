@@ -74,7 +74,6 @@ export default function WelcomeScreen() {
       password: "dev123456",
     });
     if (error?.message?.includes("Invalid login")) {
-      // Account doesn't exist yet — create it
       const { error: signUpError } = await supabase.auth.signUp({
         email: "dev@neighbourly.local",
         password: "dev123456",
@@ -89,6 +88,20 @@ export default function WelcomeScreen() {
       Alert.alert("Dev sign-in failed", error.message);
     }
     setLoading(false);
+  };
+
+  const handleDevOnboarding = async () => {
+    // Creates a fresh account so you land on the onboarding screen
+    setLoading(true);
+    const ts = Date.now();
+    const { error } = await supabase.auth.signUp({
+      email: `dev-${ts}@neighbourly.local`,
+      password: "dev123456",
+    });
+    setLoading(false);
+    if (error) {
+      Alert.alert("Dev sign-up failed", error.message);
+    }
   };
 
   return (
@@ -153,12 +166,15 @@ export default function WelcomeScreen() {
         )}
       </View>
 
-      {/* Dev sign-in at the bottom */}
-      <Pressable onPress={handleDevSignIn} disabled={loading} className="mb-2 py-3">
-        <Text className="text-gray-600 text-xs text-center">
-          Dev Sign In
-        </Text>
-      </Pressable>
+      {/* Dev buttons at the bottom */}
+      <View className="flex-row justify-center gap-6 mb-2 py-3">
+        <Pressable onPress={handleDevSignIn} disabled={loading}>
+          <Text className="text-gray-600 text-xs">Dev Sign In</Text>
+        </Pressable>
+        <Pressable onPress={handleDevOnboarding} disabled={loading}>
+          <Text className="text-gray-600 text-xs">Dev Onboarding</Text>
+        </Pressable>
+      </View>
 
       <Text className="text-gray-600 text-xs text-center pb-4 px-8">
         By continuing, you agree to our Terms of Service and Privacy Policy.

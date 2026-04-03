@@ -11,7 +11,7 @@ import {
   Pressable,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { listServices, Repo } from "../../../shared/lib/repo";
+import { listServices, listTasks } from "../../../shared/lib/api";
 import { useQuery } from "@tanstack/react-query";
 import ServiceCard from "../components/ServiceCard";
 import { useNavigation } from "@react-navigation/native";
@@ -86,7 +86,7 @@ export default function HomeScreen() {
     data: tasks = [],
     isLoading: loadingTasks,
     refetch: refetchTasks,
-  } = useQuery({ queryKey: ["tasks", "open"], queryFn: () => Repo.listTasks() });
+  } = useQuery({ queryKey: ["tasks", "open"], queryFn: () => listTasks() });
 
   const BASIC_SECTIONS: Array<{ key: string; label: string; cat: string }> = [
     { key: "cleaning", label: "Upratovanie & dom", cat: "chores" },

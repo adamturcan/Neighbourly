@@ -1,14 +1,13 @@
 import React from "react";
 import MapView, { Marker } from "react-native-maps";
-import { Repo } from "../../../shared/lib/repo";
+import { getNearbyHelpers } from "../../../shared/lib/api";
 import { useQuery } from "@tanstack/react-query";
 import { ORIGIN } from "../../../shared/lib/constants";
 
 export default function MapScreen() {
   const { data: helpers } = useQuery({
     queryKey: ["helpers", ORIGIN],
-    queryFn: () =>
-      Repo.getNearbyHelpers({ lat: ORIGIN.lat, lng: ORIGIN.lng }),
+    queryFn: () => getNearbyHelpers({ lat: ORIGIN.lat, lng: ORIGIN.lng }),
   });
 
   return (

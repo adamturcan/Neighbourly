@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { View, FlatList, TextInput, Text } from "react-native";
-import { listServices } from "../../../shared/lib/repo";
+import { listServices } from "../../../shared/lib/api";
 import { useQuery } from "@tanstack/react-query";
 import ServiceCard from "../components/ServiceCard";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";

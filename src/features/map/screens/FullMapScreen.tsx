@@ -2,7 +2,7 @@ import React from "react";
 import { View } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import { useQuery } from "@tanstack/react-query";
-import { listServices } from "../../../shared/lib/repo";
+import { listServices } from "../../../shared/lib/api";
 import { ORIGIN } from "../../../shared/lib/constants";
 
 export default function FullMapScreen() {

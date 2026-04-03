@@ -9,8 +9,16 @@ Format: [Keep a Changelog](https://keepachangelog.com/)
 ## [2026-04-03] — Phase 1: Supabase Foundation & Auth
 
 ### Changed
-- Added "Dev Sign In" button on WelcomeScreen (auto-creates dev@neighbourly.local account)
+- All screens now use Supabase API (`api.ts`) instead of mock repo
+- PostTaskScreen creates real tasks in Supabase
+- TaskDetailScreen fetches real offers from Supabase
+- HomeScreen, SearchScreen, ServiceDetailScreen fetch from `services` table
+- FullMapScreen, MapScreen fetch from Supabase
+- Added "Dev Sign In" and "Dev Onboarding" buttons on WelcomeScreen
 - Replaced phone/SMS auth with Apple Sign-In + Google OAuth + Email magic link
+
+### Removed
+- All imports of `repo.ts` — mock data layer no longer used by any screen
 - WelcomeScreen now has 3 sign-in options (Apple on iOS, Google, Email)
 - Simplified AuthStack to single WelcomeScreen (no more phone/OTP flow)
 - Removed PhoneEntryScreen and OTPScreen from auth flow (kept as files for reference)
