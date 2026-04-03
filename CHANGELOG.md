@@ -8,7 +8,14 @@ Format: [Keep a Changelog](https://keepachangelog.com/)
 
 ## [2026-04-03] — Phase 1: Supabase Foundation & Auth
 
+### Changed
+- Replaced phone/SMS auth with Apple Sign-In + Google OAuth + Email magic link
+- WelcomeScreen now has 3 sign-in options (Apple on iOS, Google, Email)
+- Simplified AuthStack to single WelcomeScreen (no more phone/OTP flow)
+- Removed PhoneEntryScreen and OTPScreen from auth flow (kept as files for reference)
+
 ### Added
+- `expo-apple-authentication` for native Apple Sign-In
 - Supabase client (`src/shared/lib/supabase.ts`) with Expo SecureStore for token persistence
 - Database schema migration (`supabase/migrations/001_schema.sql`):
   - `profiles` table with RLS policies + auto-create trigger on signup

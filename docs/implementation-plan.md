@@ -78,8 +78,10 @@
 - [x] PostGIS index on `tasks.location_point`
 
 ### 1.3 - Auth screens ✅
-- [x] Phone number auth via Supabase Auth (OTP)
-- [ ] Social login (Apple Sign-In for iOS, Google) — _deferred, phone auth is MVP_
+- [x] ~~Phone number auth~~ → replaced with Apple + Google + Email magic link
+- [x] Apple Sign-In for iOS (native via `expo-apple-authentication`)
+- [x] Google OAuth sign-in via Supabase
+- [x] Email magic link (for dev/testing)
 - [x] Build screens:
   - `WelcomeScreen` — branded black landing page with Get Started / Sign In
   - `PhoneEntryScreen` — phone number input with validation

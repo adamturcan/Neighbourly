@@ -1,15 +1,73 @@
-import React from "react";
-import { View, Text, Pressable } from "react-native";
+import React, { useState } from "react";
+import { View, Text, Pressable, Alert, Platform } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import { COLORS } from "../../../shared/lib/constants";
+import { supabase } from "../../../shared/lib/supabase";
+import * as AppleAuthentication from "expo-apple-authentication";
 
-type Props = {
-  onSignIn: () => void;
-  onSignUp: () => void;
-};
+export default function WelcomeScreen() {
+  const [loading, setLoading] = useState(false);
 
-export default function WelcomeScreen({ onSignIn, onSignUp }: Props) {
+  const handleAppleSignIn = async () => {
+    try {
+      setLoading(true);
+      const credential = await AppleAuthentication.signInAsync({
+        requestedScopes: [
+          AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+          AppleAuthentication.AppleAuthenticationScope.EMAIL,
+        ],
+      });
+
+      if (credential.identityToken) {
+        const { error } = await supabase.auth.signInWithIdToken({
+          provider: "apple",
+          token: credential.identityToken,
+        });
+        if (error) Alert.alert("Sign in error", error.message);
+      }
+    } catch (e: any) {
+      if (e.code !== "ERR_REQUEST_CANCELED") {
+        Alert.alert("Error", e.message);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    // Google sign-in via Supabase OAuth redirect
+    setLoading(true);
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: "neighbourly://auth/callback",
+      },
+    });
+    setLoading(false);
+    if (error) Alert.alert("Sign in error", error.message);
+  };
+
+  const handleEmailSignIn = async () => {
+    // For dev/testing: magic link via email
+    Alert.prompt(
+      "Sign in with email",
+      "Enter your email to receive a magic link",
+      async (email) => {
+        if (!email?.trim()) return;
+        setLoading(true);
+        const { error } = await supabase.auth.signInWithOtp({
+          email: email.trim(),
+        });
+        setLoading(false);
+        if (error) {
+          Alert.alert("Error", error.message);
+        } else {
+          Alert.alert("Check your email", "We sent you a magic link to sign in.");
+        }
+      },
+    );
+  };
+
   return (
     <SafeAreaView className="flex-1 bg-black">
       <View className="flex-1 justify-center items-center px-8 gap-6">
@@ -26,24 +84,50 @@ export default function WelcomeScreen({ onSignIn, onSignUp }: Props) {
           Find help or earn by helping others.
         </Text>
 
-        {/* CTA Buttons */}
+        {/* Sign-in buttons */}
         <View className="w-full gap-3 mt-8">
+          {/* Apple Sign In */}
+          {Platform.OS === "ios" && (
+            <Pressable
+              onPress={handleAppleSignIn}
+              disabled={loading}
+              className="bg-white rounded-2xl py-4 flex-row items-center justify-center gap-3"
+            >
+              <MaterialCommunityIcons name="apple" size={22} color="#000" />
+              <Text className="text-black font-bold text-base">
+                Continue with Apple
+              </Text>
+            </Pressable>
+          )}
+
+          {/* Google Sign In */}
           <Pressable
-            onPress={onSignUp}
-            className="bg-brand-red rounded-2xl py-4 items-center"
+            onPress={handleGoogleSignIn}
+            disabled={loading}
+            className="bg-white rounded-2xl py-4 flex-row items-center justify-center gap-3"
           >
-            <Text className="text-white font-bold text-base">Get started</Text>
+            <MaterialCommunityIcons name="google" size={22} color="#DB4437" />
+            <Text className="text-black font-bold text-base">
+              Continue with Google
+            </Text>
           </Pressable>
 
+          {/* Email magic link (for testing) */}
           <Pressable
-            onPress={onSignIn}
-            className="border border-gray-600 rounded-2xl py-4 items-center"
+            onPress={handleEmailSignIn}
+            disabled={loading}
+            className="border border-gray-600 rounded-2xl py-4 flex-row items-center justify-center gap-3"
           >
+            <MaterialCommunityIcons name="email-outline" size={22} color="#fff" />
             <Text className="text-white font-bold text-base">
-              I already have an account
+              Continue with Email
             </Text>
           </Pressable>
         </View>
+
+        {loading && (
+          <Text className="text-gray-500 text-sm mt-2">Signing in…</Text>
+        )}
       </View>
 
       <Text className="text-gray-600 text-xs text-center pb-4 px-8">
