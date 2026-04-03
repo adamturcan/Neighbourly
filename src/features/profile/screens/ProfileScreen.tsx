@@ -46,7 +46,11 @@ export default function ProfileScreen() {
   );
 
   const postedTasks = myTasks.filter((t) => t.requesterId === user?.id);
-  const helperTasks = myTasks.filter((t) => t.helperId === user?.id);
+  const helperTasks = myTasks.filter((t) => t.helperId === user?.id && t.requesterId !== user?.id);
+
+  // Remove offers for tasks where you're already the matched helper
+  const helperTaskIds = new Set(helperTasks.map((t) => t.id));
+  const filteredOffers = myOffers.filter((o) => !helperTaskIds.has(o.taskId));
 
   const goToTask = (taskId: string) => {
     nav.dispatch(
@@ -114,10 +118,10 @@ export default function ProfileScreen() {
         )}
 
         {/* My Offers */}
-        {myOffers.length > 0 && (
+        {filteredOffers.length > 0 && (
           <View style={{ gap: 10 }}>
             <Text style={{ fontSize: 17, fontWeight: "700", color: "#000" }}>My offers</Text>
-            {myOffers.map((o) => (
+            {filteredOffers.map((o) => (
               <Pressable
                 key={o.id}
                 onPress={() => goToTask(o.taskId)}
