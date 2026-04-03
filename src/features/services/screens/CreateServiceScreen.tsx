@@ -45,6 +45,7 @@ export default function CreateServiceScreen() {
   const [description, setDescription] = useState("");
   const [categories, setCategories] = useState<string[]>([]);
   const [priceFrom, setPriceFrom] = useState("");
+  const [priceType, setPriceType] = useState<"service" | "hourly">("service");
 
   const totalSteps = 3;
 
@@ -248,7 +249,20 @@ export default function CreateServiceScreen() {
                       keyboardType="numeric"
                     />
                   </View>
-                  <Text style={s.priceHint}>per service</Text>
+                </View>
+                <View style={s.priceTypeRow}>
+                  <Pressable
+                    style={[s.priceTypeBtn, priceType === "service" && s.priceTypeBtnActive]}
+                    onPress={() => setPriceType("service")}
+                  >
+                    <Text style={[s.priceTypeText, priceType === "service" && s.priceTypeTextActive]}>Per service</Text>
+                  </Pressable>
+                  <Pressable
+                    style={[s.priceTypeBtn, priceType === "hourly" && s.priceTypeBtnActive]}
+                    onPress={() => setPriceType("hourly")}
+                  >
+                    <Text style={[s.priceTypeText, priceType === "hourly" && s.priceTypeTextActive]}>Per hour</Text>
+                  </Pressable>
                 </View>
               </View>
             </>
@@ -262,7 +276,7 @@ export default function CreateServiceScreen() {
               <View style={s.previewCard}>
                 <View style={s.previewHeader}>
                   <Text style={s.previewTitle}>{title}</Text>
-                  <Text style={s.previewPrice}>From €{priceFrom}</Text>
+                  <Text style={s.previewPrice}>From €{priceFrom}{priceType === "hourly" ? "/hr" : ""}</Text>
                 </View>
                 {description ? (
                   <Text style={s.previewDesc}>{description}</Text>
@@ -326,6 +340,7 @@ const s = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 20,
+    paddingTop: 12,
     paddingBottom: 16,
   },
   stepText: { fontSize: 13, color: "#9CA3AF", fontWeight: "500" },
@@ -388,7 +403,25 @@ const s = StyleSheet.create({
     fontWeight: "700",
     color: "#000",
   },
-  priceHint: { fontSize: 13, color: "#9CA3AF" },
+  priceTypeRow: {
+    flexDirection: "row",
+    gap: 8,
+    marginTop: 10,
+  },
+  priceTypeBtn: {
+    flex: 1,
+    paddingVertical: 10,
+    borderRadius: 10,
+    borderWidth: 1.5,
+    borderColor: "#E5E7EB",
+    alignItems: "center",
+  },
+  priceTypeBtnActive: {
+    borderColor: COLORS.red,
+    backgroundColor: "#FEF2F2",
+  },
+  priceTypeText: { fontSize: 13, fontWeight: "600", color: "#9CA3AF" },
+  priceTypeTextActive: { color: COLORS.red },
   // Preview
   previewCard: {
     backgroundColor: "#F9FAFB",
