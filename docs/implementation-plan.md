@@ -213,28 +213,28 @@
 
 ---
 
-## Phase 5: Reviews & Trust
+## Phase 5: Reviews & Trust ✅ COMPLETED (2026-04-03)
 
 **Why:** Two-sided marketplace needs trust signals to function.
 
-### 5.1 - Review flow
-- [ ] After task `completed`, prompt both parties to leave a review
-- [ ] Double-blind: neither review is visible until both are submitted (or 48h passes)
-- [ ] Star rating (1-5) + optional comment
-- [ ] Insert into `reviews` table
+### 5.1 - Review flow ✅
+- [x] After task `completed`, prompt both parties to leave a review
+- [ ] Double-blind: neither review is visible until both are submitted (or 48h passes) — _deferred: needs DB migration for visible_at column_
+- [x] Star rating (1-5) + optional comment
+- [x] Insert into `reviews` table
 
-### 5.2 - Rating display
-- [ ] Show aggregate rating + review count on profile and service cards
-- [ ] Supabase function to recompute `profiles.rating` on new review insert
-- [ ] Review list on profile screen (most recent reviews)
+### 5.2 - Rating display ✅
+- [x] Show aggregate rating + review count on profile and service cards
+- [x] Supabase function to recompute `profiles.rating` on new review insert (trigger in 001_schema.sql)
+- [x] Review list on profile screen (most recent reviews)
 
-### 5.3 - Profile screen (replace stub)
-- [ ] Avatar, name, bio, role badge (Seeker/Helper)
-- [ ] Skills list (for helpers)
-- [ ] Stats: rating, jobs done, member since
-- [ ] Reviews section
-- [ ] Edit profile button -> edit name, bio, avatar, skills
-- [ ] Settings: notifications, logout
+### 5.3 - Profile screen (replace stub) ✅
+- [x] Avatar, name, bio, role badge (Seeker/Helper)
+- [x] Skills list (for helpers)
+- [x] Stats: rating, jobs done, member since
+- [x] Reviews section
+- [x] Edit profile button -> edit name, bio, avatar, skills
+- [x] Settings: notifications, logout
 
 ---
 

@@ -6,6 +6,9 @@ import FullMapScreen from "../features/map/screens/FullMapScreen";
 import ServiceDetailScreen from "../features/services/screens/ServiceDetailScreen";
 import LocationPickerScreen from "../features/map/screens/LocationPickerScreen";
 import ChatScreen from "../features/chat/screens/ChatScreen";
+import ReviewSubmitScreen from "../features/profile/screens/ReviewSubmitScreen";
+import EditProfileScreen from "../features/profile/screens/EditProfileScreen";
+import PublicProfileScreen from "../features/profile/screens/PublicProfileScreen";
 
 export type HomeStackParamList = {
   HomeMain: undefined;
@@ -14,6 +17,9 @@ export type HomeStackParamList = {
   ServiceDetail: { serviceId: string };
   LocationPicker: undefined;
   ChatScreen: { taskId: string; otherName: string; fromInbox?: boolean };
+  ReviewSubmit: { taskId: string; revieweeId: string; revieweeName: string; taskTitle: string };
+  EditProfile: undefined;
+  PublicProfile: { userId: string };
 };
 
 const Stack = createNativeStackNavigator<HomeStackParamList>();
@@ -45,6 +51,21 @@ export default function HomeStack() {
         name="ChatScreen"
         component={ChatScreen}
         options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="ReviewSubmit"
+        component={ReviewSubmitScreen}
+        options={{ presentation: "modal", headerShown: true, title: "Review" }}
+      />
+      <Stack.Screen
+        name="EditProfile"
+        component={EditProfileScreen}
+        options={{ presentation: "modal", headerShown: true, title: "Edit Profile" }}
+      />
+      <Stack.Screen
+        name="PublicProfile"
+        component={PublicProfileScreen}
+        options={{ headerShown: true, title: "Profile" }}
       />
     </Stack.Navigator>
   );

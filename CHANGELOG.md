@@ -4,6 +4,29 @@ All notable changes to the Neighborly project will be documented in this file.
 
 Format: [Keep a Changelog](https://keepachangelog.com/)
 
+## [2026-04-03] — Phase 5: Reviews & Trust
+
+### Added
+- StarRating shared component (display + interactive modes)
+- ReviewSubmitScreen — bottom sheet style modal with star rating + comment
+- Review prompt on completed tasks in TaskDetailScreen (with post-completion flow)
+- fetchReviewsForUser, fetchReviewStatus, getPublicProfile API functions
+- PublicProfileScreen — view other users' profiles with reviews
+- EditProfileScreen — edit name, bio, skills
+- Reviews section on ProfileScreen showing latest reviews with stars
+
+### Changed
+- ProfileScreen redesigned to V1 card sections layout: header card with avatar/role/bio/member since, stats card with star rating, skills card, reviews card, tasks/offers cards, settings card with sign out
+- Review type extended with reviewerName, reviewerAvatarUrl, taskTitle
+- Profile type extended with created_at
+- HomeStack updated with ReviewSubmit, EditProfile, PublicProfile routes
+- Task completion now prompts user to leave a review immediately
+
+### Fixed
+- EAS Update configured for OTA deployments
+- App name corrected to "Neighbourly" (British spelling)
+- Added android.package and ios.bundleIdentifier for EAS builds
+
 ---
 
 ## [2026-04-03] — Phase 1: Supabase Foundation & Auth

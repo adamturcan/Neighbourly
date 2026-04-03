@@ -57,6 +57,9 @@ export type Review = {
   rating: number;
   comment?: string;
   createdAt: string;
+  reviewerName?: string;
+  reviewerAvatarUrl?: string;
+  taskTitle?: string;
 };
 
 export type SavedAddress = {

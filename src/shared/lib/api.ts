@@ -388,6 +388,89 @@ export async function leaveReview(input: {
   };
 }
 
+export async function fetchReviewsForUser(userId: string): Promise<Review[]> {
+  const { data, error } = await supabase
+    .from("reviews")
+    .select("*, reviewer:profiles!reviewer_id(full_name, avatar_url), task:tasks!task_id(title)")
+    .eq("reviewee_id", userId)
+    .order("created_at", { ascending: false });
+
+  if (error) throw error;
+  return (data ?? []).map((row: any) => ({
+    id: row.id,
+    taskId: row.task_id,
+    fromUserId: row.reviewer_id,
+    toUserId: row.reviewee_id,
+    rating: row.rating,
+    comment: row.comment ?? undefined,
+    createdAt: row.created_at,
+    reviewerName: row.reviewer?.full_name ?? "User",
+    reviewerAvatarUrl: row.reviewer?.avatar_url ?? undefined,
+    taskTitle: row.task?.title ?? undefined,
+  }));
+}
+
+export async function fetchReviewStatus(taskId: string): Promise<{
+  myReview: Review | null;
+  canReview: boolean;
+}> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { myReview: null, canReview: false };
+
+  const { data: reviews } = await supabase
+    .from("reviews")
+    .select("*")
+    .eq("task_id", taskId)
+    .eq("reviewer_id", user.id);
+
+  const myReview = reviews && reviews.length > 0
+    ? {
+        id: reviews[0].id,
+        taskId: reviews[0].task_id,
+        fromUserId: reviews[0].reviewer_id,
+        toUserId: reviews[0].reviewee_id,
+        rating: reviews[0].rating,
+        comment: reviews[0].comment ?? undefined,
+        createdAt: reviews[0].created_at,
+      }
+    : null;
+
+  return { myReview, canReview: !myReview };
+}
+
+export async function getPublicProfile(userId: string): Promise<{
+  id: string;
+  name: string;
+  bio: string | null;
+  avatarUrl: string | null;
+  role: string;
+  skills: string[];
+  rating: number;
+  jobsDone: number;
+  createdAt: string;
+} | null> {
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("id", userId)
+    .single();
+
+  if (error || !data) return null;
+  return {
+    id: data.id,
+    name: data.full_name ?? data.username ?? "User",
+    bio: data.bio,
+    avatarUrl: data.avatar_url,
+    role: data.role,
+    skills: data.skills ?? [],
+    rating: data.rating ?? 0,
+    jobsDone: data.jobs_done ?? 0,
+    createdAt: data.created_at,
+  };
+}
+
 // ============================================================
 // MESSAGES / CHAT
 // ============================================================

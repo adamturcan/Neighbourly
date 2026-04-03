@@ -15,6 +15,7 @@ import {
   acceptOffer,
   createOffer,
   completeTask,
+  fetchReviewStatus,
 } from "../../../shared/lib/api";
 import { useAuth } from "../../auth/store/useAuth";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
@@ -95,6 +96,30 @@ export default function TaskDetailScreen() {
     };
   }, [taskId, refetchOffers, refetchTask]);
 
+  // Review status for completed tasks
+  const { data: reviewStatus } = useQuery({
+    queryKey: ["reviewStatus", taskId],
+    queryFn: () => fetchReviewStatus(taskId),
+    enabled: !!task && task.status === "completed",
+  });
+
+  // Get other party info for review
+  const { data: otherPartyInfo } = useQuery({
+    queryKey: ["otherPartyInfo", taskId],
+    queryFn: async () => {
+      if (!task) return null;
+      const otherId = task.requesterId === user?.id ? task.helperId : task.requesterId;
+      if (!otherId) return null;
+      const { data } = await supabase
+        .from("profiles")
+        .select("id, full_name, username")
+        .eq("id", otherId)
+        .single();
+      return data ? { id: data.id, name: data.full_name ?? data.username ?? "User" } : null;
+    },
+    enabled: !!task && task.status === "completed",
+  });
+
   // Offer form state
   const [showOfferForm, setShowOfferForm] = useState(false);
   const [offerAmount, setOfferAmount] = useState("");
@@ -147,6 +172,31 @@ export default function TaskDetailScreen() {
           await completeTask(taskId);
           refetchTask();
           queryClient.invalidateQueries({ queryKey: ["tasks"] });
+          // Prompt to leave review
+          const otherId = task.requesterId === user?.id ? task.helperId : task.requesterId;
+          if (otherId) {
+            const { data: otherProfile } = await supabase
+              .from("profiles")
+              .select("id, full_name, username")
+              .eq("id", otherId)
+              .single();
+            if (otherProfile) {
+              Alert.alert("Task completed!", "Would you like to leave a review?", [
+                { text: "Later", style: "cancel" },
+                {
+                  text: "Review Now",
+                  onPress: () =>
+                    navigation.navigate("ReviewSubmit", {
+                      taskId: task.id,
+                      revieweeId: otherProfile.id,
+                      revieweeName: otherProfile.full_name ?? otherProfile.username ?? "User",
+                      taskTitle: task.title,
+                    }),
+                },
+              ]);
+              return;
+            }
+          }
           Alert.alert("Task completed!");
         },
       },
@@ -319,6 +369,55 @@ export default function TaskDetailScreen() {
           >
             <Text style={{ color: "#fff", fontWeight: "600", fontSize: 15 }}>Mark as completed</Text>
           </Pressable>
+        )}
+
+        {/* Review prompt for completed tasks */}
+        {task.status === "completed" && reviewStatus && otherPartyInfo && (
+          reviewStatus.canReview ? (
+            <Pressable
+              onPress={() =>
+                navigation.navigate("ReviewSubmit", {
+                  taskId: task.id,
+                  revieweeId: otherPartyInfo.id,
+                  revieweeName: otherPartyInfo.name,
+                  taskTitle: task.title,
+                })
+              }
+              style={{
+                backgroundColor: "#FEF2F2",
+                borderRadius: 14,
+                padding: 16,
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 12,
+              }}
+            >
+              <MaterialCommunityIcons name="star-outline" size={24} color={COLORS.red} />
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontWeight: "700", color: "#000", fontSize: 15 }}>Leave a Review</Text>
+                <Text style={{ fontSize: 13, color: "#6B7280", marginTop: 2 }}>
+                  How was your experience with {otherPartyInfo.name}?
+                </Text>
+              </View>
+              <MaterialCommunityIcons name="chevron-right" size={20} color="#9CA3AF" />
+            </Pressable>
+          ) : (
+            <View
+              style={{
+                backgroundColor: "#F0FDF4",
+                borderRadius: 14,
+                padding: 16,
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 10,
+              }}
+            >
+              <MaterialCommunityIcons name="check-circle" size={22} color="#22C55E" />
+              <Text style={{ flex: 1, fontSize: 14, color: "#374151" }}>
+                You've reviewed {otherPartyInfo.name}
+              </Text>
+            </View>
+          )
         )}
 
         {/* Offers list (visible to task owner) */}

@@ -1,7 +1,8 @@
 {
   "expo": {
-    "name": "neighborly",
+    "name": "Neighbourly",
     "slug": "neighborly",
+    "owner": "adam2",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -13,9 +14,11 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.adam2.neighbourly"
     },
     "android": {
+      "package": "com.adam2.neighbourly",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
@@ -29,6 +32,17 @@
     "plugins": [
       "expo-font",
       "expo-secure-store"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "0bc23b6a-9551-4180-879f-a98a95447ab8"
+      }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/0bc23b6a-9551-4180-879f-a98a95447ab8"
+    }
   }
 }

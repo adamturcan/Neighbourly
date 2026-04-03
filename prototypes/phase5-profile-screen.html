@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Profile Screen - 3 Variants</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Inter', sans-serif; background: #F3F4F6; display: flex; gap: 32px; padding: 40px; flex-wrap: wrap; justify-content: center; }
+h2.variant-label { width: 100%; text-align: center; font-size: 14px; color: #6B7280; text-transform: uppercase; letter-spacing: 2px; margin-top: 20px; }
+.phone { width: 393px; height: 852px; background: #fff; border-radius: 40px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.15); position: relative; border: 8px solid #1a1a1a; }
+.phone-screen { width: 100%; height: 100%; overflow-y: auto; position: relative; }
+.notch { width: 160px; height: 34px; background: #1a1a1a; border-radius: 0 0 20px 20px; position: absolute; top: 0; left: 50%; transform: translateX(-50%); z-index: 10; }
+.phone-screen::-webkit-scrollbar { display: none; }
+
+/* ======================== VARIANT 1 - Card Sections ======================== */
+.v1 .profile-page { padding: 50px 0 100px; background: #F9FAFB; min-height: 100%; }
+.v1 .header-card { background: #fff; padding: 24px; margin: 0 0 8px; }
+.v1 .header-top { display: flex; justify-content: space-between; align-items: flex-start; }
+.v1 .avatar-area { display: flex; align-items: center; gap: 16px; }
+.v1 .avatar { width: 72px; height: 72px; border-radius: 36px; background: #E31B23; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 800; font-size: 28px; }
+.v1 .name-area h1 { font-size: 22px; font-weight: 800; color: #000; }
+.v1 .role-badge { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 20px; background: #FEF2F2; margin-top: 4px; }
+.v1 .role-badge span { font-size: 12px; font-weight: 600; color: #E31B23; }
+.v1 .edit-btn { width: 36px; height: 36px; border-radius: 18px; background: #F3F4F6; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.v1 .edit-btn .material-icons-round { font-size: 18px; color: #6B7280; }
+.v1 .bio { font-size: 14px; color: #6B7280; line-height: 1.5; margin-top: 12px; }
+.v1 .member-since { font-size: 12px; color: #9CA3AF; margin-top: 8px; display: flex; align-items: center; gap: 4px; }
+.v1 .member-since .material-icons-round { font-size: 14px; }
+
+.v1 .stats-card { background: #fff; padding: 20px 24px; margin: 0 0 8px; display: flex; justify-content: space-around; }
+.v1 .stat { text-align: center; }
+.v1 .stat-value { font-size: 22px; font-weight: 800; color: #000; }
+.v1 .stat-label { font-size: 11px; color: #9CA3AF; font-weight: 500; margin-top: 2px; }
+.v1 .stat .stars-mini { display: flex; justify-content: center; gap: 2px; margin-bottom: 2px; }
+.v1 .stat .stars-mini .material-icons-round { font-size: 16px; color: #FBBF24; }
+
+.v1 .section-card { background: #fff; padding: 20px 24px; margin: 0 0 8px; }
+.v1 .section-title { font-size: 16px; font-weight: 700; color: #000; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; }
+.v1 .see-all { font-size: 13px; color: #E31B23; font-weight: 600; cursor: pointer; }
+.v1 .skills-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.v1 .skill-chip { padding: 6px 14px; border-radius: 20px; background: #FEF2F2; font-size: 13px; font-weight: 600; color: #E31B23; }
+
+.v1 .review-item { padding: 14px 0; border-bottom: 1px solid #F3F4F6; }
+.v1 .review-item:last-child { border-bottom: none; }
+.v1 .review-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.v1 .reviewer-info { display: flex; align-items: center; gap: 10px; }
+.v1 .reviewer-avatar { width: 32px; height: 32px; border-radius: 16px; background: #2563EB; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 13px; }
+.v1 .reviewer-name { font-size: 14px; font-weight: 600; color: #000; }
+.v1 .review-date { font-size: 12px; color: #9CA3AF; }
+.v1 .review-stars { display: flex; gap: 2px; margin-bottom: 6px; }
+.v1 .review-stars .material-icons-round { font-size: 14px; color: #FBBF24; }
+.v1 .review-comment { font-size: 13px; color: #4B5563; line-height: 1.5; }
+
+.v1 .task-row { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid #F3F4F6; }
+.v1 .task-row:last-child { border-bottom: none; }
+.v1 .task-icon { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
+.v1 .task-icon .material-icons-round { font-size: 20px; color: #fff; }
+.v1 .task-info { flex: 1; }
+.v1 .task-name { font-size: 14px; font-weight: 600; color: #000; }
+.v1 .task-status { font-size: 12px; color: #9CA3AF; margin-top: 2px; }
+.v1 .task-badge { padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+
+.v1 .settings-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid #F3F4F6; cursor: pointer; }
+.v1 .settings-row:last-child { border-bottom: none; }
+.v1 .settings-left { display: flex; align-items: center; gap: 12px; }
+.v1 .settings-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+.v1 .settings-icon .material-icons-round { font-size: 20px; }
+.v1 .settings-label { font-size: 14px; font-weight: 500; color: #000; }
+.v1 .settings-arrow { font-size: 20px; color: #D1D5DB; }
+.v1 .logout-row .settings-label { color: #E31B23; }
+
+/* ======================== VARIANT 2 - Hero Header ======================== */
+.v2 .profile-page { min-height: 100%; background: #fff; }
+.v2 .hero { background: linear-gradient(135deg, #E31B23, #B91C1C); padding: 60px 24px 32px; position: relative; }
+.v2 .hero-top { display: flex; justify-content: flex-end; margin-bottom: 20px; }
+.v2 .hero-btn { width: 36px; height: 36px; border-radius: 18px; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.v2 .hero-btn .material-icons-round { font-size: 20px; color: #fff; }
+.v2 .hero-avatar { width: 80px; height: 80px; border-radius: 40px; background: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 32px; color: #E31B23; margin-bottom: 14px; border: 3px solid rgba(255,255,255,0.3); }
+.v2 .hero-name { font-size: 24px; font-weight: 800; color: #fff; }
+.v2 .hero-role { font-size: 13px; color: rgba(255,255,255,0.8); margin-top: 4px; font-weight: 500; }
+.v2 .hero-bio { font-size: 14px; color: rgba(255,255,255,0.7); margin-top: 8px; line-height: 1.4; }
+.v2 .hero-stats { display: flex; gap: 24px; margin-top: 20px; }
+.v2 .hero-stat-value { font-size: 20px; font-weight: 800; color: #fff; }
+.v2 .hero-stat-label { font-size: 11px; color: rgba(255,255,255,0.6); }
+.v2 .hero-stars { display: flex; gap: 2px; }
+.v2 .hero-stars .material-icons-round { font-size: 16px; color: #FBBF24; }
+
+.v2 .content { padding: 0 0 100px; }
+.v2 .tab-bar { display: flex; border-bottom: 2px solid #F3F4F6; padding: 0 24px; background: #fff; position: sticky; top: 0; z-index: 5; }
+.v2 .tab { padding: 14px 0; margin-right: 24px; font-size: 14px; font-weight: 600; color: #9CA3AF; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; }
+.v2 .tab.active { color: #E31B23; border-bottom-color: #E31B23; }
+
+.v2 .section { padding: 20px 24px; }
+.v2 .section-title { font-size: 15px; font-weight: 700; color: #000; margin-bottom: 14px; }
+.v2 .skills-wrap { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; padding: 0 24px; }
+.v2 .skill-tag { padding: 6px 14px; border-radius: 20px; background: #FEF2F2; font-size: 13px; font-weight: 600; color: #E31B23; }
+
+.v2 .review-card { padding: 16px; background: #F9FAFB; border-radius: 16px; margin-bottom: 12px; }
+.v2 .review-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.v2 .review-user { display: flex; align-items: center; gap: 10px; }
+.v2 .review-av { width: 32px; height: 32px; border-radius: 16px; background: #16A34A; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 13px; }
+.v2 .review-name { font-size: 14px; font-weight: 600; color: #000; }
+.v2 .review-time { font-size: 12px; color: #9CA3AF; }
+.v2 .review-stars { display: flex; gap: 2px; margin-bottom: 8px; }
+.v2 .review-stars .material-icons-round { font-size: 14px; color: #FBBF24; }
+.v2 .review-text { font-size: 13px; color: #4B5563; line-height: 1.5; }
+
+/* ======================== VARIANT 3 - Compact Modern ======================== */
+.v3 .profile-page { min-height: 100%; background: #fff; padding: 50px 0 100px; }
+.v3 .top-section { padding: 0 24px 20px; }
+.v3 .top-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.v3 .page-title { font-size: 28px; font-weight: 800; color: #000; }
+.v3 .settings-btn { width: 40px; height: 40px; border-radius: 20px; background: #F3F4F6; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.v3 .settings-btn .material-icons-round { font-size: 22px; color: #374151; }
+
+.v3 .profile-row { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
+.v3 .avatar { width: 64px; height: 64px; border-radius: 32px; background: #E31B23; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 800; font-size: 26px; position: relative; }
+.v3 .edit-dot { position: absolute; bottom: 0; right: 0; width: 22px; height: 22px; border-radius: 11px; background: #000; display: flex; align-items: center; justify-content: center; border: 2px solid #fff; }
+.v3 .edit-dot .material-icons-round { font-size: 12px; color: #fff; }
+.v3 .name-col h1 { font-size: 20px; font-weight: 800; color: #000; }
+.v3 .name-col .role-line { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
+.v3 .role-dot { width: 8px; height: 8px; border-radius: 4px; background: #22C55E; }
+.v3 .role-text { font-size: 13px; color: #6B7280; font-weight: 500; }
+.v3 .bio-text { font-size: 14px; color: #6B7280; line-height: 1.5; margin-bottom: 16px; }
+.v3 .member-line { font-size: 12px; color: #9CA3AF; display: flex; align-items: center; gap: 4px; }
+.v3 .member-line .material-icons-round { font-size: 14px; }
+
+.v3 .stats-strip { display: flex; padding: 16px 24px; gap: 0; border-top: 1px solid #F3F4F6; border-bottom: 1px solid #F3F4F6; margin-bottom: 0; }
+.v3 .stat-item { flex: 1; text-align: center; position: relative; }
+.v3 .stat-item:not(:last-child)::after { content: ''; position: absolute; right: 0; top: 4px; bottom: 4px; width: 1px; background: #E5E7EB; }
+.v3 .stat-num { font-size: 20px; font-weight: 800; color: #000; }
+.v3 .stat-stars { display: flex; justify-content: center; gap: 1px; }
+.v3 .stat-stars .material-icons-round { font-size: 14px; color: #FBBF24; }
+.v3 .stat-sub { font-size: 11px; color: #9CA3AF; margin-top: 2px; }
+
+.v3 .section { padding: 20px 24px; }
+.v3 .section-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+.v3 .section-title { font-size: 16px; font-weight: 700; color: #000; }
+.v3 .count-badge { font-size: 12px; color: #9CA3AF; font-weight: 500; background: #F3F4F6; padding: 2px 10px; border-radius: 12px; }
+
+.v3 .skill-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.v3 .chip { padding: 8px 16px; border-radius: 24px; border: 1.5px solid #E5E7EB; font-size: 13px; font-weight: 500; color: #374151; }
+.v3 .chip.primary { border-color: #E31B23; background: #FEF2F2; color: #E31B23; }
+
+.v3 .review-entry { padding: 14px 0; border-bottom: 1px solid #F3F4F6; }
+.v3 .review-entry:last-child { border-bottom: none; }
+.v3 .rev-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+.v3 .rev-user { display: flex; align-items: center; gap: 8px; }
+.v3 .rev-avatar { width: 28px; height: 28px; border-radius: 14px; background: #7C3AED; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 11px; }
+.v3 .rev-name { font-size: 13px; font-weight: 600; color: #000; }
+.v3 .rev-stars { display: flex; gap: 1px; }
+.v3 .rev-stars .material-icons-round { font-size: 13px; color: #FBBF24; }
+.v3 .rev-date { font-size: 11px; color: #9CA3AF; }
+.v3 .rev-comment { font-size: 13px; color: #4B5563; line-height: 1.5; }
+.v3 .rev-task { font-size: 11px; color: #9CA3AF; margin-top: 4px; display: flex; align-items: center; gap: 4px; }
+.v3 .rev-task .material-icons-round { font-size: 12px; }
+
+.v3 .action-list { padding: 0 24px 20px; }
+.v3 .action-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid #F3F4F6; }
+.v3 .action-row:last-child { border-bottom: none; }
+.v3 .action-left { display: flex; align-items: center; gap: 12px; }
+.v3 .action-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+.v3 .action-icon .material-icons-round { font-size: 20px; }
+.v3 .action-label { font-size: 14px; font-weight: 500; color: #374151; }
+.v3 .action-arrow { font-size: 20px; color: #D1D5DB; }
+.v3 .logout-label { color: #E31B23; }
+</style>
+</head>
+<body>
+
+<!-- ======================== VARIANT 1 - Card Sections ======================== -->
+<div>
+<h2 class="variant-label">V1 — Card Sections</h2>
+<div class="phone">
+<div class="notch"></div>
+<div class="phone-screen v1">
+<div class="profile-page">
+  <!-- Profile Header -->
+  <div class="header-card">
+    <div class="header-top">
+      <div class="avatar-area">
+        <div class="avatar">A</div>
+        <div class="name-area">
+          <h1>Adam T.</h1>
+          <div class="role-badge"><span class="material-icons-round" style="font-size:14px;color:#E31B23;">handyman</span><span>Helper & Seeker</span></div>
+        </div>
+      </div>
+      <div class="edit-btn"><span class="material-icons-round">edit</span></div>
+    </div>
+    <div class="bio">Handy neighbor in Dublin. Love helping with garden work, furniture assembly, and small repairs around the house.</div>
+    <div class="member-since"><span class="material-icons-round">schedule</span> Member since March 2026</div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-card">
+    <div class="stat">
+      <div class="stars-mini">
+        <span class="material-icons-round">star</span>
+        <span class="material-icons-round">star</span>
+        <span class="material-icons-round">star</span>
+        <span class="material-icons-round">star</span>
+        <span class="material-icons-round">star_half</span>
+      </div>
+      <div class="stat-value">4.8</div>
+      <div class="stat-label">Rating</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">12</div>
+      <div class="stat-label">Jobs Done</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">7</div>
+      <div class="stat-label">Reviews</div>
+    </div>
+  </div>
+
+  <!-- Skills -->
+  <div class="section-card">
+    <div class="section-title">Skills</div>
+    <div class="skills-row">
+      <span class="skill-chip">Gardening</span>
+      <span class="skill-chip">Cleaning</span>
+      <span class="skill-chip">Handyman</span>
+      <span class="skill-chip">Moving</span>
+      <span class="skill-chip">Painting</span>
+    </div>
+  </div>
+
+  <!-- Reviews -->
+  <div class="section-card">
+    <div class="section-title">Reviews <span class="see-all">See all</span></div>
+    <div class="review-item">
+      <div class="review-header">
+        <div class="reviewer-info">
+          <div class="reviewer-avatar">S</div>
+          <span class="reviewer-name">Sarah K.</span>
+        </div>
+        <span class="review-date">2 days ago</span>
+      </div>
+      <div class="review-stars">
+        <span class="material-icons-round">star</span>
+        <span class="material-icons-round">star</span>
+        <span class="material-icons-round">star</span>
+        <span class="material-icons-round">star</span>
+        <span class="material-icons-round">star</span>
+      </div>
+      <div class="review-comment">Amazing work on the garden! Very punctual and professional. Would definitely hire again.</div>
+    </div>
+    <div class="review-item">
+      <div class="review-header">
+        <div class="reviewer-info">
+          <div class="reviewer-avatar" style="background:#16A34A;">J</div>
+          <span class="reviewer-name">James O.</span>
+        </div>
+        <span class="review-date">1 week ago</span>
+      </div>
+      <div class="review-stars">
+        <span class="material-icons-round">star</span>
+        <span class="material-icons-round">star</span>
+        <span class="material-icons-round">star</span>
+        <span class="material-icons-round">star</span>
+        <span class="material-icons-round" style="color:#E5E7EB;">star</span>
+      </div>
+      <div class="review-comment">Good job with the furniture assembly. Took a bit longer than expected but quality was great.</div>
+    </div>
+    <div class="review-item">
+      <div class="review-header">
+        <div class="reviewer-info">
+          <div class="reviewer-avatar" style="background:#D97706;">M</div>
+          <span class="reviewer-name">Maria L.</span>
+        </div>
+        <span class="review-date">2 weeks ago</span>
+      </div>
+      <div class="review-stars">
+        <span class="material-icons-round">star</span>
+        <span class="material-icons-round">star</span>
+        <span class="material-icons-round">star</span>
+        <span class="material-icons-round">star</span>
+        <span class="material-icons-round">star</span>
+      </div>
+      <div class="review-comment">Best cleaner I've found in the area. Thorough and friendly!</div>
+    </div>
+  </div>
+
+  <!-- My Tasks -->
+  <div class="section-card">
+    <div class="section-title">My Tasks</div>
+    <div class="task-row">
+      <div class="task-icon" style="background:#16A34A;"><span class="material-icons-round">yard</span></div>
+      <div class="task-info">
+        <div class="task-name">Garden cleanup</div>
+        <div class="task-status">Completed · 3 days ago</div>
+      </div>
+      <span class="task-badge" style="background:#DCFCE7;color:#16A34A;">Done</span>
+    </div>
+    <div class="task-row">
+      <div class="task-icon" style="background:#2563EB;"><span class="material-icons-round">plumbing</span></div>
+      <div class="task-info">
+        <div class="task-name">Fix kitchen sink</div>
+        <div class="task-status">In progress</div>
+      </div>
+      <span class="task-badge" style="background:#DBEAFE;color:#2563EB;">Active</span>
+    </div>
+  </div>
+
+  <!-- Settings -->
+  <div class="section-card">
+    <div class="settings-row">
+      <div class="settings-left">
+        <div class="settings-icon" style="background:#F3F4F6;"><span class="material-icons-round" style="color:#374151;">notifications</span></div>
+        <span class="settings-label">Notifications</span>
+      </div>
+      <span class="material-icons-round settings-arrow">chevron_right</span>
+    </div>
+    <div class="settings-row">
+      <div class="settings-left">
+        <div class="settings-icon" style="background:#F3F4F6;"><span class="material-icons-round" style="color:#374151;">help_outline</span></div>
+        <span class="settings-label">Help & Support</span>
+      </div>
+      <span class="material-icons-round settings-arrow">chevron_right</span>
+    </div>
+    <div class="settings-row logout-row">
+      <div class="settings-left">
+        <div class="settings-icon" style="background:#FEF2F2;"><span class="material-icons-round" style="color:#E31B23;">logout</span></div>
+        <span class="settings-label" style="color:#E31B23;">Sign Out</span>
+      </div>
+      <span class="material-icons-round settings-arrow">chevron_right</span>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- ======================== VARIANT 2 - Hero Header ======================== -->
+<div>
+<h2 class="variant-label">V2 — Red Hero Header</h2>
+<div class="phone">
+<div class="notch"></div>
+<div class="phone-screen v2">
+<div class="profile-page">
+  <div class="hero">
+    <div class="hero-top">
+      <div class="hero-btn"><span class="material-icons-round">settings</span></div>
+    </div>
+    <div class="hero-avatar">A</div>
+    <div class="hero-name">Adam T.</div>
+    <div class="hero-role">Helper & Seeker · Member since Mar 2026</div>
+    <div class="hero-bio">Handy neighbor in Dublin. Love helping with garden work and small repairs.</div>
+    <div class="hero-stats">
+      <div>
+        <div class="hero-stars">
+          <span class="material-icons-round">star</span>
+          <span class="material-icons-round">star</span>
+          <span class="material-icons-round">star</span>
+          <span class="material-icons-round">star</span>
+          <span class="material-icons-round">star_half</span>
+        </div>
+        <div class="hero-stat-label">4.8 rating</div>
+      </div>
+      <div>
+        <div class="hero-stat-value">12</div>
+        <div class="hero-stat-label">jobs done</div>
+      </div>
+      <div>
+        <div class="hero-stat-value">7</div>
+        <div class="hero-stat-label">reviews</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="tab-bar">
+      <div class="tab active">Reviews</div>
+      <div class="tab">Skills</div>
+      <div class="tab">Tasks</div>
+      <div class="tab">About</div>
+    </div>
+
+    <div class="skills-wrap" style="padding-top:16px;">
+      <span class="skill-tag">Gardening</span>
+      <span class="skill-tag">Cleaning</span>
+      <span class="skill-tag">Handyman</span>
+      <span class="skill-tag">Moving</span>
+      <span class="skill-tag">Painting</span>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Recent Reviews</div>
+      <div class="review-card">
+        <div class="review-top">
+          <div class="review-user">
+            <div class="review-av">S</div>
+            <span class="review-name">Sarah K.</span>
+          </div>
+          <span class="review-time">2 days ago</span>
+        </div>
+        <div class="review-stars">
+          <span class="material-icons-round">star</span>
+          <span class="material-icons-round">star</span>
+          <span class="material-icons-round">star</span>
+          <span class="material-icons-round">star</span>
+          <span class="material-icons-round">star</span>
+        </div>
+        <div class="review-text">Amazing work on the garden! Very punctual and professional. Would definitely hire again.</div>
+      </div>
+      <div class="review-card">
+        <div class="review-top">
+          <div class="review-user">
+            <div class="review-av" style="background:#D97706;">J</div>
+            <span class="review-name">James O.</span>
+          </div>
+          <span class="review-time">1 week ago</span>
+        </div>
+        <div class="review-stars">
+          <span class="material-icons-round">star</span>
+          <span class="material-icons-round">star</span>
+          <span class="material-icons-round">star</span>
+          <span class="material-icons-round">star</span>
+          <span class="material-icons-round" style="color:#E5E7EB;">star</span>
+        </div>
+        <div class="review-text">Good job with the furniture assembly. Took a bit longer than expected but quality was great.</div>
+      </div>
+      <div class="review-card">
+        <div class="review-top">
+          <div class="review-user">
+            <div class="review-av" style="background:#7C3AED;">M</div>
+            <span class="review-name">Maria L.</span>
+          </div>
+          <span class="review-time">2 weeks ago</span>
+        </div>
+        <div class="review-stars">
+          <span class="material-icons-round">star</span>
+          <span class="material-icons-round">star</span>
+          <span class="material-icons-round">star</span>
+          <span class="material-icons-round">star</span>
+          <span class="material-icons-round">star</span>
+        </div>
+        <div class="review-text">Best cleaner I've found in the area. Thorough and friendly!</div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- ======================== VARIANT 3 - Compact Modern ======================== -->
+<div>
+<h2 class="variant-label">V3 — Compact Modern</h2>
+<div class="phone">
+<div class="notch"></div>
+<div class="phone-screen v3">
+<div class="profile-page">
+  <div class="top-section">
+    <div class="top-row">
+      <div class="page-title">Profile</div>
+      <div class="settings-btn"><span class="material-icons-round">settings</span></div>
+    </div>
+    <div class="profile-row">
+      <div class="avatar">A
+        <div class="edit-dot"><span class="material-icons-round">edit</span></div>
+      </div>
+      <div class="name-col">
+        <h1>Adam T.</h1>
+        <div class="role-line">
+          <div class="role-dot"></div>
+          <span class="role-text">Helper & Seeker</span>
+        </div>
+      </div>
+    </div>
+    <div class="bio-text">Handy neighbor in Dublin. Love helping with garden work, furniture assembly, and small repairs.</div>
+    <div class="member-line"><span class="material-icons-round">calendar_today</span> Joined March 2026</div>
+  </div>
+
+  <div class="stats-strip">
+    <div class="stat-item">
+      <div class="stat-stars">
+        <span class="material-icons-round">star</span>
+        <span class="material-icons-round">star</span>
+        <span class="material-icons-round">star</span>
+        <span class="material-icons-round">star</span>
+        <span class="material-icons-round">star_half</span>
+      </div>
+      <div class="stat-num">4.8</div>
+      <div class="stat-sub">Rating</div>
+    </div>
+    <div class="stat-item">
+      <div style="height:16px;"></div>
+      <div class="stat-num">12</div>
+      <div class="stat-sub">Jobs Done</div>
+    </div>
+    <div class="stat-item">
+      <div style="height:16px;"></div>
+      <div class="stat-num">7</div>
+      <div class="stat-sub">Reviews</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head">
+      <span class="section-title">Skills</span>
+    </div>
+    <div class="skill-chips">
+      <span class="chip primary">Gardening</span>
+      <span class="chip primary">Cleaning</span>
+      <span class="chip">Handyman</span>
+      <span class="chip">Moving</span>
+      <span class="chip">Painting</span>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head">
+      <span class="section-title">Reviews</span>
+      <span class="count-badge">7 total</span>
+    </div>
+    <div class="review-entry">
+      <div class="rev-top">
+        <div class="rev-user">
+          <div class="rev-avatar">S</div>
+          <span class="rev-name">Sarah K.</span>
+          <div class="rev-stars">
+            <span class="material-icons-round">star</span>
+            <span class="material-icons-round">star</span>
+            <span class="material-icons-round">star</span>
+            <span class="material-icons-round">star</span>
+            <span class="material-icons-round">star</span>
+          </div>
+        </div>
+        <span class="rev-date">2d ago</span>
+      </div>
+      <div class="rev-comment">Amazing work on the garden! Very punctual and professional. Would definitely hire again.</div>
+      <div class="rev-task"><span class="material-icons-round">task_alt</span> Garden cleanup & hedge trimming</div>
+    </div>
+    <div class="review-entry">
+      <div class="rev-top">
+        <div class="rev-user">
+          <div class="rev-avatar" style="background:#16A34A;">J</div>
+          <span class="rev-name">James O.</span>
+          <div class="rev-stars">
+            <span class="material-icons-round">star</span>
+            <span class="material-icons-round">star</span>
+            <span class="material-icons-round">star</span>
+            <span class="material-icons-round">star</span>
+            <span class="material-icons-round" style="color:#E5E7EB;">star</span>
+          </div>
+        </div>
+        <span class="rev-date">1w ago</span>
+      </div>
+      <div class="rev-comment">Good job with the furniture assembly. Took a bit longer than expected but quality was great.</div>
+      <div class="rev-task"><span class="material-icons-round">task_alt</span> IKEA wardrobe assembly</div>
+    </div>
+    <div class="review-entry">
+      <div class="rev-top">
+        <div class="rev-user">
+          <div class="rev-avatar" style="background:#D97706;">M</div>
+          <span class="rev-name">Maria L.</span>
+          <div class="rev-stars">
+            <span class="material-icons-round">star</span>
+            <span class="material-icons-round">star</span>
+            <span class="material-icons-round">star</span>
+            <span class="material-icons-round">star</span>
+            <span class="material-icons-round">star</span>
+          </div>
+        </div>
+        <span class="rev-date">2w ago</span>
+      </div>
+      <div class="rev-comment">Best cleaner I've found in the area. Thorough and friendly!</div>
+      <div class="rev-task"><span class="material-icons-round">task_alt</span> Deep house cleaning</div>
+    </div>
+  </div>
+
+  <div class="action-list">
+    <div class="action-row">
+      <div class="action-left">
+        <div class="action-icon" style="background:#FEF2F2;"><span class="material-icons-round" style="color:#E31B23;">assignment</span></div>
+        <span class="action-label">My Tasks</span>
+      </div>
+      <span class="material-icons-round action-arrow">chevron_right</span>
+    </div>
+    <div class="action-row">
+      <div class="action-left">
+        <div class="action-icon" style="background:#EFF6FF;"><span class="material-icons-round" style="color:#2563EB;">local_offer</span></div>
+        <span class="action-label">My Offers</span>
+      </div>
+      <span class="material-icons-round action-arrow">chevron_right</span>
+    </div>
+    <div class="action-row">
+      <div class="action-left">
+        <div class="action-icon" style="background:#F3F4F6;"><span class="material-icons-round" style="color:#374151;">notifications</span></div>
+        <span class="action-label">Notifications</span>
+      </div>
+      <span class="material-icons-round action-arrow">chevron_right</span>
+    </div>
+    <div class="action-row">
+      <div class="action-left">
+        <div class="action-icon" style="background:#FEF2F2;"><span class="material-icons-round" style="color:#E31B23;">logout</span></div>
+        <span class="action-label logout-label">Sign Out</span>
+      </div>
+      <span class="material-icons-round action-arrow">chevron_right</span>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+</div>
+
+</body>
+</html>

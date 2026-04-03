@@ -14,6 +14,7 @@ type Profile = {
   jobs_done: number;
   lat: number | null;
   lng: number | null;
+  created_at: string | null;
 };
 
 type AuthState = {
@@ -43,7 +44,7 @@ export const useAuth = create<AuthState>((set, get) => ({
       set({
         session: { access_token: "dev", refresh_token: "dev", expires_in: 99999, token_type: "bearer", user: { id: "dev-user", email: "dev@local", app_metadata: {}, user_metadata: {}, aud: "authenticated", created_at: "" } } as unknown as Session,
         user: { id: "dev-user" } as User,
-        profile: { id: "dev-user", username: "dev", full_name: "Dev User", bio: null, avatar_url: null, role: "both", skills: ["moving", "chores"], rating: 4.5, jobs_done: 12, lat: 48.1482, lng: 17.1067 },
+        profile: { id: "dev-user", username: "dev", full_name: "Dev User", bio: null, avatar_url: null, role: "both", skills: ["moving", "chores"], rating: 4.5, jobs_done: 12, lat: 48.1482, lng: 17.1067, created_at: "2026-03-01T00:00:00Z" },
         initialized: true,
         loading: false,
       });

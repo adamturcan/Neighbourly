@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Review Submit - 3 Variants</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Inter', sans-serif; background: #F3F4F6; display: flex; gap: 32px; padding: 40px; flex-wrap: wrap; justify-content: center; }
+h2.variant-label { width: 100%; text-align: center; font-size: 14px; color: #6B7280; text-transform: uppercase; letter-spacing: 2px; margin-top: 20px; }
+.phone { width: 393px; height: 852px; background: #fff; border-radius: 40px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.15); position: relative; border: 8px solid #1a1a1a; }
+.phone-screen { width: 100%; height: 100%; overflow-y: auto; position: relative; }
+.notch { width: 160px; height: 34px; background: #1a1a1a; border-radius: 0 0 20px 20px; position: absolute; top: 0; left: 50%; transform: translateX(-50%); z-index: 10; }
+
+/* Variant 1 - Clean Card Modal */
+.v1 .modal-overlay { background: rgba(0,0,0,0.5); min-height: 100%; display: flex; align-items: flex-end; }
+.v1 .modal-sheet { background: #fff; border-radius: 24px 24px 0 0; width: 100%; padding: 20px 24px 40px; }
+.v1 .modal-handle { width: 36px; height: 4px; background: #D1D5DB; border-radius: 2px; margin: 0 auto 20px; }
+.v1 .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+.v1 .modal-title { font-size: 20px; font-weight: 800; color: #000; }
+.v1 .close-btn { width: 32px; height: 32px; border-radius: 16px; background: #F3F4F6; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.v1 .close-btn .material-icons-round { font-size: 18px; color: #6B7280; }
+.v1 .task-info { display: flex; align-items: center; gap: 12px; padding: 16px; background: #F9FAFB; border-radius: 16px; margin-bottom: 24px; }
+.v1 .task-avatar { width: 48px; height: 48px; border-radius: 24px; background: #2563EB; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 18px; }
+.v1 .task-meta h3 { font-size: 15px; font-weight: 700; color: #000; }
+.v1 .task-meta p { font-size: 13px; color: #6B7280; margin-top: 2px; }
+.v1 .stars-section { text-align: center; margin-bottom: 28px; }
+.v1 .stars-label { font-size: 14px; font-weight: 600; color: #374151; margin-bottom: 12px; }
+.v1 .stars-row { display: flex; justify-content: center; gap: 8px; }
+.v1 .star { font-size: 40px; color: #E5E7EB; cursor: pointer; transition: all 0.15s; }
+.v1 .star.active { color: #FBBF24; }
+.v1 .star:hover { transform: scale(1.15); }
+.v1 .rating-text { font-size: 13px; color: #9CA3AF; margin-top: 8px; }
+.v1 .comment-box { width: 100%; border: 1.5px solid #E5E7EB; border-radius: 16px; padding: 14px 16px; font-size: 14px; font-family: inherit; resize: none; min-height: 100px; outline: none; color: #374151; }
+.v1 .comment-box:focus { border-color: #E31B23; }
+.v1 .comment-box::placeholder { color: #9CA3AF; }
+.v1 .comment-label { font-size: 14px; font-weight: 600; color: #374151; margin-bottom: 8px; }
+.v1 .submit-btn { width: 100%; padding: 16px; border: none; border-radius: 14px; background: #E31B23; color: #fff; font-size: 16px; font-weight: 700; cursor: pointer; margin-top: 20px; }
+.v1 .skip-btn { width: 100%; padding: 12px; border: none; background: none; color: #9CA3AF; font-size: 14px; font-weight: 500; cursor: pointer; margin-top: 8px; }
+
+/* Variant 2 - Fullscreen with Emoji Scale */
+.v2 .review-screen { min-height: 100%; background: #fff; padding: 60px 24px 40px; }
+.v2 .back-row { display: flex; align-items: center; gap: 8px; margin-bottom: 32px; }
+.v2 .back-icon { font-size: 24px; color: #000; cursor: pointer; }
+.v2 .screen-title { font-size: 24px; font-weight: 800; color: #000; }
+.v2 .reviewee-card { text-align: center; margin-bottom: 32px; }
+.v2 .reviewee-avatar { width: 72px; height: 72px; border-radius: 36px; background: #7C3AED; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 800; font-size: 28px; margin: 0 auto 12px; }
+.v2 .reviewee-name { font-size: 18px; font-weight: 700; color: #000; }
+.v2 .reviewee-task { font-size: 13px; color: #6B7280; margin-top: 4px; }
+.v2 .emoji-scale { display: flex; justify-content: space-between; margin-bottom: 32px; padding: 0 8px; }
+.v2 .emoji-option { display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; padding: 12px; border-radius: 16px; transition: all 0.2s; }
+.v2 .emoji-option.selected { background: #FEF2F2; }
+.v2 .emoji { font-size: 36px; transition: transform 0.2s; }
+.v2 .emoji-option.selected .emoji { transform: scale(1.2); }
+.v2 .emoji-label { font-size: 11px; font-weight: 600; color: #9CA3AF; }
+.v2 .emoji-option.selected .emoji-label { color: #E31B23; }
+.v2 .stars-inline { display: flex; justify-content: center; gap: 6px; margin-bottom: 8px; }
+.v2 .star-sm { font-size: 28px; color: #E5E7EB; cursor: pointer; }
+.v2 .star-sm.active { color: #FBBF24; }
+.v2 .rating-label { text-align: center; font-size: 14px; font-weight: 600; color: #E31B23; margin-bottom: 28px; }
+.v2 .input-group { margin-bottom: 20px; }
+.v2 .input-label { font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 8px; display: block; }
+.v2 textarea { width: 100%; border: 1.5px solid #E5E7EB; border-radius: 14px; padding: 14px; font-size: 14px; font-family: inherit; resize: none; min-height: 90px; outline: none; }
+.v2 textarea:focus { border-color: #E31B23; }
+.v2 .submit-btn { width: 100%; padding: 16px; border: none; border-radius: 14px; background: #E31B23; color: #fff; font-size: 16px; font-weight: 700; cursor: pointer; margin-top: 8px; }
+.v2 .blind-note { display: flex; align-items: center; gap: 8px; padding: 12px 16px; background: #F0F9FF; border-radius: 12px; margin-top: 16px; }
+.v2 .blind-note .material-icons-round { font-size: 18px; color: #2563EB; }
+.v2 .blind-note span { font-size: 12px; color: #2563EB; line-height: 1.4; }
+
+/* Variant 3 - Minimal Centered */
+.v3 .review-screen { min-height: 100%; background: #fff; padding: 60px 24px 40px; display: flex; flex-direction: column; }
+.v3 .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
+.v3 .cancel-text { font-size: 15px; color: #6B7280; cursor: pointer; }
+.v3 .step-text { font-size: 13px; color: #9CA3AF; font-weight: 500; }
+.v3 .submit-text { font-size: 15px; color: #E31B23; font-weight: 700; cursor: pointer; }
+.v3 .center-content { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding-bottom: 80px; }
+.v3 .big-avatar { width: 80px; height: 80px; border-radius: 40px; background: #16A34A; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 800; font-size: 32px; margin-bottom: 16px; }
+.v3 .review-prompt { font-size: 22px; font-weight: 800; color: #000; text-align: center; margin-bottom: 4px; }
+.v3 .review-sub { font-size: 14px; color: #6B7280; text-align: center; margin-bottom: 32px; }
+.v3 .big-stars { display: flex; gap: 12px; margin-bottom: 12px; }
+.v3 .big-star { font-size: 48px; color: #E5E7EB; cursor: pointer; transition: all 0.15s; }
+.v3 .big-star.active { color: #FBBF24; }
+.v3 .big-star:hover { transform: scale(1.1); }
+.v3 .rating-word { font-size: 15px; font-weight: 600; color: #FBBF24; margin-bottom: 32px; }
+.v3 .comment-area { width: 100%; }
+.v3 .comment-input { width: 100%; border: none; border-bottom: 2px solid #E5E7EB; padding: 12px 0; font-size: 15px; font-family: inherit; outline: none; text-align: center; color: #374151; }
+.v3 .comment-input:focus { border-color: #E31B23; }
+.v3 .comment-input::placeholder { color: #D1D5DB; }
+.v3 .bottom-submit { width: 100%; padding: 16px; border: none; border-radius: 14px; background: #E31B23; color: #fff; font-size: 16px; font-weight: 700; cursor: pointer; margin-top: auto; }
+.v3 .blind-pill { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; background: #F3F4F6; border-radius: 20px; margin-top: 20px; }
+.v3 .blind-pill .material-icons-round { font-size: 14px; color: #6B7280; }
+.v3 .blind-pill span { font-size: 11px; color: #6B7280; font-weight: 500; }
+</style>
+</head>
+<body>
+
+<!-- VARIANT 1 - Bottom Sheet Card Modal -->
+<div>
+<h2 class="variant-label">V1 — Bottom Sheet Modal</h2>
+<div class="phone">
+<div class="notch"></div>
+<div class="phone-screen v1">
+  <div class="modal-overlay">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-header">
+        <span class="modal-title">Leave a Review</span>
+        <div class="close-btn"><span class="material-icons-round">close</span></div>
+      </div>
+      <div class="task-info">
+        <div class="task-avatar">M</div>
+        <div class="task-meta">
+          <h3>Marko T.</h3>
+          <p>Garden cleanup & hedge trimming</p>
+        </div>
+      </div>
+      <div class="stars-section">
+        <div class="stars-label">How was your experience?</div>
+        <div class="stars-row">
+          <span class="material-icons-round star active">star</span>
+          <span class="material-icons-round star active">star</span>
+          <span class="material-icons-round star active">star</span>
+          <span class="material-icons-round star active">star</span>
+          <span class="material-icons-round star">star_outline</span>
+        </div>
+        <div class="rating-text">Great</div>
+      </div>
+      <div class="comment-label">Add a comment (optional)</div>
+      <textarea class="comment-box" placeholder="Tell others about your experience..."></textarea>
+      <button class="submit-btn">Submit Review</button>
+      <button class="skip-btn">Skip for now</button>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- VARIANT 2 - Fullscreen with Emoji Scale -->
+<div>
+<h2 class="variant-label">V2 — Fullscreen + Emoji Scale</h2>
+<div class="phone">
+<div class="notch"></div>
+<div class="phone-screen v2">
+  <div class="review-screen">
+    <div class="back-row">
+      <span class="material-icons-round back-icon">arrow_back</span>
+      <span class="screen-title">Rate your experience</span>
+    </div>
+    <div class="reviewee-card">
+      <div class="reviewee-avatar">M</div>
+      <div class="reviewee-name">Marko T.</div>
+      <div class="reviewee-task">Garden cleanup & hedge trimming</div>
+    </div>
+    <div class="emoji-scale">
+      <div class="emoji-option">
+        <span class="emoji">😞</span>
+        <span class="emoji-label">Terrible</span>
+      </div>
+      <div class="emoji-option">
+        <span class="emoji">😕</span>
+        <span class="emoji-label">Poor</span>
+      </div>
+      <div class="emoji-option">
+        <span class="emoji">😐</span>
+        <span class="emoji-label">Okay</span>
+      </div>
+      <div class="emoji-option selected">
+        <span class="emoji">😊</span>
+        <span class="emoji-label">Great</span>
+      </div>
+      <div class="emoji-option">
+        <span class="emoji">🤩</span>
+        <span class="emoji-label">Amazing</span>
+      </div>
+    </div>
+    <div class="stars-inline">
+      <span class="material-icons-round star-sm active">star</span>
+      <span class="material-icons-round star-sm active">star</span>
+      <span class="material-icons-round star-sm active">star</span>
+      <span class="material-icons-round star-sm active">star</span>
+      <span class="material-icons-round star-sm">star_outline</span>
+    </div>
+    <div class="rating-label">4 out of 5 stars</div>
+    <div class="input-group">
+      <label class="input-label">Tell us more (optional)</label>
+      <textarea placeholder="What went well? What could be better?"></textarea>
+    </div>
+    <button class="submit-btn">Submit Review</button>
+    <div class="blind-note">
+      <span class="material-icons-round">visibility_off</span>
+      <span>Your review stays hidden until both parties have reviewed, or 48 hours pass.</span>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- VARIANT 3 - Minimal Centered -->
+<div>
+<h2 class="variant-label">V3 — Minimal Centered</h2>
+<div class="phone">
+<div class="notch"></div>
+<div class="phone-screen v3">
+  <div class="review-screen">
+    <div class="top-bar">
+      <span class="cancel-text">Cancel</span>
+      <span class="step-text">Review</span>
+      <span class="submit-text">Done</span>
+    </div>
+    <div class="center-content">
+      <div class="big-avatar">M</div>
+      <div class="review-prompt">How was Marko?</div>
+      <div class="review-sub">Garden cleanup & hedge trimming</div>
+      <div class="big-stars">
+        <span class="material-icons-round big-star active">star</span>
+        <span class="material-icons-round big-star active">star</span>
+        <span class="material-icons-round big-star active">star</span>
+        <span class="material-icons-round big-star active">star</span>
+        <span class="material-icons-round big-star">star_outline</span>
+      </div>
+      <div class="rating-word">Great</div>
+      <div class="comment-area">
+        <input class="comment-input" placeholder="Add a comment..." />
+      </div>
+      <div class="blind-pill">
+        <span class="material-icons-round">lock</span>
+        <span>Hidden until both review</span>
+      </div>
+    </div>
+    <button class="bottom-submit">Submit Review</button>
+  </div>
+</div>
+</div>
+</div>
+
+</body>
+</html>
