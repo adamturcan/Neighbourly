@@ -1,6 +1,7 @@
 import React, { useRef, useEffect } from "react";
 import { View, Pressable, Text, StyleSheet, Animated } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { getFocusedRouteNameFromRoute } from "@react-navigation/native";
 import HomeStack from "./HomeStack";
 import PostTaskScreen from "../features/tasks/screens/PostTaskScreen";
 import InboxScreen from "../features/chat/screens/InboxScreen";
@@ -20,8 +21,15 @@ const TABS = [
   { name: "Profile", icon: "account-outline", iconFilled: "account", label: "Profile" },
 ] as const;
 
-function FloatingTabBar({ state, navigation }: any) {
+const HIDDEN_ROUTES = ["ChatScreen"];
+
+function FloatingTabBar({ state, navigation, descriptors }: any) {
   const insets = useSafeAreaInsets();
+
+  // Hide tab bar on certain nested screens (e.g. ChatScreen)
+  const focusedRoute = state.routes[state.index];
+  const nestedRouteName = getFocusedRouteNameFromRoute(focusedRoute) ?? "";
+  if (HIDDEN_ROUTES.includes(nestedRouteName)) return null;
   const indicatorX = useRef(new Animated.Value(0)).current;
   const scaleAnims = useRef(TABS.map(() => new Animated.Value(1))).current;
 
