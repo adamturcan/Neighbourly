@@ -390,6 +390,66 @@ export async function completeTask(taskId: string): Promise<void> {
     .eq("id", taskId);
 }
 
+export async function confirmStart(taskId: string): Promise<{ bothConfirmed: boolean }> {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+  const user = session?.user;
+  if (!user) throw new Error("Not authenticated");
+
+  // Get task to determine role
+  const { data: task } = await supabase.from("tasks").select("creator_id, helper_id, creator_started, helper_started").eq("id", taskId).single();
+  if (!task) throw new Error("Task not found");
+
+  const isCreator = task.creator_id === user.id;
+  const field = isCreator ? "creator_started" : "helper_started";
+
+  await supabase.from("tasks").update({ [field]: true }).eq("id", taskId);
+
+  // Check if both confirmed (the trigger will auto-transition status)
+  const otherConfirmed = isCreator ? task.helper_started : task.creator_started;
+  return { bothConfirmed: otherConfirmed === true };
+}
+
+export async function confirmComplete(taskId: string): Promise<{ bothConfirmed: boolean }> {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+  const user = session?.user;
+  if (!user) throw new Error("Not authenticated");
+
+  const { data: task } = await supabase.from("tasks").select("creator_id, helper_id, creator_completed, helper_completed").eq("id", taskId).single();
+  if (!task) throw new Error("Task not found");
+
+  const isCreator = task.creator_id === user.id;
+  const field = isCreator ? "creator_completed" : "helper_completed";
+
+  await supabase.from("tasks").update({ [field]: true }).eq("id", taskId);
+
+  const otherConfirmed = isCreator ? task.helper_completed : task.creator_completed;
+  return { bothConfirmed: otherConfirmed === true };
+}
+
+export async function getTaskConfirmations(taskId: string): Promise<{
+  creatorStarted: boolean;
+  helperStarted: boolean;
+  creatorCompleted: boolean;
+  helperCompleted: boolean;
+}> {
+  const { data } = await supabase
+    .from("tasks")
+    .select("creator_started, helper_started, creator_completed, helper_completed")
+    .eq("id", taskId)
+    .single();
+
+  return {
+    creatorStarted: data?.creator_started ?? false,
+    helperStarted: data?.helper_started ?? false,
+    creatorCompleted: data?.creator_completed ?? false,
+    helperCompleted: data?.helper_completed ?? false,
+  };
+}
+
 // ============================================================
 // HELPERS / PROFILES
 // ============================================================

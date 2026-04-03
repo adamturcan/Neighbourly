@@ -17,6 +17,9 @@ import {
   createOffer,
   completeTask,
   fetchReviewStatus,
+  confirmStart,
+  confirmComplete,
+  getTaskConfirmations,
 } from "../../../shared/lib/api";
 import { useAuth } from "../../auth/store/useAuth";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
@@ -66,6 +69,13 @@ export default function TaskDetailScreen() {
       return data ? { id: data.id, name: data.full_name ?? data.username ?? "User" } : null;
     },
     enabled: !!task && task.status !== "open",
+  });
+
+  // Confirmations for matched/in_progress tasks
+  const { data: confirmations, refetch: refetchConfirmations } = useQuery({
+    queryKey: ["confirmations", taskId],
+    queryFn: () => getTaskConfirmations(taskId),
+    enabled: !!task && (task.status === "matched" || task.status === "in_progress"),
   });
 
   // Review status for completed tasks
@@ -157,11 +167,40 @@ export default function TaskDetailScreen() {
     }
   };
 
-  const handleStartWork = async () => {
+  const handleConfirmStart = async () => {
     try {
-      await supabase.from("tasks").update({ status: "in_progress" }).eq("id", taskId);
+      const { bothConfirmed } = await confirmStart(taskId);
       refetchTask();
+      refetchConfirmations();
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      if (bothConfirmed) {
+        Alert.alert("Work started!", "Both parties confirmed. Task is now in progress.");
+      } else {
+        Alert.alert("Confirmed!", "Waiting for the other party to confirm start.");
+      }
+    } catch (e: any) {
+      Alert.alert("Error", e.message);
+    }
+  };
+
+  const handleConfirmComplete = async () => {
+    try {
+      const { bothConfirmed } = await confirmComplete(taskId);
+      refetchTask();
+      refetchConfirmations();
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      if (bothConfirmed) {
+        // Both confirmed — go to completion screen
+        navigation.goBack();
+        setTimeout(() => {
+          (navigation as any).getParent?.()?.navigate("Discover", {
+            screen: "TaskCompletion",
+            params: { taskId: task.id },
+          });
+        }, 100);
+      } else {
+        Alert.alert("Confirmed!", "Waiting for the other party to confirm completion.");
+      }
     } catch (e: any) {
       Alert.alert("Error", e.message);
     }
@@ -395,7 +434,7 @@ export default function TaskDetailScreen() {
           </View>
         )}
 
-        {/* MATCHED — Start work button */}
+        {/* MATCHED — Mutual start confirmation */}
         {task.status === "matched" && (
           <View style={{ gap: 12 }}>
             <View style={st.matchedBanner}>
@@ -403,26 +442,59 @@ export default function TaskDetailScreen() {
               <View style={{ flex: 1 }}>
                 <Text style={{ fontWeight: "700", color: "#1E40AF" }}>Matched!</Text>
                 <Text style={{ fontSize: 13, color: "#3B82F6", marginTop: 2 }}>
-                  Coordinate via chat and start when ready.
+                  Both parties must confirm to start work.
                 </Text>
               </View>
             </View>
+
+            {/* Confirmation status */}
+            {confirmations && (
+              <View style={st.confirmCard}>
+                <View style={st.confirmRow}>
+                  <MaterialCommunityIcons
+                    name={confirmations.creatorStarted ? "check-circle" : "circle-outline"}
+                    size={20}
+                    color={confirmations.creatorStarted ? "#22C55E" : "#D1D5DB"}
+                  />
+                  <Text style={st.confirmLabel}>
+                    {isOwner ? "You" : "Task owner"} {confirmations.creatorStarted ? "confirmed" : "not confirmed yet"}
+                  </Text>
+                </View>
+                <View style={st.confirmRow}>
+                  <MaterialCommunityIcons
+                    name={confirmations.helperStarted ? "check-circle" : "circle-outline"}
+                    size={20}
+                    color={confirmations.helperStarted ? "#22C55E" : "#D1D5DB"}
+                  />
+                  <Text style={st.confirmLabel}>
+                    {isHelper ? "You" : "Helper"} {confirmations.helperStarted ? "confirmed" : "not confirmed yet"}
+                  </Text>
+                </View>
+              </View>
+            )}
+
             <View style={{ flexDirection: "row", gap: 10 }}>
               <Pressable onPress={goToChat} style={[st.primaryBtn, { flex: 1 }]}>
                 <MaterialCommunityIcons name="chat-outline" size={18} color="#fff" />
                 <Text style={st.primaryBtnText}>Message</Text>
               </Pressable>
-              {isOwner && (
-                <Pressable onPress={handleStartWork} style={[st.greenBtn, { flex: 1 }]}>
-                  <MaterialCommunityIcons name="play-circle" size={18} color="#fff" />
-                  <Text style={st.greenBtnText}>Start Work</Text>
+              {((isOwner && !confirmations?.creatorStarted) || (isHelper && !confirmations?.helperStarted)) && (
+                <Pressable onPress={handleConfirmStart} style={[st.greenBtn, { flex: 1 }]}>
+                  <MaterialCommunityIcons name="check-circle" size={18} color="#fff" />
+                  <Text style={st.greenBtnText}>Confirm Start</Text>
                 </Pressable>
+              )}
+              {((isOwner && confirmations?.creatorStarted) || (isHelper && confirmations?.helperStarted)) && (
+                <View style={[st.confirmedPill]}>
+                  <MaterialCommunityIcons name="check" size={16} color="#22C55E" />
+                  <Text style={{ color: "#22C55E", fontWeight: "600", fontSize: 13 }}>You confirmed</Text>
+                </View>
               )}
             </View>
           </View>
         )}
 
-        {/* IN PROGRESS */}
+        {/* IN PROGRESS — Mutual completion */}
         {task.status === "in_progress" && (
           <View style={{ gap: 12 }}>
             {isScheduled && (
@@ -438,15 +510,56 @@ export default function TaskDetailScreen() {
                 </View>
               </View>
             )}
+
+            {/* Completion confirmation status */}
+            {confirmations && (confirmations.creatorCompleted || confirmations.helperCompleted) && (
+              <View style={st.confirmCard}>
+                <Text style={{ fontWeight: "700", color: "#000", marginBottom: 8 }}>Completion Status</Text>
+                <View style={st.confirmRow}>
+                  <MaterialCommunityIcons
+                    name={confirmations.creatorCompleted ? "check-circle" : "circle-outline"}
+                    size={20}
+                    color={confirmations.creatorCompleted ? "#22C55E" : "#D1D5DB"}
+                  />
+                  <Text style={st.confirmLabel}>
+                    {isOwner ? "You" : "Task owner"} {confirmations.creatorCompleted ? "confirmed done" : "not confirmed yet"}
+                  </Text>
+                </View>
+                <View style={st.confirmRow}>
+                  <MaterialCommunityIcons
+                    name={confirmations.helperCompleted ? "check-circle" : "circle-outline"}
+                    size={20}
+                    color={confirmations.helperCompleted ? "#22C55E" : "#D1D5DB"}
+                  />
+                  <Text style={st.confirmLabel}>
+                    {isHelper ? "You" : "Helper"} {confirmations.helperCompleted ? "confirmed done" : "not confirmed yet"}
+                  </Text>
+                </View>
+              </View>
+            )}
+
             <Pressable onPress={goToChat} style={st.primaryBtn}>
               <MaterialCommunityIcons name="chat-outline" size={18} color="#fff" />
               <Text style={st.primaryBtnText}>Message {otherParty?.name ?? ""}</Text>
             </Pressable>
-            {isOwner && (
-              <Pressable onPress={goToCompletion} style={st.greenBtn}>
+
+            {/* Show confirm complete or already confirmed */}
+            {((isOwner && !confirmations?.creatorCompleted) || (isHelper && !confirmations?.helperCompleted)) && (
+              <Pressable onPress={handleConfirmComplete} style={st.greenBtn}>
                 <MaterialCommunityIcons name="check-circle" size={18} color="#fff" />
-                <Text style={st.greenBtnText}>Mark as Completed</Text>
+                <Text style={st.greenBtnText}>Confirm Done</Text>
               </Pressable>
+            )}
+            {((isOwner && confirmations?.creatorCompleted) || (isHelper && confirmations?.helperCompleted)) && (
+              <View style={st.waitingConfirmBanner}>
+                <MaterialCommunityIcons name="clock-check-outline" size={22} color="#D97706" />
+                <View style={{ flex: 1 }}>
+                  <Text style={{ fontWeight: "700", color: "#92400E" }}>You confirmed completion</Text>
+                  <Text style={{ fontSize: 13, color: "#A16207", marginTop: 2 }}>
+                    Waiting for {isOwner ? "the helper" : "the task owner"} to confirm too.
+                  </Text>
+                </View>
+              </View>
             )}
           </View>
         )}
@@ -570,4 +683,10 @@ const st = StyleSheet.create({
   completedBanner: { flexDirection: "row", alignItems: "center", gap: 12, padding: 16, backgroundColor: "#DCFCE7", borderRadius: 14 },
   reviewBanner: { flexDirection: "row", alignItems: "center", gap: 12, padding: 16, backgroundColor: "#FEF2F2", borderRadius: 14 },
   reviewedBanner: { flexDirection: "row", alignItems: "center", gap: 10, padding: 16, backgroundColor: "#F0FDF4", borderRadius: 14 },
+  // Confirmations
+  confirmCard: { backgroundColor: "#F9FAFB", borderRadius: 14, padding: 16, gap: 8 },
+  confirmRow: { flexDirection: "row", alignItems: "center", gap: 10 },
+  confirmLabel: { fontSize: 13, color: "#374151" },
+  confirmedPill: { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, paddingVertical: 16, borderRadius: 14, backgroundColor: "#F0FDF4", borderWidth: 1.5, borderColor: "#BBF7D0" },
+  waitingConfirmBanner: { flexDirection: "row", alignItems: "center", gap: 12, padding: 16, backgroundColor: "#FEF3C7", borderRadius: 14, borderWidth: 1.5, borderColor: "#FDE68A" },
 });
