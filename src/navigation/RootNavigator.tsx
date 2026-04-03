@@ -58,10 +58,6 @@ function FloatingTabBar({ state, navigation, descriptors }: any) {
   // Also refresh when switching tabs
   useEffect(() => { fetchUnread(); }, [state.index]);
 
-  // Hide tab bar on certain nested screens (e.g. ChatScreen)
-  const focusedRoute = state.routes[state.index];
-  const nestedRouteName = getFocusedRouteNameFromRoute(focusedRoute) ?? "";
-  if (HIDDEN_ROUTES.includes(nestedRouteName)) return null;
   const indicatorX = useRef(new Animated.Value(0)).current;
   const scaleAnims = useRef(TABS.map(() => new Animated.Value(1))).current;
 
@@ -85,6 +81,11 @@ function FloatingTabBar({ state, navigation, descriptors }: any) {
     anim.setValue(0.8);
     Animated.spring(anim, { toValue: 1, useNativeDriver: true, damping: 10, stiffness: 300 }).start();
   }, [state.index]);
+
+  // Hide tab bar on certain nested screens (e.g. ChatScreen)
+  const focusedRoute = state.routes[state.index];
+  const nestedRouteName = getFocusedRouteNameFromRoute(focusedRoute) ?? "";
+  if (HIDDEN_ROUTES.includes(nestedRouteName)) return null;
 
   return (
     <View style={[tb.wrap, { paddingBottom: Math.max(insets.bottom, 8) }]}>
