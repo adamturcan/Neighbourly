@@ -11,6 +11,7 @@ import {
   ActivityIndicator,
   Animated,
   Modal,
+  Keyboard,
 } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRoute, useNavigation, useIsFocused } from "@react-navigation/native";
@@ -124,6 +125,13 @@ export default function ChatScreen() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const insets = useSafeAreaInsets();
+  const [kbVisible, setKbVisible] = useState(false);
+
+  useEffect(() => {
+    const s1 = Keyboard.addListener(Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow", () => setKbVisible(true));
+    const s2 = Keyboard.addListener(Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide", () => setKbVisible(false));
+    return () => { s1.remove(); s2.remove(); };
+  }, []);
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
   const [otherTyping, setOtherTyping] = useState(false);
@@ -544,8 +552,8 @@ export default function ChatScreen() {
           </View>
         )}
 
-        {/* Input bar */}
-        <SafeAreaView edges={["bottom"]} style={styles.inputBarSafe}>
+        {/* Input bar — only add bottom padding when keyboard is hidden */}
+        <View style={[styles.inputBarSafe, !kbVisible && { paddingBottom: insets.bottom }]}>
           <View style={styles.inputBar}>
             <Pressable style={styles.attachBtn} onPress={handleAttach}>
               <MaterialCommunityIcons name="plus" size={20} color={COLORS.textMuted} />
@@ -571,7 +579,7 @@ export default function ChatScreen() {
               )}
             </Pressable>
           </View>
-        </SafeAreaView>
+        </View>
       </KeyboardAvoidingView>
 
       {/* Reaction picker modal */}
