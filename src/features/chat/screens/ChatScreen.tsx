@@ -425,56 +425,38 @@ export default function ChatScreen() {
         </View>
       )}
 
-      {/* Messages */}
-      <FlatList
-        ref={flatListRef}
-        data={[...allMessages].reverse()}
-        renderItem={renderMessage}
-        keyExtractor={(item) => item.id}
-        inverted
-        contentContainerStyle={styles.messagesList}
-        showsVerticalScrollIndicator={false}
-      />
-
-      {/* Typing indicator */}
-      {otherTyping && (
-        <View style={styles.typingWrap}>
-          <View style={styles.typingBubble}>
-            <View style={styles.typingDot} />
-            <View style={styles.typingDot} />
-            <View style={styles.typingDot} />
-          </View>
-          <Text style={styles.typingText}>{otherName} is typing…</Text>
-        </View>
-      )}
-
-      {/* Reaction picker modal */}
-      <Modal
-        visible={reactionTarget !== null}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setReactionTarget(null)}
-      >
-        <Pressable style={styles.reactionOverlay} onPress={() => setReactionTarget(null)}>
-          <View style={styles.reactionPicker}>
-            {REACTION_EMOJIS.map((emoji) => (
-              <Pressable
-                key={emoji}
-                onPress={() => reactionTarget && handleReaction(reactionTarget.messageId, emoji)}
-                style={styles.reactionOption}
-              >
-                <Text style={styles.reactionOptionText}>{emoji}</Text>
-              </Pressable>
-            ))}
-          </View>
-        </Pressable>
-      </Modal>
-
-      {/* Input bar */}
+      {/* KeyboardAvoidingView wraps messages + input so everything shifts together */}
       <KeyboardAvoidingView
+        style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
         keyboardVerticalOffset={0}
       >
+        {/* Messages */}
+        <FlatList
+          ref={flatListRef}
+          data={[...allMessages].reverse()}
+          renderItem={renderMessage}
+          keyExtractor={(item) => item.id}
+          inverted
+          contentContainerStyle={styles.messagesList}
+          showsVerticalScrollIndicator={false}
+          keyboardDismissMode="interactive"
+          keyboardShouldPersistTaps="handled"
+        />
+
+        {/* Typing indicator */}
+        {otherTyping && (
+          <View style={styles.typingWrap}>
+            <View style={styles.typingBubble}>
+              <View style={styles.typingDot} />
+              <View style={styles.typingDot} />
+              <View style={styles.typingDot} />
+            </View>
+            <Text style={styles.typingText}>{otherName} is typing…</Text>
+          </View>
+        )}
+
+        {/* Input bar */}
         <SafeAreaView edges={["bottom"]} style={styles.inputBarSafe}>
           <View style={styles.inputBar}>
             <Pressable style={styles.attachBtn}>
@@ -503,6 +485,28 @@ export default function ChatScreen() {
           </View>
         </SafeAreaView>
       </KeyboardAvoidingView>
+
+      {/* Reaction picker modal */}
+      <Modal
+        visible={reactionTarget !== null}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setReactionTarget(null)}
+      >
+        <Pressable style={styles.reactionOverlay} onPress={() => setReactionTarget(null)}>
+          <View style={styles.reactionPicker}>
+            {REACTION_EMOJIS.map((emoji) => (
+              <Pressable
+                key={emoji}
+                onPress={() => reactionTarget && handleReaction(reactionTarget.messageId, emoji)}
+                style={styles.reactionOption}
+              >
+                <Text style={styles.reactionOptionText}>{emoji}</Text>
+              </Pressable>
+            ))}
+          </View>
+        </Pressable>
+      </Modal>
     </SafeAreaView>
   );
 }
