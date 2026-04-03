@@ -95,7 +95,7 @@ export default function HomeScreen() {
     : "Select location";
 
   return (
-    <SafeAreaView style={h.safe}>
+    <SafeAreaView style={h.safe} edges={["top"]}>
       {/* ===== HEADER ===== */}
       {!scrolled ? (
         /* Expanded header */
