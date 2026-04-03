@@ -26,7 +26,11 @@ export default function HomeStack() {
       <Stack.Screen
         name="TaskDetail"
         component={TaskDetailScreen}
-        options={{ headerShown: true, title: "Task" }}
+        options={{
+          presentation: "modal",
+          headerShown: true,
+          title: "Task",
+        }}
       />
       <Stack.Screen
         name="FullMap"
