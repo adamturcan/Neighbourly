@@ -1,5 +1,5 @@
-import React from "react";
-import { View, Pressable, Text, StyleSheet } from "react-native";
+import React, { useRef, useEffect } from "react";
+import { View, Pressable, Text, StyleSheet, Animated } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import HomeStack from "./HomeStack";
 import PostTaskScreen from "../features/tasks/screens/PostTaskScreen";
@@ -9,7 +9,6 @@ import SearchScreen from "../features/services/screens/SearchScreen";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { COLORS } from "../shared/lib/constants";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import SwipeableTabView from "../shared/components/SwipeableTabView";
 
 const Tab = createBottomTabNavigator();
 
@@ -21,8 +20,31 @@ const TABS = [
   { name: "Profile", icon: "account-outline", iconFilled: "account", label: "Profile" },
 ] as const;
 
-function FloatingTabBar({ state, descriptors, navigation }: any) {
+function FloatingTabBar({ state, navigation }: any) {
   const insets = useSafeAreaInsets();
+  const indicatorX = useRef(new Animated.Value(0)).current;
+  const scaleAnims = useRef(TABS.map(() => new Animated.Value(1))).current;
+
+  // Animate indicator to active tab
+  useEffect(() => {
+    // Each tab is roughly 1/5 of the pill width, center button is different
+    // We'll position based on index (skip center)
+    const positions = [0, 1, -1, 3, 4]; // -1 = center (no indicator)
+    const pos = positions[state.index];
+    if (pos >= 0) {
+      Animated.spring(indicatorX, {
+        toValue: pos,
+        useNativeDriver: true,
+        damping: 18,
+        stiffness: 200,
+      }).start();
+    }
+
+    // Bounce animation on the active icon
+    const anim = scaleAnims[state.index];
+    anim.setValue(0.8);
+    Animated.spring(anim, { toValue: 1, useNativeDriver: true, damping: 10, stiffness: 300 }).start();
+  }, [state.index]);
 
   return (
     <View style={[tb.wrap, { paddingBottom: Math.max(insets.bottom, 8) }]}>
@@ -42,20 +64,22 @@ function FloatingTabBar({ state, descriptors, navigation }: any) {
           if (isCenter) {
             return (
               <Pressable key={route.key} onPress={onPress} style={tb.centerWrap}>
-                <View style={tb.centerBtn}>
+                <Animated.View style={[tb.centerBtn, { transform: [{ scale: scaleAnims[index] }] }]}>
                   <MaterialCommunityIcons name="plus" size={24} color="#fff" />
-                </View>
+                </Animated.View>
               </Pressable>
             );
           }
 
           return (
             <Pressable key={route.key} onPress={onPress} style={[tb.tab, focused && tb.tabActive]}>
-              <MaterialCommunityIcons
-                name={focused ? tab.iconFilled : tab.icon}
-                size={22}
-                color={focused ? COLORS.red : "#9CA3AF"}
-              />
+              <Animated.View style={{ transform: [{ scale: scaleAnims[index] }] }}>
+                <MaterialCommunityIcons
+                  name={focused ? tab.iconFilled : tab.icon}
+                  size={22}
+                  color={focused ? COLORS.red : "#9CA3AF"}
+                />
+              </Animated.View>
               <Text style={[tb.label, focused && tb.labelActive]}>
                 {tab.label}
               </Text>
@@ -71,13 +95,16 @@ export default function MainTabs() {
   return (
     <Tab.Navigator
       tabBar={(props) => <FloatingTabBar {...props} />}
-      screenOptions={{ headerShown: false }}
+      screenOptions={{
+        headerShown: false,
+        animation: "shift",
+      }}
     >
-      <Tab.Screen name="Discover">{() => <SwipeableTabView><HomeStack /></SwipeableTabView>}</Tab.Screen>
-      <Tab.Screen name="Search">{() => <SwipeableTabView><SearchScreen /></SwipeableTabView>}</Tab.Screen>
-      <Tab.Screen name="Post">{() => <SwipeableTabView><PostTaskScreen /></SwipeableTabView>}</Tab.Screen>
-      <Tab.Screen name="Inbox">{() => <SwipeableTabView><InboxScreen /></SwipeableTabView>}</Tab.Screen>
-      <Tab.Screen name="Profile">{() => <SwipeableTabView><ProfileScreen /></SwipeableTabView>}</Tab.Screen>
+      <Tab.Screen name="Discover" component={HomeStack} />
+      <Tab.Screen name="Search" component={SearchScreen} />
+      <Tab.Screen name="Post" component={PostTaskScreen} />
+      <Tab.Screen name="Inbox" component={InboxScreen} />
+      <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
   );
 }

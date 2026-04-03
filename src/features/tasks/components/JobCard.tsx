@@ -15,6 +15,7 @@ const CATEGORY_IMAGES: Record<string, string> = {
   electrical: "https://images.unsplash.com/photo-1621905252507-b35492cc74b4?q=80&w=600&auto=format&fit=crop",
   painting: "https://images.unsplash.com/photo-1562259929-b4e1fd3aef09?q=80&w=600&auto=format&fit=crop",
   car: "https://images.unsplash.com/photo-1489824904134-891ab64532f1?q=80&w=600&auto=format&fit=crop",
+  other: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?q=80&w=600&auto=format&fit=crop",
 };
 
 const CATEGORY_ICONS: Record<string, string> = {
