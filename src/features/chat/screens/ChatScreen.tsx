@@ -11,7 +11,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useRoute, useNavigation } from "@react-navigation/native";
+import { useRoute, useNavigation, useIsFocused } from "@react-navigation/native";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { listMessages, sendMessage, getTask, markAsRead, getOtherReadReceipt } from "../../../shared/lib/api";
@@ -52,6 +52,7 @@ function formatTime(dateStr: string): string {
 export default function ChatScreen() {
   const route = useRoute<any>();
   const navigation = useNavigation();
+  const isFocused = useIsFocused();
   const { taskId, otherName, fromInbox } = route.params as {
     taskId: string;
     otherName: string;
@@ -79,14 +80,14 @@ export default function ChatScreen() {
     enabled: !!taskId,
   });
 
-  // Mark as read on open + when new messages arrive
+  // Mark as read only when the chat is actually focused
   useEffect(() => {
-    if (taskId) {
+    if (taskId && isFocused) {
       markAsRead(taskId).then(() => {
         queryClient.invalidateQueries({ queryKey: ["conversations"] });
       });
     }
-  }, [taskId, messages.length, queryClient]);
+  }, [taskId, messages.length, isFocused, queryClient]);
 
   // Fetch other person's read receipt
   const otherUserId = task?.requesterId === user?.id ? task?.helperId : task?.requesterId;
