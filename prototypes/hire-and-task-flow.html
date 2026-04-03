@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hire & Task Completion Flow - 3 Variants</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Inter', sans-serif; background: #F3F4F6; display: flex; gap: 24px; padding: 40px; flex-wrap: wrap; justify-content: center; }
+h2.variant-label { width: 100%; text-align: center; font-size: 14px; color: #6B7280; text-transform: uppercase; letter-spacing: 2px; margin-top: 20px; }
+h3.screen-label { font-size: 12px; color: #9CA3AF; text-align: center; margin-bottom: 8px; font-weight: 500; }
+.phone { width: 375px; height: 812px; background: #fff; border-radius: 40px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.15); position: relative; border: 8px solid #1a1a1a; }
+.phone-screen { width: 100%; height: 100%; overflow-y: auto; position: relative; }
+.phone-screen::-webkit-scrollbar { display: none; }
+.notch { width: 150px; height: 32px; background: #1a1a1a; border-radius: 0 0 18px 18px; position: absolute; top: 0; left: 50%; transform: translateX(-50%); z-index: 10; }
+.row { display: flex; gap: 24px; justify-content: center; flex-wrap: wrap; }
+
+/* ======================== SHARED STYLES ======================== */
+.page { min-height: 100%; background: #fff; padding: 48px 0 40px; }
+.top-bar { display: flex; align-items: center; padding: 0 20px 14px; gap: 12px; }
+.top-bar .material-icons-round { font-size: 24px; color: #000; cursor: pointer; }
+.top-bar-title { flex: 1; font-size: 17px; font-weight: 700; color: #000; }
+
+/* Buttons */
+.btn-red { width: 100%; padding: 16px; border-radius: 14px; background: #E31B23; color: #fff; font-size: 16px; font-weight: 700; border: none; cursor: pointer; text-align: center; }
+.btn-outline { width: 100%; padding: 16px; border-radius: 14px; background: #fff; color: #374151; font-size: 16px; font-weight: 600; border: 1.5px solid #E5E7EB; cursor: pointer; text-align: center; }
+.btn-green { width: 100%; padding: 16px; border-radius: 14px; background: #22C55E; color: #fff; font-size: 16px; font-weight: 700; border: none; cursor: pointer; text-align: center; }
+.btn-row { display: flex; gap: 10px; padding: 0 20px; }
+
+/* Cards */
+.info-card { margin: 0 20px; padding: 16px; background: #F9FAFB; border-radius: 16px; margin-bottom: 16px; }
+.info-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; }
+.info-icon { font-size: 20px; color: #6B7280; }
+.info-label { font-size: 12px; color: #9CA3AF; }
+.info-value { font-size: 14px; font-weight: 600; color: #000; }
+
+/* Status banner */
+.status-banner { margin: 0 20px 16px; padding: 14px 16px; border-radius: 14px; display: flex; align-items: center; gap: 10px; }
+.status-banner .material-icons-round { font-size: 22px; }
+.status-text { flex: 1; }
+.status-title { font-size: 14px; font-weight: 700; }
+.status-sub { font-size: 12px; margin-top: 2px; }
+
+/* ======================== V1 — HIRE FLOW (Seeker books a service) ======================== */
+.v1 .section-title { font-size: 16px; font-weight: 700; color: #000; padding: 0 20px; margin-bottom: 12px; }
+.v1 .provider-card { display: flex; align-items: center; gap: 14px; margin: 0 20px 16px; padding: 16px; background: #F9FAFB; border-radius: 16px; }
+.v1 .prov-avatar { width: 52px; height: 52px; border-radius: 26px; background: #2563EB; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 20px; font-weight: 800; }
+.v1 .prov-info { flex: 1; }
+.v1 .prov-name { font-size: 16px; font-weight: 700; color: #000; }
+.v1 .prov-meta { font-size: 12px; color: #9CA3AF; margin-top: 2px; }
+
+.v1 .date-picker { margin: 0 20px 16px; }
+.v1 .date-label { font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 8px; }
+.v1 .date-options { display: flex; gap: 8px; }
+.v1 .date-opt { flex: 1; padding: 12px; border-radius: 12px; border: 1.5px solid #E5E7EB; text-align: center; cursor: pointer; }
+.v1 .date-opt.active { border-color: #E31B23; background: #FEF2F2; }
+.v1 .date-day { font-size: 12px; color: #9CA3AF; font-weight: 500; }
+.v1 .date-num { font-size: 18px; font-weight: 800; color: #000; margin-top: 2px; }
+.v1 .date-opt.active .date-day, .v1 .date-opt.active .date-num { color: #E31B23; }
+
+.v1 .time-slots { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 20px 16px; }
+.v1 .time-slot { padding: 10px 16px; border-radius: 10px; border: 1.5px solid #E5E7EB; font-size: 13px; font-weight: 600; color: #374151; cursor: pointer; }
+.v1 .time-slot.active { border-color: #E31B23; background: #FEF2F2; color: #E31B23; }
+
+.v1 .price-summary { margin: 0 20px 16px; padding: 16px; background: #F9FAFB; border-radius: 16px; }
+.v1 .price-row { display: flex; justify-content: space-between; padding: 6px 0; }
+.v1 .price-label { font-size: 13px; color: #6B7280; }
+.v1 .price-val { font-size: 13px; font-weight: 600; color: #000; }
+.v1 .price-total { border-top: 1.5px solid #E5E7EB; margin-top: 8px; padding-top: 8px; }
+.v1 .price-total .price-label { font-weight: 700; color: #000; }
+.v1 .price-total .price-val { font-size: 16px; font-weight: 800; color: #E31B23; }
+
+.v1 .note-input { margin: 0 20px 20px; border: 1.5px solid #E5E7EB; border-radius: 14px; padding: 14px; font-size: 14px; color: #374151; min-height: 60px; }
+
+/* ======================== V2 — TASK LIFECYCLE (Status progression) ======================== */
+.v2 .timeline { padding: 0 20px; margin-bottom: 20px; }
+.v2 .tl-item { display: flex; gap: 14px; padding-bottom: 20px; position: relative; }
+.v2 .tl-item:not(:last-child)::before { content: ''; position: absolute; left: 15px; top: 32px; bottom: 0; width: 2px; background: #E5E7EB; }
+.v2 .tl-item.done:not(:last-child)::before { background: #22C55E; }
+.v2 .tl-dot { width: 32px; height: 32px; border-radius: 16px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; z-index: 1; }
+.v2 .tl-dot.done { background: #22C55E; }
+.v2 .tl-dot.done .material-icons-round { color: #fff; font-size: 18px; }
+.v2 .tl-dot.active { background: #E31B23; }
+.v2 .tl-dot.active .material-icons-round { color: #fff; font-size: 18px; }
+.v2 .tl-dot.pending { background: #F3F4F6; }
+.v2 .tl-dot.pending .material-icons-round { color: #9CA3AF; font-size: 18px; }
+.v2 .tl-content { flex: 1; padding-top: 4px; }
+.v2 .tl-title { font-size: 14px; font-weight: 700; color: #000; }
+.v2 .tl-sub { font-size: 12px; color: #6B7280; margin-top: 2px; }
+.v2 .tl-date { font-size: 11px; color: #9CA3AF; margin-top: 4px; }
+
+.v2 .action-card { margin: 0 20px 16px; padding: 20px; background: #FEF2F2; border-radius: 16px; border: 1.5px solid #FECACA; }
+.v2 .action-title { font-size: 15px; font-weight: 700; color: #000; margin-bottom: 4px; }
+.v2 .action-sub { font-size: 13px; color: #6B7280; margin-bottom: 14px; }
+
+.v2 .schedule-card { margin: 0 20px 16px; padding: 16px; background: #F0F9FF; border-radius: 16px; border: 1.5px solid #BAE6FD; display: flex; align-items: center; gap: 12px; }
+.v2 .schedule-icon { width: 44px; height: 44px; border-radius: 12px; background: #2563EB; display: flex; align-items: center; justify-content: center; }
+.v2 .schedule-icon .material-icons-round { font-size: 22px; color: #fff; }
+.v2 .schedule-info { flex: 1; }
+.v2 .schedule-title { font-size: 14px; font-weight: 700; color: #000; }
+.v2 .schedule-date { font-size: 13px; color: #2563EB; font-weight: 600; margin-top: 2px; }
+
+/* ======================== V3 — COMPLETION + PAYMENT (Mock) ======================== */
+.v3 .completion-header { text-align: center; padding: 20px; }
+.v3 .completion-icon { width: 72px; height: 72px; border-radius: 36px; margin: 0 auto 16px; display: flex; align-items: center; justify-content: center; }
+.v3 .completion-title { font-size: 22px; font-weight: 800; color: #000; }
+.v3 .completion-sub { font-size: 14px; color: #6B7280; margin-top: 4px; }
+
+.v3 .payment-card { margin: 0 20px 16px; background: #F9FAFB; border-radius: 16px; overflow: hidden; }
+.v3 .payment-header { padding: 16px; border-bottom: 1px solid #F3F4F6; display: flex; align-items: center; gap: 10px; }
+.v3 .payment-header .material-icons-round { font-size: 22px; color: #E31B23; }
+.v3 .payment-title { font-size: 15px; font-weight: 700; color: #000; }
+.v3 .payment-body { padding: 16px; }
+.v3 .pay-row { display: flex; justify-content: space-between; padding: 8px 0; }
+.v3 .pay-label { font-size: 13px; color: #6B7280; }
+.v3 .pay-val { font-size: 13px; font-weight: 600; color: #000; }
+.v3 .pay-total { border-top: 1.5px solid #E5E7EB; margin-top: 6px; padding-top: 10px; }
+.v3 .pay-total .pay-label { font-weight: 700; color: #000; font-size: 14px; }
+.v3 .pay-total .pay-val { font-size: 18px; font-weight: 800; color: #E31B23; }
+
+.v3 .method-row { margin: 0 20px 16px; display: flex; align-items: center; gap: 12px; padding: 14px 16px; border: 1.5px solid #E5E7EB; border-radius: 14px; }
+.v3 .method-icon { width: 40px; height: 40px; border-radius: 10px; background: #F3F4F6; display: flex; align-items: center; justify-content: center; }
+.v3 .method-info { flex: 1; }
+.v3 .method-name { font-size: 14px; font-weight: 600; color: #000; }
+.v3 .method-sub { font-size: 12px; color: #9CA3AF; }
+.v3 .method-check { font-size: 20px; color: #22C55E; }
+
+.v3 .agreement { margin: 0 20px 16px; padding: 14px 16px; background: #FFFBEB; border-radius: 14px; border: 1.5px solid #FDE68A; display: flex; gap: 10px; }
+.v3 .agreement .material-icons-round { font-size: 20px; color: #D97706; flex-shrink: 0; margin-top: 2px; }
+.v3 .agreement-text { font-size: 12px; color: #92400E; line-height: 1.5; }
+
+.v3 .rating-section { text-align: center; padding: 20px; }
+.v3 .rating-prompt { font-size: 16px; font-weight: 700; color: #000; margin-bottom: 12px; }
+.v3 .stars { display: flex; justify-content: center; gap: 8px; }
+.v3 .star { font-size: 36px; color: #FBBF24; cursor: pointer; }
+.v3 .star.empty { color: #E5E7EB; }
+</style>
+</head>
+<body>
+
+<!-- ======================== V1 — HIRE/BOOK A SERVICE ======================== -->
+<h2 class="variant-label">V1 — Book a Service (Seeker hires provider)</h2>
+<div class="row">
+
+<div>
+<h3 class="screen-label">Step 1: Choose date & time</h3>
+<div class="phone">
+<div class="notch"></div>
+<div class="phone-screen v1">
+<div class="page">
+  <div class="top-bar">
+    <span class="material-icons-round">arrow_back</span>
+    <span class="top-bar-title">Book Service</span>
+    <span class="material-icons-round" style="color:#6B7280;">close</span>
+  </div>
+
+  <div class="v1 provider-card">
+    <div class="prov-avatar">M</div>
+    <div class="prov-info">
+      <div class="prov-name">Garden Maintenance</div>
+      <div class="prov-meta">by Marko T. · ★ 4.9 · 28 jobs</div>
+    </div>
+  </div>
+
+  <div class="v1 date-picker">
+    <div class="date-label">Select a date</div>
+    <div class="date-options">
+      <div class="date-opt">
+        <div class="date-day">Today</div>
+        <div class="date-num">4</div>
+      </div>
+      <div class="date-opt active">
+        <div class="date-day">Sat</div>
+        <div class="date-num">5</div>
+      </div>
+      <div class="date-opt">
+        <div class="date-day">Sun</div>
+        <div class="date-num">6</div>
+      </div>
+      <div class="date-opt">
+        <div class="date-day">Mon</div>
+        <div class="date-num">7</div>
+      </div>
+      <div class="date-opt">
+        <div class="date-day">Tue</div>
+        <div class="date-num">8</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="v1 section-title">Preferred time</div>
+  <div class="v1 time-slots">
+    <div class="time-slot">8:00</div>
+    <div class="time-slot active">10:00</div>
+    <div class="time-slot">12:00</div>
+    <div class="time-slot">14:00</div>
+    <div class="time-slot">16:00</div>
+    <div class="time-slot">18:00</div>
+  </div>
+
+  <div class="v1 section-title">Add a note (optional)</div>
+  <div class="v1 note-input" contenteditable="true" style="color:#9CA3AF;">Back garden needs mowing, hedges on the left side...</div>
+
+  <div class="v1 price-summary">
+    <div class="price-row">
+      <span class="price-label">Service fee</span>
+      <span class="price-val">€20</span>
+    </div>
+    <div class="price-row">
+      <span class="price-label">Estimated duration</span>
+      <span class="price-val">~2 hours</span>
+    </div>
+    <div class="price-row price-total">
+      <span class="price-label">Total estimate</span>
+      <span class="price-val">€40</span>
+    </div>
+  </div>
+
+  <div style="padding:0 20px;">
+    <button class="btn-red">Confirm Booking</button>
+  </div>
+</div>
+</div>
+</div>
+</div>
+
+<div>
+<h3 class="screen-label">Step 2: Booking confirmed</h3>
+<div class="phone">
+<div class="notch"></div>
+<div class="phone-screen v1">
+<div class="page">
+  <div class="top-bar">
+    <span class="material-icons-round">arrow_back</span>
+    <span class="top-bar-title">Booking Details</span>
+  </div>
+
+  <div class="status-banner" style="background:#DCFCE7;">
+    <span class="material-icons-round" style="color:#16A34A;">check_circle</span>
+    <div class="status-text">
+      <div class="status-title" style="color:#16A34A;">Booking Confirmed</div>
+      <div class="status-sub" style="color:#15803D;">Marko will arrive on Sat, Apr 5 at 10:00</div>
+    </div>
+  </div>
+
+  <div class="info-card">
+    <div class="info-row">
+      <span class="material-icons-round info-icon">event</span>
+      <div>
+        <div class="info-label">Date & Time</div>
+        <div class="info-value">Saturday, Apr 5 · 10:00 AM</div>
+      </div>
+    </div>
+    <div class="info-row">
+      <span class="material-icons-round info-icon">place</span>
+      <div>
+        <div class="info-label">Location</div>
+        <div class="info-value">123 Oak Street, Bratislava</div>
+      </div>
+    </div>
+    <div class="info-row">
+      <span class="material-icons-round info-icon">euro</span>
+      <div>
+        <div class="info-label">Estimated Total</div>
+        <div class="info-value">€40</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="v1 provider-card">
+    <div class="prov-avatar">M</div>
+    <div class="prov-info">
+      <div class="prov-name">Marko T.</div>
+      <div class="prov-meta">★ 4.9 · 28 jobs completed</div>
+    </div>
+    <span class="material-icons-round" style="color:#E31B23;">chat</span>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn-outline" style="flex:1;">Reschedule</button>
+    <button class="btn-red" style="flex:1;">Message</button>
+  </div>
+
+  <div style="padding:20px;">
+    <button class="btn-outline" style="color:#EF4444;border-color:#FECACA;">Cancel Booking</button>
+  </div>
+</div>
+</div>
+</div>
+</div>
+
+</div>
+
+<!-- ======================== V2 — TASK LIFECYCLE TIMELINE ======================== -->
+<h2 class="variant-label">V2 — Task Lifecycle Timeline</h2>
+<div class="row">
+
+<div>
+<h3 class="screen-label">In Progress — with scheduled date</h3>
+<div class="phone">
+<div class="notch"></div>
+<div class="phone-screen v2">
+<div class="page">
+  <div class="top-bar">
+    <span class="material-icons-round">arrow_back</span>
+    <span class="top-bar-title">Garden Cleanup</span>
+  </div>
+
+  <div class="status-banner" style="background:#FEF3C7;">
+    <span class="material-icons-round" style="color:#D97706;">schedule</span>
+    <div class="status-text">
+      <div class="status-title" style="color:#92400E;">In Progress</div>
+      <div class="status-sub" style="color:#A16207;">Scheduled for Saturday, Apr 5 at 10:00</div>
+    </div>
+  </div>
+
+  <div class="v2 schedule-card">
+    <div class="schedule-icon"><span class="material-icons-round">event</span></div>
+    <div class="schedule-info">
+      <div class="schedule-title">Scheduled Date</div>
+      <div class="schedule-date">Saturday, April 5 · 10:00 AM</div>
+    </div>
+    <span class="material-icons-round" style="color:#D1D5DB;">edit</span>
+  </div>
+
+  <div style="padding:0 20px;margin-bottom:16px;">
+    <div style="font-size:16px;font-weight:700;color:#000;margin-bottom:14px;">Progress</div>
+  </div>
+
+  <div class="v2 timeline">
+    <div class="tl-item done">
+      <div class="tl-dot done"><span class="material-icons-round">check</span></div>
+      <div class="tl-content">
+        <div class="tl-title">Task Posted</div>
+        <div class="tl-sub">You posted "Garden Cleanup"</div>
+        <div class="tl-date">Apr 2, 2026 · 3:45 PM</div>
+      </div>
+    </div>
+    <div class="tl-item done">
+      <div class="tl-dot done"><span class="material-icons-round">check</span></div>
+      <div class="tl-content">
+        <div class="tl-title">Offer Accepted</div>
+        <div class="tl-sub">You accepted Marko's offer for €40</div>
+        <div class="tl-date">Apr 3, 2026 · 10:15 AM</div>
+      </div>
+    </div>
+    <div class="tl-item done">
+      <div class="tl-dot done"><span class="material-icons-round">check</span></div>
+      <div class="tl-content">
+        <div class="tl-title">Date Scheduled</div>
+        <div class="tl-sub">Set for Apr 5, 10:00 AM</div>
+        <div class="tl-date">Apr 3, 2026 · 10:20 AM</div>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot active"><span class="material-icons-round">hourglass_top</span></div>
+      <div class="tl-content">
+        <div class="tl-title">Work in Progress</div>
+        <div class="tl-sub">Waiting for task to be completed</div>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot pending"><span class="material-icons-round">payments</span></div>
+      <div class="tl-content">
+        <div class="tl-title">Payment & Review</div>
+        <div class="tl-sub">Confirm completion and pay</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn-red" style="flex:1;">
+      <span style="display:flex;align-items:center;justify-content:center;gap:8px;">
+        <span class="material-icons-round" style="font-size:18px;">chat</span> Message Marko
+      </span>
+    </button>
+  </div>
+</div>
+</div>
+</div>
+</div>
+
+<div>
+<h3 class="screen-label">Ready to complete</h3>
+<div class="phone">
+<div class="notch"></div>
+<div class="phone-screen v2">
+<div class="page">
+  <div class="top-bar">
+    <span class="material-icons-round">arrow_back</span>
+    <span class="top-bar-title">Garden Cleanup</span>
+  </div>
+
+  <div class="v2 action-card">
+    <div class="action-title">Ready to finish?</div>
+    <div class="action-sub">If the work is done, confirm completion to proceed with payment.</div>
+    <button class="btn-green">
+      <span style="display:flex;align-items:center;justify-content:center;gap:8px;">
+        <span class="material-icons-round" style="font-size:18px;">check_circle</span> Mark as Completed
+      </span>
+    </button>
+  </div>
+
+  <div class="v2 timeline">
+    <div class="tl-item done">
+      <div class="tl-dot done"><span class="material-icons-round">check</span></div>
+      <div class="tl-content">
+        <div class="tl-title">Task Posted</div>
+        <div class="tl-date">Apr 2 · 3:45 PM</div>
+      </div>
+    </div>
+    <div class="tl-item done">
+      <div class="tl-dot done"><span class="material-icons-round">check</span></div>
+      <div class="tl-content">
+        <div class="tl-title">Offer Accepted — €40</div>
+        <div class="tl-date">Apr 3 · 10:15 AM</div>
+      </div>
+    </div>
+    <div class="tl-item done">
+      <div class="tl-dot done"><span class="material-icons-round">check</span></div>
+      <div class="tl-content">
+        <div class="tl-title">Scheduled — Apr 5, 10:00</div>
+        <div class="tl-date">Apr 3 · 10:20 AM</div>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot active"><span class="material-icons-round">flag</span></div>
+      <div class="tl-content">
+        <div class="tl-title" style="color:#E31B23;">Awaiting Confirmation</div>
+        <div class="tl-sub">Both parties must confirm completion</div>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot pending"><span class="material-icons-round">payments</span></div>
+      <div class="tl-content">
+        <div class="tl-title">Payment & Review</div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+</div>
+
+</div>
+
+<!-- ======================== V3 — COMPLETION + MOCK PAYMENT ======================== -->
+<h2 class="variant-label">V3 — Completion + Mock Payment + Review</h2>
+<div class="row">
+
+<div>
+<h3 class="screen-label">Confirm & Pay</h3>
+<div class="phone">
+<div class="notch"></div>
+<div class="phone-screen v3">
+<div class="page">
+  <div class="top-bar">
+    <span class="material-icons-round">arrow_back</span>
+    <span class="top-bar-title">Complete Task</span>
+  </div>
+
+  <div class="v3 completion-header">
+    <div class="completion-icon" style="background:#DCFCE7;">
+      <span class="material-icons-round" style="font-size:36px;color:#16A34A;">check_circle</span>
+    </div>
+    <div class="completion-title">Task Completed!</div>
+    <div class="completion-sub">Garden Cleanup by Marko T.</div>
+  </div>
+
+  <div class="v3 payment-card">
+    <div class="payment-header">
+      <span class="material-icons-round">receipt_long</span>
+      <span class="payment-title">Payment Summary</span>
+    </div>
+    <div class="payment-body">
+      <div class="pay-row">
+        <span class="pay-label">Service</span>
+        <span class="pay-val">Garden Cleanup</span>
+      </div>
+      <div class="pay-row">
+        <span class="pay-label">Agreed amount</span>
+        <span class="pay-val">€40</span>
+      </div>
+      <div class="pay-row">
+        <span class="pay-label">Platform fee (5%)</span>
+        <span class="pay-val">€2</span>
+      </div>
+      <div class="pay-row pay-total">
+        <span class="pay-label">Total</span>
+        <span class="pay-val">€42</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="v3 method-row">
+    <div class="method-icon"><span class="material-icons-round" style="color:#374151;">credit_card</span></div>
+    <div class="method-info">
+      <div class="method-name">Cash Payment</div>
+      <div class="method-sub">Pay the helper directly</div>
+    </div>
+    <span class="material-icons-round method-check">check_circle</span>
+  </div>
+  <div class="v3 method-row" style="opacity:0.5;">
+    <div class="method-icon"><span class="material-icons-round" style="color:#374151;">account_balance</span></div>
+    <div class="method-info">
+      <div class="method-name">Online Payment</div>
+      <div class="method-sub">Coming soon</div>
+    </div>
+  </div>
+
+  <div class="v3 agreement">
+    <span class="material-icons-round">info</span>
+    <span class="agreement-text">By confirming, you agree that the task has been completed satisfactorily and the agreed payment will be made to the helper.</span>
+  </div>
+
+  <div style="padding:0 20px;">
+    <button class="btn-green">Confirm & Complete</button>
+  </div>
+</div>
+</div>
+</div>
+</div>
+
+<div>
+<h3 class="screen-label">Done — Rate & Review</h3>
+<div class="phone">
+<div class="notch"></div>
+<div class="phone-screen v3">
+<div class="page">
+  <div class="top-bar">
+    <span class="material-icons-round" style="visibility:hidden;">x</span>
+    <span class="top-bar-title"></span>
+    <span class="material-icons-round" style="color:#6B7280;">close</span>
+  </div>
+
+  <div class="v3 completion-header">
+    <div class="completion-icon" style="background:#E31B23;">
+      <span class="material-icons-round" style="font-size:36px;color:#fff;">celebration</span>
+    </div>
+    <div class="completion-title">All Done! 🎉</div>
+    <div class="completion-sub">Payment confirmed · Task completed</div>
+  </div>
+
+  <div class="info-card">
+    <div class="info-row">
+      <span class="material-icons-round info-icon">task_alt</span>
+      <div>
+        <div class="info-label">Task</div>
+        <div class="info-value">Garden Cleanup</div>
+      </div>
+    </div>
+    <div class="info-row">
+      <span class="material-icons-round info-icon">person</span>
+      <div>
+        <div class="info-label">Helper</div>
+        <div class="info-value">Marko T.</div>
+      </div>
+    </div>
+    <div class="info-row">
+      <span class="material-icons-round info-icon">euro</span>
+      <div>
+        <div class="info-label">Paid</div>
+        <div class="info-value" style="color:#16A34A;">€42 (cash)</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="v3 rating-section">
+    <div class="rating-prompt">How was Marko?</div>
+    <div class="stars">
+      <span class="material-icons-round star">star</span>
+      <span class="material-icons-round star">star</span>
+      <span class="material-icons-round star">star</span>
+      <span class="material-icons-round star">star</span>
+      <span class="material-icons-round star empty">star_outline</span>
+    </div>
+  </div>
+
+  <div style="padding:0 20px;margin-bottom:12px;">
+    <div class="v1 note-input" contenteditable="true" style="color:#9CA3AF;">Add a comment...</div>
+  </div>
+
+  <div style="padding:0 20px;margin-bottom:12px;">
+    <button class="btn-red">Submit Review</button>
+  </div>
+  <div style="padding:0 20px;">
+    <button class="btn-outline">Skip</button>
+  </div>
+</div>
+</div>
+</div>
+</div>
+
+</div>
+
+</body>
+</html>

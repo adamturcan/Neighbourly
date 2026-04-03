@@ -139,8 +139,8 @@ export default function ServiceDetailScreen() {
         )}
 
         {/* Hire Button */}
-        <Pressable style={s.hireBtn} onPress={() => Alert.alert("Coming soon", "Hiring flow will be available soon!")}>
-          <Text style={s.hireBtnText}>Hire Now</Text>
+        <Pressable style={s.hireBtn} onPress={() => nav.navigate("BookService", { serviceId: service.id })}>
+          <Text style={s.hireBtnText}>Request Booking</Text>
         </Pressable>
       </View>
     </ScrollView>

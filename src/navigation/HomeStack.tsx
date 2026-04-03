@@ -11,6 +11,8 @@ import EditProfileScreen from "../features/profile/screens/EditProfileScreen";
 import PublicProfileScreen from "../features/profile/screens/PublicProfileScreen";
 import MyServicesScreen from "../features/services/screens/MyServicesScreen";
 import CreateServiceScreen from "../features/services/screens/CreateServiceScreen";
+import BookServiceScreen from "../features/services/screens/BookServiceScreen";
+import TaskCompletionScreen from "../features/tasks/screens/TaskCompletionScreen";
 
 export type HomeStackParamList = {
   HomeMain: undefined;
@@ -24,6 +26,8 @@ export type HomeStackParamList = {
   PublicProfile: { userId: string };
   MyServices: undefined;
   CreateService: { editId?: string } | undefined;
+  BookService: { serviceId: string };
+  TaskCompletion: { taskId: string };
 };
 
 const Stack = createNativeStackNavigator<HomeStackParamList>();
@@ -79,6 +83,16 @@ export default function HomeStack() {
       <Stack.Screen
         name="CreateService"
         component={CreateServiceScreen}
+        options={{ presentation: "modal", headerShown: false }}
+      />
+      <Stack.Screen
+        name="BookService"
+        component={BookServiceScreen}
+        options={{ presentation: "modal", headerShown: false }}
+      />
+      <Stack.Screen
+        name="TaskCompletion"
+        component={TaskCompletionScreen}
         options={{ presentation: "modal", headerShown: false }}
       />
     </Stack.Navigator>

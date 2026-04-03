@@ -4,6 +4,23 @@ All notable changes to the Neighborly project will be documented in this file.
 
 Format: [Keep a Changelog](https://keepachangelog.com/)
 
+## [2026-04-04] — Booking Request & Task Completion Flow
+
+### Added
+- BookServiceScreen — request booking with date/time picker, note, price summary. Sends as request for provider to accept/decline
+- TaskCompletionScreen — 3-step flow: confirm & mock payment (cash/online coming soon) → rate & review → done celebration
+- Date picker with 7 upcoming days + time slot selection for bookings
+- Payment summary card with agreed amount and payment method selection
+- Agreement notice before confirming completion
+- "All Done" celebration screen with task summary
+
+### Changed
+- ServiceDetail "Hire Now" → "Request Booking" linking to BookServiceScreen
+- TaskDetail "Mark as completed" → opens TaskCompletionScreen with payment flow
+- Tab bar hidden on BookService and TaskCompletion screens
+
+---
+
 ## [2026-04-03] — Phase 5.5: Service Publishing & Provider Dashboard
 
 ### Added

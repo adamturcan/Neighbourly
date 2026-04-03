@@ -365,10 +365,18 @@ export default function TaskDetailScreen() {
           </Pressable>
         )}
 
-        {/* Complete button */}
+        {/* Complete button — opens completion flow */}
         {task.status === "in_progress" && isOwner && (
           <Pressable
-            onPress={handleComplete}
+            onPress={() => {
+              navigation.goBack();
+              setTimeout(() => {
+                (navigation as any).getParent?.()?.navigate("Discover", {
+                  screen: "TaskCompletion",
+                  params: { taskId: task.id },
+                });
+              }, 100);
+            }}
             style={{ backgroundColor: "#22C55E", borderRadius: 14, paddingVertical: 16, alignItems: "center" }}
           >
             <Text style={{ color: "#fff", fontWeight: "600", fontSize: 15 }}>Mark as completed</Text>
