@@ -528,8 +528,8 @@ export default function ChatScreen() {
       {/* KeyboardAvoidingView wraps messages + input so everything shifts together */}
       <KeyboardAvoidingView
         style={{ flex: 1 }}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-        keyboardVerticalOffset={insets.top}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={0}
       >
         {/* Messages */}
         <FlatList
