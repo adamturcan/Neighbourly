@@ -187,9 +187,21 @@ export default function ChatScreen() {
       otherName.charCodeAt(0) % AVATAR_COLORS.length
     ];
 
+  // Find the last message (by either person) that the other person has seen
+  const lastSeenMessageId = (() => {
+    if (!otherSeenAt) return null;
+    for (let i = messages.length - 1; i >= 0; i--) {
+      if (new Date(messages[i].createdAt).getTime() <= new Date(otherSeenAt).getTime()) {
+        return messages[i].id;
+      }
+    }
+    return null;
+  })();
+
   const renderMessage = useCallback(
     ({ item }: { item: Message }) => {
       const isMine = item.senderId === user?.id;
+      const showSeen = item.id === lastSeenMessageId;
       return (
         <View
           style={[
@@ -220,10 +232,17 @@ export default function ChatScreen() {
           >
             {formatTime(item.createdAt)}
           </Text>
+          {showSeen && (
+            <View style={styles.seenRow}>
+              <View style={[styles.seenAvatar, { backgroundColor: avatarColor }]}>
+                <Text style={styles.seenAvatarText}>{otherName.charAt(0).toUpperCase()}</Text>
+              </View>
+            </View>
+          )}
         </View>
       );
     },
-    [user?.id],
+    [user?.id, lastSeenMessageId, avatarColor, otherName],
   );
 
   const categoryColor =
@@ -291,15 +310,6 @@ export default function ChatScreen() {
         inverted
         contentContainerStyle={styles.messagesList}
         showsVerticalScrollIndicator={false}
-        ListHeaderComponent={
-          otherSeenAt && messages.length > 0 && otherSeenAt >= messages[messages.length - 1].createdAt ? (
-            <View style={styles.seenRow}>
-              <View style={[styles.seenAvatar, { backgroundColor: avatarColor }]}>
-                <Text style={styles.seenAvatarText}>{otherName.charAt(0).toUpperCase()}</Text>
-              </View>
-            </View>
-          ) : null
-        }
       />
 
       {/* Typing indicator */}
