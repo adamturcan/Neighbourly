@@ -8,6 +8,7 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  StyleSheet,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
@@ -15,18 +16,17 @@ import { createTask } from "../../../shared/lib/api";
 import { COLORS } from "../../../shared/lib/constants";
 
 const CATEGORIES = [
-  { key: "cleaning", label: "Cleaning", icon: "broom" as const, color: "#E31B23" },
-  { key: "gardening", label: "Garden", icon: "flower-outline" as const, color: "#16A34A" },
-  { key: "moving", label: "Moving", icon: "truck-outline" as const, color: "#2563EB" },
-  { key: "tutoring", label: "Tutoring", icon: "school-outline" as const, color: "#7C3AED" },
-  { key: "plumbing", label: "Plumbing", icon: "pipe-wrench" as const, color: "#0891B2" },
-  { key: "electrical", label: "Electrical", icon: "flash-outline" as const, color: "#D97706" },
-  { key: "painting", label: "Painting", icon: "format-paint" as const, color: "#EA580C" },
-  { key: "car", label: "Car help", icon: "car-outline" as const, color: "#E11D48" },
+  { key: "cleaning", label: "Cleaning", desc: "Home, office, deep clean", icon: "broom" as const, bg: "#FEF2F2", fg: "#E31B23" },
+  { key: "gardening", label: "Garden", desc: "Mowing, trimming, planting", icon: "flower-outline" as const, bg: "#F0FDF4", fg: "#16A34A" },
+  { key: "moving", label: "Moving", desc: "Furniture, boxes, transport", icon: "truck-outline" as const, bg: "#EFF6FF", fg: "#2563EB" },
+  { key: "tutoring", label: "Tutoring", desc: "Math, languages, music", icon: "school-outline" as const, bg: "#F5F3FF", fg: "#7C3AED" },
+  { key: "plumbing", label: "Plumbing", desc: "Leaks, pipes, installation", icon: "pipe-wrench" as const, bg: "#ECFEFF", fg: "#0891B2" },
+  { key: "electrical", label: "Electrical", desc: "Wiring, outlets, fixtures", icon: "flash-outline" as const, bg: "#FFFBEB", fg: "#D97706" },
+  { key: "painting", label: "Painting", desc: "Walls, furniture, exterior", icon: "format-paint" as const, bg: "#FFF7ED", fg: "#EA580C" },
+  { key: "car", label: "Car help", desc: "Jump start, wash, tyre", icon: "car-outline" as const, bg: "#FFF1F2", fg: "#E11D48" },
 ];
 
 const PRICE_PRESETS = [20, 45, 60, 80, 100];
-
 type Step = 1 | 2 | 3;
 
 export default function PostTaskScreen() {
@@ -41,171 +41,67 @@ export default function PostTaskScreen() {
   const selectedCat = CATEGORIES.find((c) => c.key === category);
 
   const handleNext = () => {
-    if (step === 1 && !category) {
-      Alert.alert("Pick a category");
-      return;
-    }
+    if (step === 1 && !category) { Alert.alert("Pick a category"); return; }
     if (step === 2) {
-      if (title.trim().length < 3) {
-        Alert.alert("Title too short", "At least 3 characters");
-        return;
-      }
-      if (description.trim().length < 5) {
-        Alert.alert("Add a description", "At least 5 characters");
-        return;
-      }
+      if (title.trim().length < 3) { Alert.alert("Title too short", "At least 3 characters"); return; }
+      if (description.trim().length < 5) { Alert.alert("Add a description", "At least 5 characters"); return; }
     }
     setStep((s) => Math.min(s + 1, 3) as Step);
   };
 
   const handleSubmit = async () => {
-    if (!Number(budget) || Number(budget) < 1) {
-      Alert.alert("Set a budget", "At least €1");
-      return;
-    }
+    if (!Number(budget) || Number(budget) < 1) { Alert.alert("Set a budget", "At least €1"); return; }
     setSubmitting(true);
     try {
-      await createTask({
-        title: title.trim(),
-        description: description.trim(),
-        category,
-        budget: Number(budget),
-        payment_type: paymentType,
-        lat: 48.1482,
-        lng: 17.1067,
-      });
+      await createTask({ title: title.trim(), description: description.trim(), category, budget: Number(budget), payment_type: paymentType, lat: 48.1482, lng: 17.1067 });
       Alert.alert("Task posted!", "Helpers nearby will see your task.");
-      setStep(1);
-      setCategory("");
-      setTitle("");
-      setDescription("");
-      setBudget("");
-      setPaymentType("cash");
-    } catch (e: any) {
-      Alert.alert("Error", e.message);
-    }
+      setStep(1); setCategory(""); setTitle(""); setDescription(""); setBudget(""); setPaymentType("cash");
+    } catch (e: any) { Alert.alert("Error", e.message); }
     setSubmitting(false);
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#f2f2f7" }}>
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-      >
-        {/* Nav bar */}
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            paddingHorizontal: 16,
-            height: 44,
-          }}
-        >
+    <SafeAreaView style={s.safe}>
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
+        {/* Nav */}
+        <View style={s.nav}>
           {step > 1 ? (
-            <Pressable onPress={() => setStep((s) => (s - 1) as Step)} hitSlop={8}>
-              <MaterialCommunityIcons name="chevron-left" size={28} color="#000" />
+            <Pressable onPress={() => setStep((prev) => (prev - 1) as Step)} hitSlop={8}>
+              <MaterialCommunityIcons name="chevron-left" size={26} color="#000" />
             </Pressable>
-          ) : (
-            <View style={{ width: 28 }} />
-          )}
-          <Text
-            style={{
-              flex: 1,
-              textAlign: "center",
-              fontSize: 17,
-              fontWeight: "600",
-              color: "#000",
-            }}
-          >
-            New Task
-          </Text>
-          <View style={{ width: 28 }} />
+          ) : <View style={{ width: 26 }} />}
+          <Text style={s.navTitle}>New Task</Text>
+          <View style={{ width: 26 }} />
         </View>
 
-        <ScrollView
-          style={{ flex: 1 }}
-          contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 16 }}
-          keyboardShouldPersistTaps="handled"
-        >
-          {/* ===== STEP 1: Category grid ===== */}
+        {/* Progress */}
+        <View style={s.progressRow}>
+          {[1, 2, 3].map((i) => (
+            <View key={i} style={[s.progressSeg, { backgroundColor: i <= step ? COLORS.red : "#E5E5EA" }]} />
+          ))}
+        </View>
+
+        <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 20 }} keyboardShouldPersistTaps="handled">
+
+          {/* ========== STEP 1 ========== */}
           {step === 1 && (
             <View>
-              <Text style={{ fontSize: 28, fontWeight: "700", color: "#000", marginTop: 8 }}>
-                Category
-              </Text>
-              <Text style={{ fontSize: 13, color: "#8E8E93", marginTop: 2, marginBottom: 20 }}>
-                What kind of help do you need?
-              </Text>
-
-              <View
-                style={{
-                  flexDirection: "row",
-                  flexWrap: "wrap",
-                  gap: 12,
-                }}
-              >
+              <Text style={s.heading}>What do you{"\n"}need help with?</Text>
+              <Text style={s.sub}>Choose a category</Text>
+              <View style={{ gap: 6 }}>
                 {CATEGORIES.map((cat) => {
-                  const selected = category === cat.key;
+                  const on = category === cat.key;
                   return (
-                    <Pressable
-                      key={cat.key}
-                      onPress={() => setCategory(cat.key)}
-                      style={{
-                        width: "22%",
-                        alignItems: "center",
-                        gap: 6,
-                      }}
-                    >
-                      <View
-                        style={{
-                          width: 60,
-                          height: 60,
-                          borderRadius: 16,
-                          backgroundColor: "#fff",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          shadowColor: "#000",
-                          shadowOpacity: 0.06,
-                          shadowRadius: 8,
-                          shadowOffset: { width: 0, height: 2 },
-                          elevation: 2,
-                          borderWidth: selected ? 2 : 0,
-                          borderColor: selected ? COLORS.red : "transparent",
-                        }}
-                      >
-                        <MaterialCommunityIcons
-                          name={cat.icon}
-                          size={26}
-                          color={selected ? COLORS.red : cat.color}
-                        />
-                        {selected && (
-                          <View
-                            style={{
-                              position: "absolute",
-                              top: -4,
-                              right: -4,
-                              width: 18,
-                              height: 18,
-                              borderRadius: 9,
-                              backgroundColor: COLORS.red,
-                              alignItems: "center",
-                              justifyContent: "center",
-                            }}
-                          >
-                            <MaterialCommunityIcons name="check" size={12} color="#fff" />
-                          </View>
-                        )}
+                    <Pressable key={cat.key} onPress={() => setCategory(cat.key)}
+                      style={[s.catRow, on && { backgroundColor: "#FEF2F2", borderColor: COLORS.red }]}>
+                      <View style={[s.catIcon, { backgroundColor: on ? COLORS.red : cat.bg }]}>
+                        <MaterialCommunityIcons name={cat.icon} size={20} color={on ? "#fff" : cat.fg} />
                       </View>
-                      <Text
-                        style={{
-                          fontSize: 11,
-                          fontWeight: "500",
-                          color: selected ? COLORS.red : "#000",
-                        }}
-                      >
-                        {cat.label}
-                      </Text>
+                      <View style={{ flex: 1 }}>
+                        <Text style={[s.catLabel, on && { color: COLORS.red }]}>{cat.label}</Text>
+                        <Text style={s.catDesc}>{cat.desc}</Text>
+                      </View>
+                      {on && <MaterialCommunityIcons name="check-circle" size={20} color={COLORS.red} />}
                     </Pressable>
                   );
                 })}
@@ -213,288 +109,123 @@ export default function PostTaskScreen() {
             </View>
           )}
 
-          {/* ===== STEP 2: Details ===== */}
+          {/* ========== STEP 2 ========== */}
           {step === 2 && (
             <View>
-              <Text style={{ fontSize: 28, fontWeight: "700", color: "#000", marginTop: 8 }}>
-                Details
-              </Text>
-              <Text style={{ fontSize: 13, color: "#8E8E93", marginTop: 2, marginBottom: 20 }}>
-                Tell helpers what you need
-              </Text>
-
-              {/* Grouped card */}
-              <View
-                style={{
-                  backgroundColor: "#fff",
-                  borderRadius: 12,
-                  overflow: "hidden",
-                  shadowColor: "#000",
-                  shadowOpacity: 0.04,
-                  shadowRadius: 8,
-                  shadowOffset: { width: 0, height: 2 },
-                  elevation: 1,
-                  marginBottom: 16,
-                }}
-              >
-                <View style={{ paddingHorizontal: 14, paddingTop: 10, paddingBottom: 6, borderBottomWidth: 0.5, borderBottomColor: "#e5e5ea" }}>
-                  <Text style={{ fontSize: 11, fontWeight: "500", color: "#8E8E93", marginBottom: 2 }}>
-                    TITLE
-                  </Text>
-                  <TextInput
-                    placeholder="e.g. Deep clean my apartment"
-                    value={title}
-                    onChangeText={setTitle}
-                    style={{ fontSize: 15, fontWeight: "500", color: "#000", paddingVertical: 4 }}
-                    placeholderTextColor="#C7C7CC"
-                  />
+              {/* Category chip */}
+              {selectedCat && (
+                <View style={s.chip}>
+                  <MaterialCommunityIcons name={selectedCat.icon} size={14} color={COLORS.red} />
+                  <Text style={s.chipText}>{selectedCat.label}</Text>
                 </View>
-                <View style={{ paddingHorizontal: 14, paddingTop: 10, paddingBottom: 10 }}>
-                  <Text style={{ fontSize: 11, fontWeight: "500", color: "#8E8E93", marginBottom: 2 }}>
-                    DESCRIPTION
-                  </Text>
-                  <TextInput
-                    placeholder="Add details — when, where, what's needed…"
-                    value={description}
-                    onChangeText={setDescription}
-                    multiline
-                    numberOfLines={4}
-                    style={{ fontSize: 15, color: "#000", minHeight: 100, textAlignVertical: "top", paddingVertical: 4, lineHeight: 22 }}
-                    placeholderTextColor="#C7C7CC"
-                  />
+              )}
+              <Text style={s.heading}>Describe your task</Text>
+              <View style={{ gap: 16, marginTop: 20 }}>
+                <View>
+                  <Text style={s.inputLabel}>Title</Text>
+                  <TextInput value={title} onChangeText={setTitle} placeholder="e.g. Deep clean my apartment"
+                    style={s.input} placeholderTextColor="#C7C7CC" />
                 </View>
-              </View>
-
-              {/* Photos */}
-              <Text style={{ fontSize: 11, fontWeight: "500", color: "#8E8E93", textTransform: "uppercase", marginBottom: 6, paddingLeft: 2 }}>
-                Photos
-              </Text>
-              <View
-                style={{
-                  backgroundColor: "#fff",
-                  borderRadius: 12,
-                  padding: 12,
-                  shadowColor: "#000",
-                  shadowOpacity: 0.04,
-                  shadowRadius: 8,
-                  shadowOffset: { width: 0, height: 2 },
-                  elevation: 1,
-                }}
-              >
-                <Pressable
-                  style={{
-                    width: 64,
-                    height: 64,
-                    borderRadius: 10,
-                    backgroundColor: "#f2f2f7",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <MaterialCommunityIcons name="camera-plus-outline" size={22} color="#8E8E93" />
-                  <Text style={{ fontSize: 9, color: "#8E8E93", fontWeight: "500", marginTop: 2 }}>
-                    Add
-                  </Text>
-                </Pressable>
+                <View>
+                  <Text style={s.inputLabel}>Description</Text>
+                  <TextInput value={description} onChangeText={setDescription} placeholder="Add details — when, where, what's needed…"
+                    multiline numberOfLines={4} style={[s.input, { minHeight: 110, textAlignVertical: "top", lineHeight: 22 }]} placeholderTextColor="#C7C7CC" />
+                </View>
+                <View>
+                  <Text style={s.inputLabel}>Photos <Text style={{ color: "#C7C7CC", fontWeight: "400" }}>(optional)</Text></Text>
+                  <Pressable style={s.photoAdd}>
+                    <MaterialCommunityIcons name="camera-plus-outline" size={22} color="#A1A1AA" />
+                    <Text style={{ fontSize: 9, color: "#A1A1AA", fontWeight: "500" }}>Add</Text>
+                  </Pressable>
+                </View>
               </View>
             </View>
           )}
 
-          {/* ===== STEP 3: Budget ===== */}
+          {/* ========== STEP 3 ========== */}
           {step === 3 && (
             <View>
-              <Text style={{ fontSize: 28, fontWeight: "700", color: "#000", marginTop: 8 }}>
-                Budget
-              </Text>
-              <Text style={{ fontSize: 13, color: "#8E8E93", marginTop: 2, marginBottom: 20 }}>
-                Set your price and preferences
-              </Text>
-
-              {/* Budget input card */}
-              <View
-                style={{
-                  backgroundColor: "#fff",
-                  borderRadius: 12,
-                  paddingHorizontal: 14,
-                  paddingVertical: 12,
-                  flexDirection: "row",
-                  alignItems: "center",
-                  gap: 4,
-                  shadowColor: "#000",
-                  shadowOpacity: 0.04,
-                  shadowRadius: 8,
-                  shadowOffset: { width: 0, height: 2 },
-                  elevation: 1,
-                  marginBottom: 8,
-                }}
-              >
-                <Text style={{ fontSize: 22, fontWeight: "700", color: "#C7C7CC" }}>€</Text>
-                <TextInput
-                  placeholder="0"
-                  value={budget}
-                  onChangeText={setBudget}
-                  keyboardType="numeric"
-                  style={{ fontSize: 22, fontWeight: "700", color: "#000", flex: 1 }}
-                  placeholderTextColor="#C7C7CC"
-                />
-              </View>
-
-              {/* Price presets */}
-              <View style={{ flexDirection: "row", gap: 6, marginBottom: 20 }}>
-                {PRICE_PRESETS.map((p) => (
-                  <Pressable
-                    key={p}
-                    onPress={() => setBudget(String(p))}
-                    style={{
-                      height: 30,
-                      paddingHorizontal: 12,
-                      borderRadius: 8,
-                      backgroundColor: Number(budget) === p ? COLORS.red : "#fff",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      shadowColor: "#000",
-                      shadowOpacity: Number(budget) === p ? 0 : 0.04,
-                      shadowRadius: 4,
-                      shadowOffset: { width: 0, height: 1 },
-                      elevation: Number(budget) === p ? 0 : 1,
-                    }}
-                  >
-                    <Text
-                      style={{
-                        fontSize: 12,
-                        fontWeight: "600",
-                        color: Number(budget) === p ? "#fff" : "#8E8E93",
-                      }}
-                    >
-                      €{p}
-                    </Text>
-                  </Pressable>
-                ))}
-              </View>
-
-              {/* Preferences grouped table */}
-              <Text style={{ fontSize: 11, fontWeight: "500", color: "#8E8E93", textTransform: "uppercase", marginBottom: 6, paddingLeft: 2 }}>
-                Preferences
-              </Text>
-              <View
-                style={{
-                  backgroundColor: "#fff",
-                  borderRadius: 12,
-                  overflow: "hidden",
-                  shadowColor: "#000",
-                  shadowOpacity: 0.04,
-                  shadowRadius: 8,
-                  shadowOffset: { width: 0, height: 2 },
-                  elevation: 1,
-                  marginBottom: 20,
-                }}
-              >
-                <Pressable
-                  onPress={() => setPaymentType(paymentType === "cash" ? "digital" : "cash")}
-                  style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 14, paddingVertical: 11, borderBottomWidth: 0.5, borderBottomColor: "#e5e5ea" }}
-                >
-                  <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-                    <MaterialCommunityIcons name="cash-multiple" size={20} color="#8E8E93" />
-                    <Text style={{ fontSize: 15, color: "#000" }}>Payment</Text>
+              {/* Summary */}
+              {selectedCat && (
+                <View style={s.summary}>
+                  <View style={s.summaryIcon}>
+                    <MaterialCommunityIcons name={selectedCat.icon} size={16} color="#fff" />
                   </View>
-                  <View style={{ flexDirection: "row", alignItems: "center", gap: 2 }}>
-                    <Text style={{ fontSize: 14, color: "#8E8E93" }}>
-                      {paymentType === "cash" ? "Cash" : "Digital"}
-                    </Text>
-                    <MaterialCommunityIcons name="chevron-right" size={18} color="#C7C7CC" />
+                  <View>
+                    <Text style={{ fontSize: 13, fontWeight: "600", color: "#000" }} numberOfLines={1}>{title || "Your task"}</Text>
+                    <Text style={{ fontSize: 11, color: "#A1A1AA" }}>{selectedCat.label}</Text>
+                  </View>
+                </View>
+              )}
+
+              <Text style={s.heading}>Budget & details</Text>
+
+              {/* Budget input */}
+              <View style={{ marginTop: 20 }}>
+                <Text style={s.inputLabel}>Your budget</Text>
+                <View style={s.budgetRow}>
+                  <Text style={{ fontSize: 20, fontWeight: "700", color: "#C7C7CC" }}>€</Text>
+                  <TextInput value={budget} onChangeText={setBudget} placeholder="0" keyboardType="numeric"
+                    style={{ fontSize: 20, fontWeight: "700", color: "#000", flex: 1 }} placeholderTextColor="#C7C7CC" />
+                </View>
+              </View>
+
+              {/* Presets */}
+              <View style={{ flexDirection: "row", gap: 6, marginTop: 8, marginBottom: 20 }}>
+                {PRICE_PRESETS.map((p) => {
+                  const on = Number(budget) === p;
+                  return (
+                    <Pressable key={p} onPress={() => setBudget(String(p))}
+                      style={[s.preset, on && { borderColor: COLORS.red, backgroundColor: "#FEF2F2" }]}>
+                      <Text style={[s.presetText, on && { color: COLORS.red }]}>€{p}</Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+
+              {/* Settings group */}
+              <View style={s.settingsGroup}>
+                <Pressable onPress={() => setPaymentType(paymentType === "cash" ? "digital" : "cash")} style={[s.settingsRow, s.settingsBorder]}>
+                  <View style={s.settingsLeft}>
+                    <MaterialCommunityIcons name="cash-multiple" size={20} color="#A1A1AA" />
+                    <Text style={s.settingsLabel}>Payment</Text>
+                  </View>
+                  <View style={s.settingsRight}>
+                    <Text style={s.settingsValue}>{paymentType === "cash" ? "Cash" : "Digital"}</Text>
+                    <MaterialCommunityIcons name="chevron-right" size={18} color="#D1D1D6" />
                   </View>
                 </Pressable>
-                <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 14, paddingVertical: 11, borderBottomWidth: 0.5, borderBottomColor: "#e5e5ea" }}>
-                  <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-                    <MaterialCommunityIcons name="clock-outline" size={20} color="#8E8E93" />
-                    <Text style={{ fontSize: 15, color: "#000" }}>When</Text>
+                <View style={[s.settingsRow, s.settingsBorder]}>
+                  <View style={s.settingsLeft}>
+                    <MaterialCommunityIcons name="clock-outline" size={20} color="#A1A1AA" />
+                    <Text style={s.settingsLabel}>When</Text>
                   </View>
-                  <View style={{ flexDirection: "row", alignItems: "center", gap: 2 }}>
-                    <Text style={{ fontSize: 14, color: "#8E8E93" }}>ASAP</Text>
-                    <MaterialCommunityIcons name="chevron-right" size={18} color="#C7C7CC" />
+                  <View style={s.settingsRight}>
+                    <Text style={s.settingsValue}>As soon as possible</Text>
+                    <MaterialCommunityIcons name="chevron-right" size={18} color="#D1D1D6" />
                   </View>
                 </View>
-                <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 14, paddingVertical: 11 }}>
-                  <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-                    <MaterialCommunityIcons name="map-marker-outline" size={20} color="#8E8E93" />
-                    <Text style={{ fontSize: 15, color: "#000" }}>Location</Text>
+                <View style={s.settingsRow}>
+                  <View style={s.settingsLeft}>
+                    <MaterialCommunityIcons name="map-marker-outline" size={20} color="#A1A1AA" />
+                    <Text style={s.settingsLabel}>Location</Text>
                   </View>
-                  <View style={{ flexDirection: "row", alignItems: "center", gap: 2 }}>
-                    <Text style={{ fontSize: 14, color: "#8E8E93" }}>Current</Text>
-                    <MaterialCommunityIcons name="chevron-right" size={18} color="#C7C7CC" />
+                  <View style={s.settingsRight}>
+                    <Text style={s.settingsValue}>Current location</Text>
+                    <MaterialCommunityIcons name="chevron-right" size={18} color="#D1D1D6" />
                   </View>
                 </View>
               </View>
-
-              {/* Review card */}
-              {selectedCat && (
-                <>
-                  <Text style={{ fontSize: 11, fontWeight: "500", color: "#8E8E93", textTransform: "uppercase", marginBottom: 6, paddingLeft: 2 }}>
-                    Review
-                  </Text>
-                  <View
-                    style={{
-                      backgroundColor: "#fff",
-                      borderRadius: 12,
-                      paddingHorizontal: 14,
-                      paddingVertical: 12,
-                      flexDirection: "row",
-                      alignItems: "center",
-                      gap: 10,
-                      shadowColor: "#000",
-                      shadowOpacity: 0.04,
-                      shadowRadius: 8,
-                      shadowOffset: { width: 0, height: 2 },
-                      elevation: 1,
-                    }}
-                  >
-                    <View
-                      style={{
-                        width: 32,
-                        height: 32,
-                        borderRadius: 8,
-                        backgroundColor: COLORS.red,
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
-                    >
-                      <MaterialCommunityIcons name={selectedCat.icon} size={16} color="#fff" />
-                    </View>
-                    <View style={{ flex: 1 }}>
-                      <Text style={{ fontSize: 14, fontWeight: "600", color: "#000" }} numberOfLines={1}>
-                        {title || "Your task"}
-                      </Text>
-                      <Text style={{ fontSize: 11, color: "#8E8E93", marginTop: 1 }}>
-                        {selectedCat.label} · {paymentType === "cash" ? "Cash" : "Digital"} · ASAP
-                      </Text>
-                    </View>
-                  </View>
-                </>
-              )}
             </View>
           )}
         </ScrollView>
 
-        {/* Bottom button */}
-        <View style={{ paddingHorizontal: 16, paddingBottom: 8, paddingTop: 8, backgroundColor: "#f2f2f7" }}>
-          <Pressable
-            onPress={step < 3 ? handleNext : handleSubmit}
-            disabled={submitting || (step === 1 && !category)}
-            style={{
-              backgroundColor: (step === 1 && !category) ? "#C7C7CC" : COLORS.red,
-              borderRadius: 14,
-              paddingVertical: 16,
-              alignItems: "center",
-            }}
-          >
-            <Text style={{ color: "#fff", fontSize: 15, fontWeight: "600" }}>
-              {submitting
-                ? "Posting…"
-                : step < 3
-                  ? "Continue"
-                  : budget
-                    ? `Post task — €${budget}`
-                    : "Post task"}
+        {/* Bottom CTA */}
+        <View style={s.bottomBar}>
+          <Pressable onPress={step < 3 ? handleNext : handleSubmit} disabled={submitting || (step === 1 && !category)}
+            style={[s.cta, (step === 1 && !category) && { backgroundColor: "#D1D1D6" }]}>
+            <Text style={s.ctaText}>
+              {submitting ? "Posting…" : step < 3 ? "Continue" : budget ? `Post task` : "Post task"}
             </Text>
           </Pressable>
         </View>
@@ -502,3 +233,53 @@ export default function PostTaskScreen() {
     </SafeAreaView>
   );
 }
+
+const s = StyleSheet.create({
+  safe: { flex: 1, backgroundColor: "#fff" },
+  nav: { flexDirection: "row", alignItems: "center", paddingHorizontal: 16, height: 44 },
+  navTitle: { flex: 1, textAlign: "center", fontSize: 15, fontWeight: "600", color: "#000" },
+  progressRow: { flexDirection: "row", gap: 6, paddingHorizontal: 16, paddingTop: 4, paddingBottom: 12 },
+  progressSeg: { flex: 1, height: 3, borderRadius: 2 },
+  heading: { fontSize: 22, fontWeight: "700", color: "#000", lineHeight: 28, marginTop: 4 },
+  sub: { fontSize: 13, color: "#A1A1AA", marginTop: 2, marginBottom: 16 },
+
+  // Category list
+  catRow: { flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 12, paddingVertical: 10, borderRadius: 12, borderWidth: 1, borderColor: "#E5E5EA", backgroundColor: "#fff" },
+  catIcon: { width: 36, height: 36, borderRadius: 10, alignItems: "center", justifyContent: "center" },
+  catLabel: { fontSize: 14, fontWeight: "600", color: "#000" },
+  catDesc: { fontSize: 11, color: "#A1A1AA", marginTop: 1 },
+
+  // Chip
+  chip: { flexDirection: "row", alignItems: "center", gap: 4, backgroundColor: "#FEF2F2", borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4, alignSelf: "flex-start", marginBottom: 12 },
+  chipText: { fontSize: 12, fontWeight: "600", color: COLORS.red },
+
+  // Inputs
+  inputLabel: { fontSize: 12, fontWeight: "500", color: "#71717A", marginBottom: 6 },
+  input: { backgroundColor: "#FAFAFA", borderWidth: 1, borderColor: "#E5E5EA", borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: 14, color: "#000", fontWeight: "500" },
+
+  // Photo
+  photoAdd: { width: 68, height: 68, borderRadius: 12, borderWidth: 1, borderStyle: "dashed" as const, borderColor: "#D1D1D6", backgroundColor: "#FAFAFA", alignItems: "center", justifyContent: "center", gap: 2 },
+
+  // Summary
+  summary: { flexDirection: "row", alignItems: "center", gap: 10, backgroundColor: "#FAFAFA", borderRadius: 12, paddingHorizontal: 12, paddingVertical: 10, marginBottom: 16 },
+  summaryIcon: { width: 32, height: 32, borderRadius: 8, backgroundColor: COLORS.red, alignItems: "center", justifyContent: "center" },
+
+  // Budget
+  budgetRow: { flexDirection: "row", alignItems: "center", gap: 4, backgroundColor: "#FAFAFA", borderWidth: 1, borderColor: "#E5E5EA", borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12 },
+  preset: { height: 32, paddingHorizontal: 14, borderRadius: 8, borderWidth: 1, borderColor: "#E5E5EA", alignItems: "center", justifyContent: "center" },
+  presetText: { fontSize: 12, fontWeight: "600", color: "#71717A" },
+
+  // Settings
+  settingsGroup: { backgroundColor: "#F5F5F5", borderRadius: 12, overflow: "hidden" as const },
+  settingsRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", backgroundColor: "#fff", paddingHorizontal: 14, paddingVertical: 12 },
+  settingsBorder: { borderBottomWidth: 0.5, borderBottomColor: "#E5E5EA" },
+  settingsLeft: { flexDirection: "row", alignItems: "center", gap: 10 },
+  settingsRight: { flexDirection: "row", alignItems: "center", gap: 2 },
+  settingsLabel: { fontSize: 14, fontWeight: "500", color: "#000" },
+  settingsValue: { fontSize: 13, fontWeight: "500", color: "#A1A1AA" },
+
+  // Bottom
+  bottomBar: { paddingHorizontal: 16, paddingVertical: 8, borderTopWidth: 0.5, borderTopColor: "#F0F0F0", backgroundColor: "#fff" },
+  cta: { backgroundColor: COLORS.red, borderRadius: 14, paddingVertical: 16, alignItems: "center" },
+  ctaText: { color: "#fff", fontSize: 15, fontWeight: "600" },
+});
