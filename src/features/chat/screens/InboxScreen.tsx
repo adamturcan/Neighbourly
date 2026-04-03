@@ -137,8 +137,12 @@ export default function InboxScreen() {
       const avatarColor = AVATAR_COLORS[index % AVATAR_COLORS.length];
       const catColor =
         CATEGORY_COLORS[item.taskCategory] ?? CATEGORY_COLORS.other;
-      const hasNewMessage = item.lastMessageSenderId != null && item.lastMessageSenderId !== user?.id;
-      const isUnread = hasNewMessage && (!item.myLastReadAt || (item.lastMessageAt != null && item.lastMessageAt > item.myLastReadAt));
+      const fromOther = item.lastMessageSenderId != null && item.lastMessageSenderId !== user?.id;
+      const isUnread = fromOther && (
+        !item.myLastReadAt
+        || !item.lastMessageAt
+        || new Date(item.lastMessageAt).getTime() > new Date(item.myLastReadAt).getTime()
+      );
       const isTyping = typingTasks.has(item.taskId);
 
       return (
