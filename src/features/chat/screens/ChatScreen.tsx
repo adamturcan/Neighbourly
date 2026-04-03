@@ -255,10 +255,13 @@ export default function ChatScreen() {
       {/* Header */}
       <View style={styles.header}>
         <Pressable onPress={() => {
+          // Always go back in the stack first (clears ChatScreen from Discover stack)
+          navigation.goBack();
+          // If we came from Inbox, also switch to the Inbox tab
           if (fromInbox) {
-            (navigation as any).getParent?.()?.navigate("Inbox");
-          } else {
-            navigation.goBack();
+            setTimeout(() => {
+              (navigation as any).getParent?.()?.navigate("Inbox");
+            }, 0);
           }
         }} style={styles.backBtn}>
           <MaterialCommunityIcons name="arrow-left" size={24} color="#000" />
