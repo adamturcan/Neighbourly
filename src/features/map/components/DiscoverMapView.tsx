@@ -90,7 +90,7 @@ export default function DiscoverMapView({
       </Pressable>
 
       {/* V2: Bottom sheet */}
-      <View style={[s.sheet, { bottom: TAB_BAR_HEIGHT + 4 }]}>
+      <View style={s.sheet}>
         <View style={s.sheetInner}>
           <View style={s.grabber} />
 
@@ -184,12 +184,13 @@ const s = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 }, elevation: 4,
   },
   sheet: {
-    position: "absolute", left: 0, right: 0,
+    position: "absolute", left: 0, right: 0, bottom: 0,
   },
   sheetInner: {
     backgroundColor: "#fff",
     borderTopLeftRadius: 20, borderTopRightRadius: 20,
-    paddingTop: 6, paddingBottom: 10, paddingHorizontal: 12,
+    paddingTop: 6, paddingHorizontal: 12,
+    paddingBottom: TAB_BAR_HEIGHT + 16,
     shadowColor: "#000", shadowOpacity: 0.06, shadowRadius: 16,
     shadowOffset: { width: 0, height: -2 }, elevation: 6,
   },
