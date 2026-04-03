@@ -147,7 +147,8 @@ export default function MainTabs() {
       tabBar={(props) => <FloatingTabBar {...props} />}
       screenOptions={{
         headerShown: false,
-        animation: "fade",
+        animation: "shift",
+        sceneStyle: { backgroundColor: "#fff" },
       }}
     >
       <Tab.Screen name="Discover" component={HomeStack} />
