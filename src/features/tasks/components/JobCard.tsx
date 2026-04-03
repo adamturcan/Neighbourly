@@ -33,9 +33,10 @@ const CATEGORY_ICONS: Record<string, string> = {
 type Props = {
   task: Task;
   onPress?: () => void;
+  fullWidth?: boolean;
 };
 
-export default function JobCard({ task, onPress }: Props) {
+export default function JobCard({ task, onPress, fullWidth }: Props) {
   const img = CATEGORY_IMAGES[task.category] ?? "https://images.unsplash.com/photo-1503602642458-232111445657?q=80&w=600";
   const catColor = CATEGORY_COLORS[task.category] ?? "#6B7280";
 
@@ -43,7 +44,7 @@ export default function JobCard({ task, onPress }: Props) {
     <Pressable
       onPress={onPress}
       style={{
-        width: 220,
+        width: fullWidth ? "100%" : 220,
         borderRadius: 16,
         backgroundColor: "#fff",
         overflow: "hidden",

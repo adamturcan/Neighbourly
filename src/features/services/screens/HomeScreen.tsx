@@ -231,16 +231,11 @@ export default function HomeScreen() {
               </Text>
             )}
             renderItem={({ item }) => (
-              <FlatList
-                data={item}
-                keyExtractor={(t: any) => t.id}
-                ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
-                contentContainerStyle={{ paddingHorizontal: 16 }}
-                renderItem={({ item: task }) => (
-                  <JobCard task={task} onPress={() => nav.navigate("TaskDetail", { taskId: task.id })} />
-                )}
-                showsVerticalScrollIndicator={false}
-              />
+              <View style={{ paddingHorizontal: 16, gap: 12 }}>
+                {item.map((task: any) => (
+                  <JobCard key={task.id} task={task} fullWidth onPress={() => nav.navigate("TaskDetail", { taskId: task.id })} />
+                ))}
+              </View>
             )}
             stickySectionHeadersEnabled={false}
             showsVerticalScrollIndicator={false}
