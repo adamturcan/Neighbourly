@@ -12,7 +12,7 @@ import {
   Animated,
   Modal,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { useNavigation } from "@react-navigation/native";
 import { createTask } from "../../../shared/lib/api";
@@ -35,6 +35,7 @@ const TOTAL_STEPS = 3;
 
 export default function PostTaskScreen() {
   const nav = useNavigation<any>();
+  const insets = useSafeAreaInsets();
   const [step, setStep] = useState(0);
   const slideAnim = useRef(new Animated.Value(0)).current;
   const progressAnims = useRef([0, 1, 2].map((i) => new Animated.Value(i === 0 ? 1 : 0))).current;
@@ -117,7 +118,7 @@ export default function PostTaskScreen() {
   };
 
   return (
-    <SafeAreaView style={st.safe}>
+    <SafeAreaView style={st.safe} edges={["top"]}>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
         {/* Nav */}
         <View style={st.nav}>
@@ -269,7 +270,7 @@ export default function PostTaskScreen() {
         </Animated.View>
 
         {/* Bottom CTA */}
-        <View style={st.bottomBar}>
+        <View style={[st.bottomBar, { paddingBottom: insets.bottom + TAB_BAR_HEIGHT }]}>
           <Pressable onPress={step < 2 ? handleNext : handleSubmit} disabled={submitting || (step === 0 && !category)}
             style={[st.cta, (step === 0 && !category) && { backgroundColor: "#D1D1D6" }]}>
             <Text style={st.ctaText}>
@@ -325,7 +326,7 @@ const st = StyleSheet.create({
   settingsRight: { flexDirection: "row", alignItems: "center", gap: 2 },
   settingsLabel: { fontSize: 14, fontWeight: "500", color: "#000" },
   settingsValue: { fontSize: 13, fontWeight: "500", color: "#A1A1AA" },
-  bottomBar: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: TAB_BAR_HEIGHT + 12, borderTopWidth: 0.5, borderTopColor: "#F0F0F0", backgroundColor: "#fff" },
+  bottomBar: { paddingHorizontal: 16, paddingTop: 8, borderTopWidth: 0.5, borderTopColor: "#F0F0F0", backgroundColor: "#fff" },
   cta: { backgroundColor: COLORS.red, borderRadius: 14, paddingVertical: 16, alignItems: "center" },
   ctaText: { color: "#fff", fontSize: 15, fontWeight: "600" },
 });
