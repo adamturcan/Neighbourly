@@ -259,7 +259,7 @@ const h = StyleSheet.create({
   safe: { flex: 1, backgroundColor: "#fff" },
 
   // Expanded header
-  headerExpanded: { borderBottomWidth: 0.5, borderBottomColor: "#F0F0F0" },
+  headerExpanded: {},
   locationRow: { flexDirection: "row", alignItems: "center", gap: 8, paddingHorizontal: 16, paddingTop: 4, paddingBottom: 8 },
   locationDot: { width: 32, height: 32, borderRadius: 16, backgroundColor: "#FEF2F2", alignItems: "center", justifyContent: "center" },
   locationLabel: { fontSize: 11, fontWeight: "500", color: "#A1A1AA" },
@@ -272,7 +272,7 @@ const h = StyleSheet.create({
   segmentTextActive: { color: "#000" },
 
   // Collapsed header
-  headerCollapsed: { flexDirection: "row", alignItems: "center", paddingHorizontal: 16, paddingVertical: 8, borderBottomWidth: 0.5, borderBottomColor: "#F0F0F0" },
+  headerCollapsed: { flexDirection: "row", alignItems: "center", paddingHorizontal: 16, paddingVertical: 8 },
   miniSegment: { flexDirection: "row", backgroundColor: "#F5F5F5", borderRadius: 8, padding: 2 },
   miniSegItem: { paddingHorizontal: 8, paddingVertical: 5, borderRadius: 6 },
   miniSegActive: { backgroundColor: "#fff", shadowColor: "#000", shadowOpacity: 0.06, shadowRadius: 3, shadowOffset: { width: 0, height: 1 }, elevation: 1 },
