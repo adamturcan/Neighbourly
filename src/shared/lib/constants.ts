@@ -1,0 +1,13 @@
+export const COLORS = {
+  red: "#E31B23",
+  black: "#000000",
+  white: "#FFFFFF",
+  surfaceMuted: "#F9F0F2",
+  surfaceDim: "#F1F5F9",
+  textMuted: "#6B7280",
+  textSubtle: "#5b6470",
+  chipBg: "#FFE5E5",
+  checkGreen: "#22C55E",
+} as const;
+
+export const ORIGIN = { lat: 48.1482, lng: 17.1067 } as const;

@@ -1,9 +1,9 @@
-import React from 'react';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import HomeScreen from '../screens/HomeScreen';
-import TaskDetailScreen from '../screens/TaskDetailScreen';
-import FullMapScreen from '../screens/FullMapScreen';
-import ServiceDetailScreen from '../screens/ServiceDetailScreen';
+import React from "react";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import HomeScreen from "../features/services/screens/HomeScreen";
+import TaskDetailScreen from "../features/tasks/screens/TaskDetailScreen";
+import FullMapScreen from "../features/map/screens/FullMapScreen";
+import ServiceDetailScreen from "../features/services/screens/ServiceDetailScreen";
 
 export type HomeStackParamList = {
   HomeMain: undefined;
@@ -21,17 +21,17 @@ export default function HomeStack() {
       <Stack.Screen
         name="ServiceDetail"
         component={ServiceDetailScreen}
-        options={{ headerShown: true, title: 'Service' }}
+        options={{ headerShown: true, title: "Service" }}
       />
       <Stack.Screen
         name="TaskDetail"
         component={TaskDetailScreen}
-        options={{ headerShown: true, title: 'Task' }}
+        options={{ headerShown: true, title: "Task" }}
       />
       <Stack.Screen
         name="FullMap"
         component={FullMapScreen}
-        options={{ headerShown: true, title: 'Map' }}
+        options={{ headerShown: true, title: "Map" }}
       />
     </Stack.Navigator>
   );
