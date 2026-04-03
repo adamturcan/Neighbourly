@@ -11,6 +11,7 @@ import {
   ActivityIndicator,
   Animated,
   Modal,
+  Keyboard,
 } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRoute, useNavigation, useIsFocused } from "@react-navigation/native";
@@ -124,6 +125,7 @@ export default function ChatScreen() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const insets = useSafeAreaInsets();
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
   const [otherTyping, setOtherTyping] = useState(false);
@@ -212,6 +214,19 @@ export default function ChatScreen() {
     });
     return () => { unsub(); if (typingTimeout.current) clearTimeout(typingTimeout.current); };
   }, [taskId, user]);
+
+  // Track keyboard visibility to remove bottom safe area padding when keyboard is up
+  useEffect(() => {
+    const showSub = Keyboard.addListener(
+      Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow",
+      () => setKeyboardVisible(true),
+    );
+    const hideSub = Keyboard.addListener(
+      Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide",
+      () => setKeyboardVisible(false),
+    );
+    return () => { showSub.remove(); hideSub.remove(); };
+  }, []);
 
   const doBroadcastTyping = useCallback(() => {
     if (user?.id && taskId) broadcastTyping(taskId, user.id);
@@ -541,8 +556,8 @@ export default function ChatScreen() {
           </View>
         )}
 
-        {/* Input bar */}
-        <SafeAreaView edges={["bottom"]} style={styles.inputBarSafe}>
+        {/* Input bar — no bottom safe area when keyboard is open */}
+        <View style={[styles.inputBarSafe, !keyboardVisible && { paddingBottom: insets.bottom }]}>
           <View style={styles.inputBar}>
             <Pressable style={styles.attachBtn} onPress={handleAttach}>
               <MaterialCommunityIcons name="plus" size={20} color={COLORS.textMuted} />
@@ -568,7 +583,7 @@ export default function ChatScreen() {
               )}
             </Pressable>
           </View>
-        </SafeAreaView>
+        </View>
       </KeyboardAvoidingView>
 
       {/* Reaction picker modal */}
