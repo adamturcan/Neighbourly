@@ -30,6 +30,8 @@ import { useAuth } from "../../auth/store/useAuth";
 import { supabase } from "../../../shared/lib/supabase";
 import { onTyping, broadcastTyping } from "../../../shared/lib/typingService";
 import { COLORS, CATEGORY_COLORS } from "../../../shared/lib/constants";
+import * as ImagePicker from "expo-image-picker";
+import { Image, ActionSheetIOS } from "react-native";
 
 const CATEGORY_ICONS: Record<string, string> = {
   cleaning: "broom",
@@ -276,6 +278,78 @@ export default function ChatScreen() {
     }
   }, [messages, optimisticMessages]);
 
+  const handleAttach = useCallback(() => {
+    if (Platform.OS === "ios") {
+      ActionSheetIOS.showActionSheetWithOptions(
+        {
+          options: ["Cancel", "Take Photo", "Choose from Library"],
+          cancelButtonIndex: 0,
+        },
+        async (index) => {
+          if (index === 1) pickImage("camera");
+          else if (index === 2) pickImage("library");
+        },
+      );
+    } else {
+      // Android: just open library
+      pickImage("library");
+    }
+  }, [taskId, user?.id]);
+
+  const pickImage = useCallback(async (source: "camera" | "library") => {
+    let result;
+    if (source === "camera") {
+      const perm = await ImagePicker.requestCameraPermissionsAsync();
+      if (!perm.granted) return;
+      result = await ImagePicker.launchCameraAsync({
+        quality: 0.7,
+        allowsEditing: true,
+      });
+    } else {
+      const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!perm.granted) return;
+      result = await ImagePicker.launchImageLibraryAsync({
+        quality: 0.7,
+        allowsEditing: true,
+      });
+    }
+
+    if (result.canceled || !result.assets?.[0]) return;
+    const asset = result.assets[0];
+
+    // Upload to Supabase Storage
+    try {
+      const ext = asset.uri.split(".").pop() ?? "jpg";
+      const fileName = `chat/${taskId}/${Date.now()}.${ext}`;
+
+      const response = await fetch(asset.uri);
+      const blob = await response.blob();
+
+      const { error: uploadError } = await supabase.storage
+        .from("chat-images")
+        .upload(fileName, blob, { contentType: `image/${ext}` });
+
+      if (uploadError) {
+        // Bucket might not exist — send as a local URI message instead
+        await sendMessage(taskId, `📷 [Photo]`);
+        refetch();
+        return;
+      }
+
+      const { data: urlData } = supabase.storage
+        .from("chat-images")
+        .getPublicUrl(fileName);
+
+      // Send the image URL as a message with a marker prefix
+      await sendMessage(taskId, `[img]${urlData.publicUrl}`);
+      refetch();
+    } catch (e) {
+      // Fallback: send as text
+      await sendMessage(taskId, `📷 [Photo]`);
+      refetch();
+    }
+  }, [taskId, refetch]);
+
   const handleReaction = useCallback(async (messageId: string, emoji: string) => {
     setReactionTarget(null);
     try {
@@ -328,21 +402,31 @@ export default function ChatScreen() {
                   isMine ? styles.messageBubbleWrapRight : styles.messageBubbleWrapLeft,
                 ]}
               >
-                <View
-                  style={[
-                    styles.messageBubble,
-                    isMine ? styles.messageBubbleMine : styles.messageBubbleOther,
-                  ]}
-                >
-                  <Text
+                {item.content.startsWith("[img]") ? (
+                  <View style={styles.imageBubble}>
+                    <Image
+                      source={{ uri: item.content.replace("[img]", "") }}
+                      style={styles.chatImage}
+                      resizeMode="cover"
+                    />
+                  </View>
+                ) : (
+                  <View
                     style={[
-                      styles.messageText,
-                      isMine ? styles.messageTextMine : styles.messageTextOther,
+                      styles.messageBubble,
+                      isMine ? styles.messageBubbleMine : styles.messageBubbleOther,
                     ]}
                   >
-                    {item.content}
-                  </Text>
-                </View>
+                    <Text
+                      style={[
+                        styles.messageText,
+                        isMine ? styles.messageTextMine : styles.messageTextOther,
+                      ]}
+                    >
+                      {item.content}
+                    </Text>
+                  </View>
+                )}
 
                 {/* Reaction pills below the bubble */}
                 {emojiCounts.size > 0 && (
@@ -460,7 +544,7 @@ export default function ChatScreen() {
         {/* Input bar */}
         <SafeAreaView edges={["bottom"]} style={styles.inputBarSafe}>
           <View style={styles.inputBar}>
-            <Pressable style={styles.attachBtn}>
+            <Pressable style={styles.attachBtn} onPress={handleAttach}>
               <MaterialCommunityIcons name="plus" size={20} color={COLORS.textMuted} />
             </Pressable>
             <TextInput
@@ -548,6 +632,15 @@ const styles = StyleSheet.create({
   messageBubbleWrapLeft: { alignSelf: "flex-start" },
   messageBubbleWrapRight: { alignSelf: "flex-end" },
   messageBubble: { paddingHorizontal: 14, paddingVertical: 10 },
+  imageBubble: {
+    borderRadius: 16,
+    overflow: "hidden",
+  },
+  chatImage: {
+    width: 200,
+    height: 200,
+    borderRadius: 16,
+  },
   messageBubbleMine: {
     backgroundColor: COLORS.red, borderRadius: 20, borderBottomRightRadius: 6,
   },
