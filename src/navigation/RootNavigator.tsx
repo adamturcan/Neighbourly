@@ -1,5 +1,4 @@
 import React from "react";
-import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import HomeStack from "./HomeStack";
 import PostTaskScreen from "../features/tasks/screens/PostTaskScreen";
@@ -11,9 +10,8 @@ import { COLORS } from "../shared/lib/constants";
 
 const Tab = createBottomTabNavigator();
 
-export default function RootNavigator() {
+export default function MainTabs() {
   return (
-    <NavigationContainer>
       <Tab.Navigator
         screenOptions={{
           headerShown: false,
@@ -68,6 +66,5 @@ export default function RootNavigator() {
           }}
         />
       </Tab.Navigator>
-    </NavigationContainer>
   );
 }

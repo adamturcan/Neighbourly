@@ -6,6 +6,36 @@ Format: [Keep a Changelog](https://keepachangelog.com/)
 
 ---
 
+## [2026-04-03] — Phase 1: Supabase Foundation & Auth
+
+### Added
+- Supabase client (`src/shared/lib/supabase.ts`) with Expo SecureStore for token persistence
+- Database schema migration (`supabase/migrations/001_schema.sql`):
+  - `profiles` table with RLS policies + auto-create trigger on signup
+  - `tasks` table with PostGIS spatial index + RLS for creator/helper access
+  - `offers` table with RLS (helper creates, task creator accepts/rejects)
+  - `messages` table with RLS + Supabase Realtime enabled
+  - `reviews` table with RLS + trigger to recompute profile rating
+- Auth store (`src/features/auth/store/useAuth.ts`) with Zustand:
+  - Session/user/profile state, initialize, fetchProfile, updateProfile, signOut
+  - Dev mode fallback: mock profile when Supabase env vars not set
+- Auth screens:
+  - `WelcomeScreen` — branded landing page with Get Started / Sign In
+  - `PhoneEntryScreen` — phone number input with OTP send
+  - `OTPScreen` — 6-digit code verification with resend
+  - `OnboardingScreen` — role selection (Seeker/Helper/Both), name, skills picker
+- Auth navigation (`src/navigation/AuthStack.tsx`) — step-based flow
+- Auth-gated App.tsx: unauthenticated → auth flow, no profile → onboarding, ready → main tabs
+- `.env.example` with Supabase env var template
+- `.env` added to `.gitignore`
+
+### Changed
+- App.tsx now wraps NavigationContainer and conditionally renders auth/main
+- RootNavigator renamed to MainTabs, NavigationContainer moved to App.tsx
+- Fixed `expo-secure-store` version to match SDK 54
+
+---
+
 ## [2025-09-21] — Initial UI Shell
 
 ### Added

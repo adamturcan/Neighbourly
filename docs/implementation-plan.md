@@ -54,94 +54,42 @@
 
 ---
 
-## Phase 1: Foundation & Auth (Supabase)
+## Phase 1: Foundation & Auth (Supabase) — IN PROGRESS
 
 **Why:** Everything depends on user identity. No auth = no task ownership, no chat, no payments.
 
-### 1.1 - Supabase project setup
-- [ ] Create Supabase project
-- [ ] Install `@supabase/supabase-js`
-- [ ] Create `src/shared/lib/supabase.ts` client singleton
-- [ ] Configure Supabase URL + anon key via `.env`
+### 1.1 - Supabase project setup ✅
+- [ ] Create Supabase project — _waiting for user to create project and provide credentials_
+- [x] Install `@supabase/supabase-js` + `expo-secure-store` + `react-native-url-polyfill`
+- [x] Create `src/shared/lib/supabase.ts` client singleton (with SecureStore adapter)
+- [x] Create `.env.example` with `EXPO_PUBLIC_SUPABASE_URL` / `EXPO_PUBLIC_SUPABASE_ANON_KEY`
+- [x] Add `.env` to `.gitignore`
+- [x] Dev mode fallback: app works with mock data when env vars not set
 
-### 1.2 - Database schema (SQL migrations)
-- [ ] Create `profiles` table:
-  ```sql
-  id uuid references auth.users primary key,
-  username text unique,
-  full_name text,
-  bio text,
-  avatar_url text,
-  role text check (role in ('seeker', 'helper', 'both')),
-  skills text[],
-  rating numeric default 0,
-  jobs_done integer default 0,
-  lat double precision,
-  lng double precision,
-  created_at timestamptz default now()
-  ```
-- [ ] Create `tasks` table:
-  ```sql
-  id uuid primary key default gen_random_uuid(),
-  creator_id uuid references profiles(id),
-  helper_id uuid references profiles(id),
-  title text not null,
-  description text,
-  category text not null,
-  status text default 'open' check (status in ('open','matched','in_progress','disputed','completed','cancelled')),
-  budget numeric,
-  payment_type text check (payment_type in ('digital', 'cash')),
-  photos text[],
-  location_point geography(Point, 4326),
-  address text,
-  scheduled_at timestamptz,
-  created_at timestamptz default now()
-  ```
-- [ ] Create `offers` table:
-  ```sql
-  id uuid primary key default gen_random_uuid(),
-  task_id uuid references tasks(id),
-  helper_id uuid references profiles(id),
-  amount numeric,
-  message text,
-  status text default 'pending' check (status in ('pending','accepted','rejected')),
-  created_at timestamptz default now()
-  ```
-- [ ] Create `messages` table:
-  ```sql
-  id uuid primary key default gen_random_uuid(),
-  task_id uuid references tasks(id),
-  sender_id uuid references profiles(id),
-  content text,
-  created_at timestamptz default now()
-  ```
-- [ ] Create `reviews` table:
-  ```sql
-  id uuid primary key default gen_random_uuid(),
-  task_id uuid references tasks(id),
-  reviewer_id uuid references profiles(id),
-  reviewee_id uuid references profiles(id),
-  rating integer check (rating between 1 and 5),
-  comment text,
-  created_at timestamptz default now()
-  ```
-- [ ] Enable Row Level Security (RLS) on all tables
-- [ ] Write RLS policies (users read own data, public read for discovery, etc.)
-- [ ] Create PostGIS indexes on `location_point` columns for geo queries
+### 1.2 - Database schema (SQL migrations) ✅
+- [x] Created `supabase/migrations/001_schema.sql` with full schema:
+  - `profiles` table with auto-create trigger on auth.users insert
+  - `tasks` table with PostGIS spatial index
+  - `offers` table
+  - `messages` table with Supabase Realtime enabled
+  - `reviews` table with rating recompute trigger
+- [x] Enable Row Level Security (RLS) on all tables
+- [x] RLS policies written for all tables (public read for discovery, owner writes, participant access)
+- [x] PostGIS index on `tasks.location_point`
 
-### 1.3 - Auth screens
-- [ ] Phone number auth via Supabase Auth (OTP)
-- [ ] Social login (Apple Sign-In for iOS, Google)
-- [ ] Build screens:
-  - `WelcomeScreen` -- app intro with Sign In / Sign Up
-  - `PhoneEntryScreen` -- phone number input
-  - `OTPScreen` -- verification code input
-  - `OnboardingScreen` -- choose role (Seeker / Helper / Both), set name, avatar, skills
-- [ ] Create `useAuth` Zustand store (replace empty stub):
-  - `session`, `user`, `profile`
-  - `signIn()`, `signOut()`, `refreshProfile()`
-- [ ] Auth-gated navigation: unauthenticated users see auth stack, authenticated see main tabs
-- [ ] Auto-create `profiles` row on first sign-in (Supabase trigger or client-side)
+### 1.3 - Auth screens ✅
+- [x] Phone number auth via Supabase Auth (OTP)
+- [ ] Social login (Apple Sign-In for iOS, Google) — _deferred, phone auth is MVP_
+- [x] Build screens:
+  - `WelcomeScreen` — branded black landing page with Get Started / Sign In
+  - `PhoneEntryScreen` — phone number input with validation
+  - `OTPScreen` — 6-digit code input with resend
+  - `OnboardingScreen` — role picker (Seeker/Helper/Both), name, skills
+- [x] Create `useAuth` Zustand store:
+  - `session`, `user`, `profile`, `loading`, `initialized`
+  - `initialize()`, `fetchProfile()`, `updateProfile()`, `signOut()`
+- [x] Auth-gated navigation: unauthenticated → AuthStack, no profile → Onboarding, ready → MainTabs
+- [x] Auto-create `profiles` row on first sign-in (Supabase trigger in migration)
 
 ### 1.4 - Replace mock repo with Supabase queries
 - [ ] Create `src/shared/lib/api.ts` with typed Supabase query functions
@@ -149,6 +97,7 @@
 - [ ] Update React Query hooks to use new API functions
 - [ ] Delete `seed.ts` and `repo.ts` once fully migrated
 - [ ] Test all data flows on Simulator
+- _Note: Blocked until Supabase project is created and `.env` is configured_
 
 ---
 
@@ -358,7 +307,7 @@
 | Order | Phase | Status | Depends On |
 |-------|-------|--------|------------|
 | 1 | Phase 0: Restructure & NativeWind | ✅ Done | Nothing |
-| 2 | Phase 1: Auth & Supabase | ⬜ Next | Phase 0 |
+| 2 | Phase 1: Auth & Supabase | 🔧 In Progress | Phase 0 |
 | 3 | Phase 2: Task Lifecycle | ⬜ | Phase 1 |
 | 4 | Phase 3: Maps & Location | ⬜ | Phase 1 |
 | 5 | Phase 4: Chat & Notifications | ⬜ | Phase 2 |
