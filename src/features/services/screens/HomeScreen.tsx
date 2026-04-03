@@ -1,15 +1,13 @@
-import React, { useMemo, useRef, useState, useEffect } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import {
   View,
   FlatList,
   Dimensions,
-  StatusBar,
-  Platform,
   Animated,
-  useWindowDimensions,
   Text,
   Pressable,
   RefreshControl,
+  StyleSheet,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { listServices, listTasks } from "../../../shared/lib/api";
@@ -18,68 +16,27 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import ServiceCard from "../components/ServiceCard";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import JobCard from "../../tasks/components/JobCard";
-import LocationBar from "../../../shared/components/LocationBar";
 import LocationPickerSheet from "../../../shared/components/LocationPickerSheet";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { Image } from "expo-image";
 import { COLORS } from "../../../shared/lib/constants";
 import DiscoverMapView from "../../map/components/DiscoverMapView";
+import { useLocation } from "../../../shared/lib/store/useLocation";
 
 const CARD_W = Math.min(240, Dimensions.get("window").width * 0.72);
 
-type Mode = "providers" | "requests";
+type ViewMode = "hire" | "jobs" | "map";
 
 export default function HomeScreen() {
   const nav = useNavigation<any>();
-  const { width } = useWindowDimensions();
-  const [mode, setMode] = useState<Mode>("providers");
-  const [viewMode, setViewMode] = useState<"list" | "map">("list");
+  const [viewMode, setViewMode] = useState<ViewMode>("hire");
   const [locSheet, setLocSheet] = useState(false);
-
+  const { current: currentAddr } = useLocation();
   const scrollY = useRef(new Animated.Value(0)).current;
+  const [scrolled, setScrolled] = useState(false);
 
-  const HEADER_CHANGE_DISTANCE = 64;
-  const TOGGLE_FREEZE_UNTIL = 10;
-
-  const PROG = scrollY.interpolate({
-    inputRange: [0, HEADER_CHANGE_DISTANCE],
-    outputRange: [0, 1],
-    extrapolate: "clamp",
-  });
-
-  const headerBg = PROG.interpolate({
-    inputRange: [0, 1],
-    outputRange: ["#ffffff", "#ffeaea"],
-  });
-
-  const segHeight = PROG.interpolate({ inputRange: [0, 1], outputRange: [48, 0] });
-  const segOpacity = PROG.interpolate({
-    inputRange: [0, 0.15, 0.5, 1],
-    outputRange: [1, 1, 0.2, 0],
-  });
-
-  const still = TOGGLE_FREEZE_UNTIL / HEADER_CHANGE_DISTANCE;
-  const segTranslateX = PROG.interpolate({
-    inputRange: [0, still, 1],
-    outputRange: [0, 0, 0.35 * width],
-  });
-  const segTranslateY = PROG.interpolate({
-    inputRange: [0, still, 1],
-    outputRange: [0, 0, -18],
-  });
-  const segScale = PROG.interpolate({
-    inputRange: [0, still, 1],
-    outputRange: [1, 1, 0.6],
-  });
-
-  const circleOpacity = PROG.interpolate({ inputRange: [0, still, 1], outputRange: [0, 0, 1] });
-  const circleScale = PROG.interpolate({ inputRange: [0, still, 1], outputRange: [0.8, 0.8, 1] });
-
-  const [showCircle, setShowCircle] = useState(false);
-  useEffect(() => {
-    const id = scrollY.addListener(({ value }) => setShowCircle(value > TOGGLE_FREEZE_UNTIL));
-    return () => scrollY.removeListener(id);
-  }, [scrollY]);
+  // Track scroll for header collapse
+  scrollY.addListener(({ value }) => setScrolled(value > 40));
 
   const {
     data: services = [],
@@ -93,7 +50,6 @@ export default function HomeScreen() {
     refetch: refetchTasks,
   } = useQuery({ queryKey: ["tasks", "open"], queryFn: () => listTasks() });
 
-  // Refetch when tab is focused
   const qc = useQueryClient();
   useFocusEffect(
     React.useCallback(() => {
@@ -102,11 +58,11 @@ export default function HomeScreen() {
     }, [qc]),
   );
 
-  const BASIC_SECTIONS: Array<{ key: string; label: string; cat: string }> = [
-    { key: "cleaning", label: "Upratovanie & dom", cat: "chores" },
-    { key: "garden", label: "Záhrada & exteriér", cat: "gardening" },
-    { key: "moving", label: "Sťahovanie & transport", cat: "moving" },
-    { key: "tutoring", label: "Doučovanie & štúdium", cat: "tutoring" },
+  const BASIC_SECTIONS = [
+    { key: "cleaning", label: "Cleaning & home", cat: "chores" },
+    { key: "garden", label: "Garden & exterior", cat: "gardening" },
+    { key: "moving", label: "Moving & transport", cat: "moving" },
+    { key: "tutoring", label: "Tutoring & study", cat: "tutoring" },
   ];
 
   const providerCategorySections = useMemo(() => {
@@ -134,126 +90,84 @@ export default function HomeScreen() {
     { useNativeDriver: false },
   );
 
-  const toggleMode = () => {
-    const next: Mode = mode === "providers" ? "requests" : "providers";
-    setMode(next);
-    if (next === "providers") refetchServices();
-    else refetchTasks();
-  };
-
-  const CircleToggle = showCircle ? (
-    <Animated.View style={{ opacity: circleOpacity as any, transform: [{ scale: circleScale as any }] }}>
-      <Pressable
-        onPress={toggleMode}
-        className="w-8 h-8 rounded-full bg-white border border-gray-200 items-center justify-center"
-      >
-        <MaterialCommunityIcons
-          name={mode === "providers" ? "hand-extended-outline" : "briefcase-outline"}
-          size={18}
-          color={COLORS.red}
-        />
-      </Pressable>
-    </Animated.View>
-  ) : undefined;
+  const addressLabel = currentAddr
+    ? `${currentAddr.line1}${currentAddr.city ? `, ${currentAddr.city}` : ""}`
+    : "Select location";
 
   return (
-    <SafeAreaView
-      style={{
-        flex: 1,
-        backgroundColor: "#fff",
-        paddingTop: Platform.OS === "android" ? (StatusBar.currentHeight ?? 0) : 0,
-      }}
-    >
-      <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+    <SafeAreaView style={h.safe}>
+      {/* ===== HEADER ===== */}
+      {!scrolled ? (
+        /* Expanded header */
+        <View style={h.headerExpanded}>
+          {/* Location row */}
+          <Pressable onPress={() => setLocSheet(true)} style={h.locationRow}>
+            <View style={h.locationDot}>
+              <MaterialCommunityIcons name="map-marker" size={16} color={COLORS.red} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={h.locationLabel}>Deliver to</Text>
+              <Text style={h.locationAddr} numberOfLines={1}>{addressLabel}</Text>
+            </View>
+            <MaterialCommunityIcons name="chevron-down" size={18} color="#A1A1AA" />
+          </Pressable>
 
-      <Animated.View
-        style={{
-          backgroundColor: headerBg as any,
-          borderBottomWidth: 1,
-          borderBottomColor: "#f1f5f9",
-        }}
-      >
-        <LocationBar
-          onPress={() => setLocSheet(true)}
-          animatedStyle={{}}
-          rightSlot={CircleToggle}
-          showChevron={!showCircle}
-        />
-
-        <Animated.View
-          style={{
-            height: segHeight as any,
-            opacity: segOpacity as any,
-            transform: [
-              { translateX: segTranslateX as any },
-              { translateY: segTranslateY as any },
-              { scale: segScale as any },
-            ],
-            overflow: "hidden",
-            flexDirection: "row",
-            gap: 8,
-            paddingHorizontal: 16,
-            paddingTop: 8,
-            paddingBottom: 8,
-          }}
-          pointerEvents="box-none"
-        >
-          <Pressable
-            onPress={() => { setMode("providers"); refetchServices(); }}
-            className={`flex-row items-center gap-1.5 px-4 py-2 rounded-full border ${mode === "providers" ? "bg-brand-red border-brand-red" : "bg-white border-brand-red"}`}
-          >
-            <MaterialCommunityIcons name="hand-extended-outline" size={18} color={mode === "providers" ? "#fff" : COLORS.red} />
-            <Text className={mode === "providers" ? "text-white font-bold" : "text-brand-red font-bold"}>
-              Hire help
+          {/* Segmented control */}
+          <View style={h.segmentWrap}>
+            <Pressable
+              onPress={() => { setViewMode("hire"); refetchServices(); }}
+              style={[h.segmentItem, viewMode === "hire" && h.segmentActive]}
+            >
+              <MaterialCommunityIcons name="hammer-wrench" size={16} color={viewMode === "hire" ? COLORS.red : "#A1A1AA"} />
+              <Text style={[h.segmentText, viewMode === "hire" && h.segmentTextActive]}>Hire help</Text>
+            </Pressable>
+            <Pressable
+              onPress={() => { setViewMode("jobs"); refetchTasks(); }}
+              style={[h.segmentItem, viewMode === "jobs" && h.segmentActive]}
+            >
+              <MaterialCommunityIcons name="briefcase-outline" size={16} color={viewMode === "jobs" ? COLORS.red : "#A1A1AA"} />
+              <Text style={[h.segmentText, viewMode === "jobs" && h.segmentTextActive]}>Jobs</Text>
+            </Pressable>
+            <Pressable
+              onPress={() => setViewMode("map")}
+              style={[h.segmentItem, viewMode === "map" && h.segmentActive]}
+            >
+              <MaterialCommunityIcons name="map-outline" size={16} color={viewMode === "map" ? COLORS.red : "#A1A1AA"} />
+              <Text style={[h.segmentText, viewMode === "map" && h.segmentTextActive]}>Map</Text>
+            </Pressable>
+          </View>
+        </View>
+      ) : (
+        /* Collapsed header */
+        <View style={h.headerCollapsed}>
+          <Pressable onPress={() => setLocSheet(true)} style={{ flexDirection: "row", alignItems: "center", gap: 6, flex: 1 }}>
+            <MaterialCommunityIcons name="map-marker" size={16} color={COLORS.red} />
+            <Text style={{ fontSize: 13, fontWeight: "700", color: "#000" }} numberOfLines={1}>
+              {currentAddr?.city ?? "Location"}
             </Text>
           </Pressable>
-          <Pressable
-            onPress={() => { setMode("requests"); refetchTasks(); }}
-            className={`flex-row items-center gap-1.5 px-4 py-2 rounded-full border ${mode === "requests" ? "bg-brand-red border-brand-red" : "bg-white border-brand-red"}`}
-          >
-            <MaterialCommunityIcons name="briefcase-outline" size={18} color={mode === "requests" ? "#fff" : COLORS.red} />
-            <Text className={mode === "requests" ? "text-white font-bold" : "text-brand-red font-bold"}>
-              Jobs near you
-            </Text>
-          </Pressable>
-        </Animated.View>
-      </Animated.View>
+          <View style={h.miniSegment}>
+            <Pressable onPress={() => { setViewMode("hire"); refetchServices(); }} style={[h.miniSegItem, viewMode === "hire" && h.miniSegActive]}>
+              <MaterialCommunityIcons name="hammer-wrench" size={14} color={viewMode === "hire" ? COLORS.red : "#A1A1AA"} />
+            </Pressable>
+            <Pressable onPress={() => { setViewMode("jobs"); refetchTasks(); }} style={[h.miniSegItem, viewMode === "jobs" && h.miniSegActive]}>
+              <MaterialCommunityIcons name="briefcase-outline" size={14} color={viewMode === "jobs" ? COLORS.red : "#A1A1AA"} />
+            </Pressable>
+            <Pressable onPress={() => setViewMode("map")} style={[h.miniSegItem, viewMode === "map" && h.miniSegActive]}>
+              <MaterialCommunityIcons name="map-outline" size={14} color={viewMode === "map" ? COLORS.red : "#A1A1AA"} />
+            </Pressable>
+          </View>
+        </View>
+      )}
 
-      {/* List / Map toggle */}
-      <View style={{ flexDirection: "row", gap: 8, paddingHorizontal: 16, paddingBottom: 8 }}>
-        <Pressable
-          onPress={() => setViewMode("list")}
-          style={{
-            flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 4,
-            paddingVertical: 8, borderRadius: 999,
-            backgroundColor: viewMode === "list" ? "#fff" : "transparent",
-            borderWidth: 1, borderColor: viewMode === "list" ? "#E5E5EA" : "#E5E5EA",
-          }}
-        >
-          <MaterialCommunityIcons name="view-list" size={18} color={viewMode === "list" ? "#000" : "#A1A1AA"} />
-          <Text style={{ fontSize: 12, fontWeight: "600", color: viewMode === "list" ? "#000" : "#A1A1AA" }}>List</Text>
-        </Pressable>
-        <Pressable
-          onPress={() => setViewMode("map")}
-          style={{
-            flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 4,
-            paddingVertical: 8, borderRadius: 999,
-            backgroundColor: viewMode === "map" ? COLORS.red : "transparent",
-            borderWidth: 1, borderColor: viewMode === "map" ? COLORS.red : "#E5E5EA",
-          }}
-        >
-          <MaterialCommunityIcons name="map-outline" size={18} color={viewMode === "map" ? "#fff" : "#A1A1AA"} />
-          <Text style={{ fontSize: 12, fontWeight: "600", color: viewMode === "map" ? "#fff" : "#A1A1AA" }}>Map</Text>
-        </Pressable>
-      </View>
-
-      <View className="flex-1 bg-white">
+      {/* ===== CONTENT ===== */}
+      <View style={{ flex: 1, backgroundColor: "#fff" }}>
         {viewMode === "map" ? (
           <DiscoverMapView onTaskPress={(id) => nav.navigate("TaskDetail", { taskId: id })} />
-        ) : mode === "providers" ? (
+        ) : viewMode === "hire" ? (
           loadingServices ? (
-            <View className="flex-1 items-center justify-center">
-              <Text className="text-text-muted">Loading…</Text>
+            <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+              <Text style={{ color: "#A1A1AA" }}>Loading…</Text>
             </View>
           ) : (
             <Animated.ScrollView
@@ -281,8 +195,8 @@ export default function HomeScreen() {
               </View>
 
               {providerCategorySections.map((section) => (
-                <View key={section.key} className="mt-3">
-                  <Text className="text-xl font-extrabold text-black px-4 mb-2.5">
+                <View key={section.key} style={{ marginTop: 12 }}>
+                  <Text style={{ fontSize: 18, fontWeight: "800", color: "#000", paddingHorizontal: 16, marginBottom: 10 }}>
                     {section.title}
                   </Text>
                   <FlatList
@@ -291,10 +205,7 @@ export default function HomeScreen() {
                     horizontal
                     renderItem={({ item }) => (
                       <View style={{ width: CARD_W, marginLeft: 16, marginRight: 8 }}>
-                        <ServiceCard
-                          service={item}
-                          onPress={() => nav.navigate("ServiceDetail", { serviceId: item.id })}
-                        />
+                        <ServiceCard service={item} onPress={() => nav.navigate("ServiceDetail", { serviceId: item.id })} />
                       </View>
                     )}
                     showsHorizontalScrollIndicator={false}
@@ -304,8 +215,8 @@ export default function HomeScreen() {
             </Animated.ScrollView>
           )
         ) : loadingTasks ? (
-          <View className="flex-1 items-center justify-center">
-            <Text className="text-text-muted">Loading…</Text>
+          <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+            <Text style={{ color: "#A1A1AA" }}>Loading…</Text>
           </View>
         ) : (
           <Animated.SectionList
@@ -315,7 +226,7 @@ export default function HomeScreen() {
             keyExtractor={(_, index) => `req-section-${index}`}
             refreshControl={<RefreshControl refreshing={false} onRefresh={refetchTasks} tintColor={COLORS.red} />}
             renderSectionHeader={({ section: { title } }) => (
-              <Text className="text-xl font-extrabold text-black px-4 mt-3.5 mb-2">
+              <Text style={{ fontSize: 18, fontWeight: "800", color: "#000", paddingHorizontal: 16, marginTop: 14, marginBottom: 8 }}>
                 {title}
               </Text>
             )}
@@ -323,13 +234,12 @@ export default function HomeScreen() {
               <FlatList
                 data={item}
                 keyExtractor={(t: any) => t.id}
-                ItemSeparatorComponent={() => <View className="h-3" />}
+                ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
                 contentContainerStyle={{ paddingHorizontal: 16 }}
                 renderItem={({ item: task }) => (
                   <JobCard task={task} onPress={() => nav.navigate("TaskDetail", { taskId: task.id })} />
                 )}
                 showsVerticalScrollIndicator={false}
-                showsHorizontalScrollIndicator={false}
               />
             )}
             stickySectionHeadersEnabled={false}
@@ -344,11 +254,31 @@ export default function HomeScreen() {
         onDismiss={() => setLocSheet(false)}
         onAddAddress={() => setLocSheet(false)}
         onShowAll={() => setLocSheet(false)}
-        onShowMap={() => {
-          setLocSheet(false);
-          nav.navigate("FullMap");
-        }}
+        onShowMap={() => { setLocSheet(false); nav.navigate("FullMap"); }}
       />
     </SafeAreaView>
   );
 }
+
+const h = StyleSheet.create({
+  safe: { flex: 1, backgroundColor: "#fff" },
+
+  // Expanded header
+  headerExpanded: { borderBottomWidth: 0.5, borderBottomColor: "#F0F0F0" },
+  locationRow: { flexDirection: "row", alignItems: "center", gap: 8, paddingHorizontal: 16, paddingTop: 4, paddingBottom: 8 },
+  locationDot: { width: 32, height: 32, borderRadius: 16, backgroundColor: "#FEF2F2", alignItems: "center", justifyContent: "center" },
+  locationLabel: { fontSize: 11, fontWeight: "500", color: "#A1A1AA" },
+  locationAddr: { fontSize: 14, fontWeight: "700", color: "#000" },
+
+  segmentWrap: { flexDirection: "row", marginHorizontal: 16, marginBottom: 10, backgroundColor: "#F5F5F5", borderRadius: 12, padding: 3 },
+  segmentItem: { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 4, paddingVertical: 8, borderRadius: 10 },
+  segmentActive: { backgroundColor: "#fff", shadowColor: "#000", shadowOpacity: 0.06, shadowRadius: 4, shadowOffset: { width: 0, height: 1 }, elevation: 2 },
+  segmentText: { fontSize: 12, fontWeight: "600", color: "#A1A1AA" },
+  segmentTextActive: { color: "#000" },
+
+  // Collapsed header
+  headerCollapsed: { flexDirection: "row", alignItems: "center", paddingHorizontal: 16, paddingVertical: 8, borderBottomWidth: 0.5, borderBottomColor: "#F0F0F0" },
+  miniSegment: { flexDirection: "row", backgroundColor: "#F5F5F5", borderRadius: 8, padding: 2 },
+  miniSegItem: { paddingHorizontal: 8, paddingVertical: 5, borderRadius: 6 },
+  miniSegActive: { backgroundColor: "#fff", shadowColor: "#000", shadowOpacity: 0.06, shadowRadius: 3, shadowOffset: { width: 0, height: 1 }, elevation: 1 },
+});

@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Header — 3 Variants (Expanded + Collapsed)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Rounded:opsz,wght,FILL@20..48,100..700,0..1" rel="stylesheet">
+  <script>tailwind.config={theme:{extend:{colors:{brand:'#E31B23'},fontFamily:{sans:['Inter','system-ui']}}}}</script>
+  <style>
+    body{font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased}
+    .ph{width:375px;height:812px;border-radius:50px;border:10px solid #1d1d1f;overflow:hidden;position:relative;background:#fff;box-shadow:0 40px 80px -20px rgba(0,0,0,.3),inset 0 0 0 2px #3a3a3c}
+    .ph::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:150px;height:30px;background:#1d1d1f;border-radius:0 0 20px 20px;z-index:10}
+    .ms{font-family:'Material Symbols Rounded';font-size:24px;line-height:1;display:inline-block;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24}
+  </style>
+</head>
+<body class="bg-neutral-200 min-h-screen flex flex-col items-center gap-6 p-6">
+
+<h1 class="text-sm font-bold text-neutral-400 uppercase tracking-[.15em]">Header Redesign — Expanded vs Collapsed States</h1>
+
+<div class="flex gap-8 flex-wrap justify-center">
+
+<!-- ============ V1: Wolt-style search bar header ============ -->
+<div>
+  <p class="text-[11px] font-semibold text-neutral-400 mb-1 text-center uppercase tracking-wider">V1 — Search Bar Header</p>
+  <p class="text-[10px] text-neutral-400 mb-3 text-center max-w-[375px]">Location as compact pill, search bar prominent. On scroll: bar shrinks into compact single line.</p>
+  <div class="flex gap-4">
+    <!-- Expanded -->
+    <div>
+      <p class="text-[9px] text-neutral-400 text-center mb-1">EXPANDED</p>
+      <div class="ph" style="height:400px;border-radius:30px">
+        <div class="pt-[42px]">
+          <div class="flex justify-between px-6 py-1 text-[12px] font-semibold text-black"><span>9:41</span><div class="flex gap-1 items-center"><span class="ms" style="font-size:15px">signal_cellular_alt</span><span class="ms" style="font-size:15px">wifi</span><span class="ms" style="font-size:16px">battery_full</span></div></div>
+
+          <!-- Location pill -->
+          <div class="px-4 pt-1 pb-2">
+            <div class="flex items-center gap-2">
+              <span class="ms text-brand" style="font-size:18px">location_on</span>
+              <span class="text-[13px] font-semibold text-black">Kovanecká 14, Praha 9</span>
+              <span class="ms text-neutral-400" style="font-size:16px">expand_more</span>
+            </div>
+          </div>
+
+          <!-- Search bar -->
+          <div class="px-4 pb-2">
+            <div class="bg-neutral-100 rounded-xl px-3.5 py-2.5 flex items-center gap-2.5">
+              <span class="ms text-neutral-400" style="font-size:18px">search</span>
+              <span class="text-[13px] text-neutral-400">What do you need help with?</span>
+            </div>
+          </div>
+
+          <!-- Mode toggle -->
+          <div class="px-4 pb-3 flex gap-2">
+            <div class="flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-brand">
+              <span class="ms text-white" style="font-size:16px">handyman</span>
+              <span class="text-[12px] font-bold text-white">Hire help</span>
+            </div>
+            <div class="flex items-center gap-1.5 px-3.5 py-2 rounded-full border border-neutral-200">
+              <span class="ms text-neutral-400" style="font-size:16px">work_outline</span>
+              <span class="text-[12px] font-semibold text-neutral-500">Jobs near you</span>
+            </div>
+            <div class="flex-1"></div>
+            <div class="flex items-center gap-1.5 px-3 py-2 rounded-full border border-neutral-200">
+              <span class="ms text-neutral-400" style="font-size:16px">map</span>
+              <span class="text-[12px] font-semibold text-neutral-500">Map</span>
+            </div>
+          </div>
+
+          <div class="border-t border-neutral-100"></div>
+          <div class="px-4 pt-3">
+            <div class="h-3 w-32 bg-neutral-100 rounded"></div>
+            <div class="h-2 w-48 bg-neutral-50 rounded mt-2"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Collapsed -->
+    <div>
+      <p class="text-[9px] text-neutral-400 text-center mb-1">COLLAPSED (scrolled)</p>
+      <div class="ph" style="height:400px;border-radius:30px">
+        <div class="pt-[42px]">
+          <div class="flex justify-between px-6 py-1 text-[12px] font-semibold text-black"><span>9:41</span><div class="flex gap-1 items-center"><span class="ms" style="font-size:15px">signal_cellular_alt</span><span class="ms" style="font-size:15px">wifi</span><span class="ms" style="font-size:16px">battery_full</span></div></div>
+
+          <!-- Collapsed: single compact bar -->
+          <div class="px-4 py-2">
+            <div class="bg-neutral-100 rounded-full px-3 py-2 flex items-center gap-2">
+              <span class="ms text-brand" style="font-size:16px">location_on</span>
+              <span class="text-[12px] font-semibold text-black flex-1">Praha 9</span>
+              <div class="w-px h-4 bg-neutral-300"></div>
+              <span class="ms text-neutral-400" style="font-size:16px">search</span>
+              <div class="w-px h-4 bg-neutral-300"></div>
+              <span class="ms text-brand" style="font-size:16px">handyman</span>
+              <div class="w-px h-4 bg-neutral-300"></div>
+              <span class="ms text-neutral-400" style="font-size:16px">map</span>
+            </div>
+          </div>
+
+          <div class="border-t border-neutral-100"></div>
+          <div class="px-4 pt-3">
+            <div class="h-3 w-32 bg-neutral-100 rounded"></div>
+            <div class="h-2 w-48 bg-neutral-50 rounded mt-2"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ V2: Sticky compact ============ -->
+<div>
+  <p class="text-[11px] font-semibold text-neutral-400 mb-1 text-center uppercase tracking-wider">V2 — Sticky Compact</p>
+  <p class="text-[10px] text-neutral-400 mb-3 text-center max-w-[375px]">Always compact. Location as tappable row, toggles as inline segmented control.</p>
+  <div class="flex gap-4">
+    <!-- Expanded -->
+    <div>
+      <p class="text-[9px] text-neutral-400 text-center mb-1">EXPANDED</p>
+      <div class="ph" style="height:400px;border-radius:30px">
+        <div class="pt-[42px]">
+          <div class="flex justify-between px-6 py-1 text-[12px] font-semibold text-black"><span>9:41</span><div class="flex gap-1 items-center"><span class="ms" style="font-size:15px">signal_cellular_alt</span><span class="ms" style="font-size:15px">wifi</span><span class="ms" style="font-size:16px">battery_full</span></div></div>
+
+          <!-- Location row -->
+          <div class="px-4 pt-1 pb-2 flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-full bg-red-50 flex items-center justify-center">
+              <span class="ms text-brand" style="font-size:16px">location_on</span>
+            </div>
+            <div class="flex-1">
+              <p class="text-[11px] text-neutral-400 font-medium">Deliver to</p>
+              <p class="text-[14px] font-bold text-black">Kovanecká 14, Praha 9</p>
+            </div>
+            <div class="w-8 h-8 rounded-full bg-neutral-100 flex items-center justify-center">
+              <span class="ms text-neutral-500" style="font-size:18px">notifications_none</span>
+            </div>
+          </div>
+
+          <!-- Segmented control -->
+          <div class="mx-4 mb-3 bg-neutral-100 rounded-xl p-1 flex">
+            <div class="flex-1 flex items-center justify-center gap-1.5 py-2 bg-white rounded-lg shadow-sm">
+              <span class="ms text-brand" style="font-size:16px">handyman</span>
+              <span class="text-[12px] font-bold text-black">Hire help</span>
+            </div>
+            <div class="flex-1 flex items-center justify-center gap-1.5 py-2">
+              <span class="ms text-neutral-400" style="font-size:16px">work_outline</span>
+              <span class="text-[12px] font-medium text-neutral-400">Jobs</span>
+            </div>
+            <div class="flex-1 flex items-center justify-center gap-1.5 py-2">
+              <span class="ms text-neutral-400" style="font-size:16px">map</span>
+              <span class="text-[12px] font-medium text-neutral-400">Map</span>
+            </div>
+          </div>
+
+          <div class="border-t border-neutral-100"></div>
+          <div class="px-4 pt-3">
+            <div class="h-3 w-32 bg-neutral-100 rounded"></div>
+            <div class="h-2 w-48 bg-neutral-50 rounded mt-2"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Collapsed -->
+    <div>
+      <p class="text-[9px] text-neutral-400 text-center mb-1">COLLAPSED (scrolled)</p>
+      <div class="ph" style="height:400px;border-radius:30px">
+        <div class="pt-[42px]">
+          <div class="flex justify-between px-6 py-1 text-[12px] font-semibold text-black"><span>9:41</span><div class="flex gap-1 items-center"><span class="ms" style="font-size:15px">signal_cellular_alt</span><span class="ms" style="font-size:15px">wifi</span><span class="ms" style="font-size:16px">battery_full</span></div></div>
+
+          <!-- Collapsed: location + segment stays but tighter -->
+          <div class="px-4 pt-1 pb-1 flex items-center gap-2">
+            <span class="ms text-brand" style="font-size:16px">location_on</span>
+            <span class="text-[13px] font-bold text-black flex-1">Praha 9</span>
+            <div class="bg-neutral-100 rounded-lg p-0.5 flex">
+              <div class="px-2 py-1 bg-white rounded-md shadow-sm"><span class="ms text-brand" style="font-size:14px">handyman</span></div>
+              <div class="px-2 py-1"><span class="ms text-neutral-400" style="font-size:14px">work_outline</span></div>
+              <div class="px-2 py-1"><span class="ms text-neutral-400" style="font-size:14px">map</span></div>
+            </div>
+          </div>
+
+          <div class="border-t border-neutral-100"></div>
+          <div class="px-4 pt-3">
+            <div class="h-3 w-32 bg-neutral-100 rounded"></div>
+            <div class="h-2 w-48 bg-neutral-50 rounded mt-2"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ V3: Bold greeting ============ -->
+<div>
+  <p class="text-[11px] font-semibold text-neutral-400 mb-1 text-center uppercase tracking-wider">V3 — Bold Greeting</p>
+  <p class="text-[10px] text-neutral-400 mb-3 text-center max-w-[375px]">Personal greeting with name, location underneath. On scroll: collapses to single row.</p>
+  <div class="flex gap-4">
+    <!-- Expanded -->
+    <div>
+      <p class="text-[9px] text-neutral-400 text-center mb-1">EXPANDED</p>
+      <div class="ph" style="height:400px;border-radius:30px">
+        <div class="pt-[42px]">
+          <div class="flex justify-between px-6 py-1 text-[12px] font-semibold text-black"><span>9:41</span><div class="flex gap-1 items-center"><span class="ms" style="font-size:15px">signal_cellular_alt</span><span class="ms" style="font-size:15px">wifi</span><span class="ms" style="font-size:16px">battery_full</span></div></div>
+
+          <!-- Greeting -->
+          <div class="px-4 pt-2 pb-1 flex items-start justify-between">
+            <div>
+              <p class="text-[22px] font-extrabold text-black">Hi, Adam 👋</p>
+              <div class="flex items-center gap-1 mt-0.5">
+                <span class="ms text-brand" style="font-size:14px">location_on</span>
+                <span class="text-[12px] text-neutral-500">Kovanecká 14, Praha 9</span>
+                <span class="ms text-neutral-400" style="font-size:14px">expand_more</span>
+              </div>
+            </div>
+            <div class="w-9 h-9 rounded-full bg-neutral-200 flex items-center justify-center mt-1">
+              <span class="ms text-neutral-500" style="font-size:20px">person</span>
+            </div>
+          </div>
+
+          <!-- Horizontal scrolling category pills -->
+          <div class="flex gap-2 px-4 pt-3 pb-3 overflow-x-auto">
+            <div class="flex items-center gap-1 px-3 py-1.5 rounded-full bg-brand shrink-0">
+              <span class="ms text-white" style="font-size:14px">handyman</span>
+              <span class="text-[11px] font-bold text-white">Hire help</span>
+            </div>
+            <div class="flex items-center gap-1 px-3 py-1.5 rounded-full border border-neutral-200 shrink-0">
+              <span class="ms text-neutral-400" style="font-size:14px">work_outline</span>
+              <span class="text-[11px] font-semibold text-neutral-500">Jobs</span>
+            </div>
+            <div class="flex items-center gap-1 px-3 py-1.5 rounded-full border border-neutral-200 shrink-0">
+              <span class="ms text-neutral-400" style="font-size:14px">map</span>
+              <span class="text-[11px] font-semibold text-neutral-500">Map</span>
+            </div>
+            <div class="flex items-center gap-1 px-3 py-1.5 rounded-full border border-neutral-200 shrink-0">
+              <span class="ms text-neutral-400" style="font-size:14px">cleaning_services</span>
+              <span class="text-[11px] font-semibold text-neutral-500">Cleaning</span>
+            </div>
+            <div class="flex items-center gap-1 px-3 py-1.5 rounded-full border border-neutral-200 shrink-0">
+              <span class="ms text-neutral-400" style="font-size:14px">yard</span>
+              <span class="text-[11px] font-semibold text-neutral-500">Garden</span>
+            </div>
+          </div>
+
+          <div class="border-t border-neutral-100"></div>
+          <div class="px-4 pt-3">
+            <div class="h-3 w-32 bg-neutral-100 rounded"></div>
+            <div class="h-2 w-48 bg-neutral-50 rounded mt-2"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Collapsed -->
+    <div>
+      <p class="text-[9px] text-neutral-400 text-center mb-1">COLLAPSED (scrolled)</p>
+      <div class="ph" style="height:400px;border-radius:30px">
+        <div class="pt-[42px]">
+          <div class="flex justify-between px-6 py-1 text-[12px] font-semibold text-black"><span>9:41</span><div class="flex gap-1 items-center"><span class="ms" style="font-size:15px">signal_cellular_alt</span><span class="ms" style="font-size:15px">wifi</span><span class="ms" style="font-size:16px">battery_full</span></div></div>
+
+          <!-- Collapsed: compact row -->
+          <div class="px-4 py-2 flex items-center gap-2.5">
+            <span class="ms text-brand" style="font-size:16px">location_on</span>
+            <span class="text-[13px] font-bold text-black flex-1">Praha 9</span>
+            <div class="bg-brand/10 rounded-full px-2.5 py-1 flex items-center gap-1">
+              <span class="ms text-brand" style="font-size:13px">handyman</span>
+              <span class="text-[10px] font-bold text-brand">Hire</span>
+            </div>
+          </div>
+
+          <div class="border-t border-neutral-100"></div>
+          <div class="px-4 pt-3">
+            <div class="h-3 w-32 bg-neutral-100 rounded"></div>
+            <div class="h-2 w-48 bg-neutral-50 rounded mt-2"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+</body>
+</html>
