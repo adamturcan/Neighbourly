@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bottom Nav — 3 Variants</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Rounded:opsz,wght,FILL@20..48,100..700,0..1" rel="stylesheet">
+  <script>tailwind.config={theme:{extend:{colors:{brand:'#E31B23'},fontFamily:{sans:['Inter','system-ui']}}}}</script>
+  <style>
+    body{font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased}
+    .ph{width:375px;height:812px;border-radius:50px;border:10px solid #1d1d1f;overflow:hidden;position:relative;background:#f8f8f8;box-shadow:0 40px 80px -20px rgba(0,0,0,.3),inset 0 0 0 2px #3a3a3c}
+    .ph::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:150px;height:30px;background:#1d1d1f;border-radius:0 0 20px 20px;z-index:10}
+    .ms{font-family:'Material Symbols Rounded';font-size:24px;line-height:1;display:inline-block;font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24}
+    .ms.filled{font-variation-settings:'FILL' 1,'wght' 500,'GRAD' 0,'opsz' 24}
+    .tab{cursor:pointer;transition:all .2s ease;-webkit-tap-highlight-color:transparent}
+    .tab:active{transform:scale(.9)}
+  </style>
+</head>
+<body class="bg-neutral-200 min-h-screen flex flex-col items-center gap-8 p-8">
+
+<p class="text-[11px] font-semibold text-neutral-400 uppercase tracking-[.15em]">Bottom Navigation — 3 Variants (tap to switch tabs)</p>
+
+<div class="flex gap-8 flex-wrap justify-center">
+
+<!-- ============ V1: Wolt / Floating pill ============ -->
+<div>
+  <p class="text-[11px] font-semibold text-neutral-400 mb-2 text-center uppercase tracking-wider">V1 — Floating Pill</p>
+  <div class="ph" id="v1">
+    <div class="flex flex-col h-full pt-[42px]">
+      <!-- Status bar -->
+      <div class="flex justify-between px-6 py-1 text-[12px] font-semibold text-black">
+        <span>9:41</span>
+        <div class="flex gap-1 items-center"><span class="ms" style="font-size:15px">signal_cellular_alt</span><span class="ms" style="font-size:15px">wifi</span><span class="ms" style="font-size:16px">battery_full</span></div>
+      </div>
+      <!-- Mock content -->
+      <div class="flex-1 flex items-center justify-center">
+        <div class="text-center">
+          <p class="text-[13px] text-neutral-400">Content area</p>
+          <p id="v1-label" class="text-[15px] font-semibold text-black mt-1">Discover</p>
+        </div>
+      </div>
+      <!-- Floating nav -->
+      <div class="px-4 pb-8">
+        <div class="bg-white rounded-full px-2 py-1.5 flex items-center justify-between shadow-[0_2px_20px_rgba(0,0,0,0.08)]">
+          <div class="tab flex-1 flex flex-col items-center gap-0.5 py-1.5 rounded-full bg-red-50" onclick="v1Tab(this,0)">
+            <span class="ms filled text-brand" style="font-size:22px">explore</span>
+            <span class="text-[10px] font-semibold text-brand">Discover</span>
+          </div>
+          <div class="tab flex-1 flex flex-col items-center gap-0.5 py-1.5 rounded-full" onclick="v1Tab(this,1)">
+            <span class="ms text-neutral-400" style="font-size:22px">search</span>
+            <span class="text-[10px] font-medium text-neutral-400">Search</span>
+          </div>
+          <div class="tab flex items-center justify-center" onclick="v1Tab(this,2)" style="width:52px;height:52px">
+            <div class="w-[44px] h-[44px] rounded-full bg-brand flex items-center justify-center shadow-[0_4px_12px_rgba(227,27,35,0.3)]">
+              <span class="ms text-white" style="font-size:24px;font-variation-settings:'FILL' 1,'wght' 600,'opsz' 24">add</span>
+            </div>
+          </div>
+          <div class="tab flex-1 flex flex-col items-center gap-0.5 py-1.5 rounded-full" onclick="v1Tab(this,3)">
+            <span class="ms text-neutral-400" style="font-size:22px">chat_bubble_outline</span>
+            <span class="text-[10px] font-medium text-neutral-400">Inbox</span>
+          </div>
+          <div class="tab flex-1 flex flex-col items-center gap-0.5 py-1.5 rounded-full" onclick="v1Tab(this,4)">
+            <span class="ms text-neutral-400" style="font-size:22px">person_outline</span>
+            <span class="text-[10px] font-medium text-neutral-400">Profile</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ V2: iOS Tab Bar with indicator dot ============ -->
+<div>
+  <p class="text-[11px] font-semibold text-neutral-400 mb-2 text-center uppercase tracking-wider">V2 — Clean iOS + Dot</p>
+  <div class="ph" id="v2" style="background:#fff">
+    <div class="flex flex-col h-full pt-[42px]">
+      <div class="flex justify-between px-6 py-1 text-[12px] font-semibold text-black">
+        <span>9:41</span>
+        <div class="flex gap-1 items-center"><span class="ms" style="font-size:15px">signal_cellular_alt</span><span class="ms" style="font-size:15px">wifi</span><span class="ms" style="font-size:16px">battery_full</span></div>
+      </div>
+      <div class="flex-1 flex items-center justify-center">
+        <div class="text-center">
+          <p class="text-[13px] text-neutral-400">Content area</p>
+          <p id="v2-label" class="text-[15px] font-semibold text-black mt-1">Discover</p>
+        </div>
+      </div>
+      <!-- Tab bar -->
+      <div class="border-t border-neutral-100 bg-white/95 backdrop-blur pb-7 pt-1.5">
+        <div class="flex items-start justify-around px-2">
+          <div class="tab flex flex-col items-center gap-[2px] pt-1 w-16" onclick="v2Tab(this,0)">
+            <span class="ms filled text-brand" style="font-size:24px">explore</span>
+            <span class="text-[10px] font-medium text-brand">Discover</span>
+            <div class="w-1 h-1 rounded-full bg-brand mt-0.5"></div>
+          </div>
+          <div class="tab flex flex-col items-center gap-[2px] pt-1 w-16" onclick="v2Tab(this,1)">
+            <span class="ms text-neutral-400" style="font-size:24px">search</span>
+            <span class="text-[10px] font-medium text-neutral-400">Search</span>
+            <div class="w-1 h-1 rounded-full bg-transparent mt-0.5"></div>
+          </div>
+          <div class="tab flex flex-col items-center gap-[2px] w-16" onclick="v2Tab(this,2)">
+            <div class="w-10 h-10 rounded-2xl bg-brand flex items-center justify-center -mt-3 shadow-[0_2px_8px_rgba(227,27,35,0.25)]">
+              <span class="ms text-white" style="font-size:22px;font-variation-settings:'FILL' 1,'wght' 600,'opsz' 24">add</span>
+            </div>
+            <span class="text-[10px] font-medium text-neutral-400">Post</span>
+          </div>
+          <div class="tab flex flex-col items-center gap-[2px] pt-1 w-16" onclick="v2Tab(this,3)">
+            <div class="relative">
+              <span class="ms text-neutral-400" style="font-size:24px">chat_bubble_outline</span>
+              <div class="absolute -top-0.5 -right-1 w-[14px] h-[14px] rounded-full bg-brand flex items-center justify-center border-2 border-white">
+                <span class="text-[8px] font-bold text-white">2</span>
+              </div>
+            </div>
+            <span class="text-[10px] font-medium text-neutral-400">Inbox</span>
+            <div class="w-1 h-1 rounded-full bg-transparent mt-0.5"></div>
+          </div>
+          <div class="tab flex flex-col items-center gap-[2px] pt-1 w-16" onclick="v2Tab(this,4)">
+            <span class="ms text-neutral-400" style="font-size:24px">person_outline</span>
+            <span class="text-[10px] font-medium text-neutral-400">Profile</span>
+            <div class="w-1 h-1 rounded-full bg-transparent mt-0.5"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ V3: Dark glass with sliding indicator ============ -->
+<div>
+  <p class="text-[11px] font-semibold text-neutral-400 mb-2 text-center uppercase tracking-wider">V3 — Dark Glass</p>
+  <div class="ph" id="v3" style="background:#000">
+    <div class="flex flex-col h-full pt-[42px]">
+      <div class="flex justify-between px-6 py-1 text-[12px] font-semibold text-white">
+        <span>9:41</span>
+        <div class="flex gap-1 items-center"><span class="ms" style="font-size:15px">signal_cellular_alt</span><span class="ms" style="font-size:15px">wifi</span><span class="ms" style="font-size:16px">battery_full</span></div>
+      </div>
+      <div class="flex-1 flex items-center justify-center">
+        <div class="text-center">
+          <p class="text-[13px] text-neutral-500">Content area</p>
+          <p id="v3-label" class="text-[15px] font-semibold text-white mt-1">Discover</p>
+        </div>
+      </div>
+      <!-- Dark glass nav -->
+      <div class="px-3 pb-8">
+        <div class="bg-[#1c1c1e]/90 backdrop-blur-xl rounded-[22px] px-1.5 py-1.5 flex items-center justify-between border border-white/[0.06]" id="v3-bar">
+          <!-- Sliding bg indicator -->
+          <div id="v3-indicator" class="absolute w-[62px] h-[46px] rounded-2xl bg-brand/15 transition-all duration-300 ease-out" style="left:6px"></div>
+          <div class="tab relative z-10 flex flex-col items-center gap-[1px] py-1.5 w-[62px] rounded-2xl" onclick="v3Tab(this,0)">
+            <span class="ms filled text-brand" style="font-size:22px">explore</span>
+            <span class="text-[9px] font-semibold text-brand">Discover</span>
+          </div>
+          <div class="tab relative z-10 flex flex-col items-center gap-[1px] py-1.5 w-[62px] rounded-2xl" onclick="v3Tab(this,1)">
+            <span class="ms text-neutral-500" style="font-size:22px">search</span>
+            <span class="text-[9px] font-medium text-neutral-500">Search</span>
+          </div>
+          <div class="tab relative z-10 flex items-center justify-center w-[50px]" onclick="v3Tab(this,2)">
+            <div class="w-[42px] h-[42px] rounded-full bg-brand flex items-center justify-center shadow-[0_0_20px_rgba(227,27,35,0.4)]">
+              <span class="ms text-white" style="font-size:22px;font-variation-settings:'FILL' 1,'wght' 600,'opsz' 24">add</span>
+            </div>
+          </div>
+          <div class="tab relative z-10 flex flex-col items-center gap-[1px] py-1.5 w-[62px] rounded-2xl" onclick="v3Tab(this,3)">
+            <span class="ms text-neutral-500" style="font-size:22px">chat_bubble_outline</span>
+            <span class="text-[9px] font-medium text-neutral-500">Inbox</span>
+          </div>
+          <div class="tab relative z-10 flex flex-col items-center gap-[1px] py-1.5 w-[62px] rounded-2xl" onclick="v3Tab(this,4)">
+            <span class="ms text-neutral-500" style="font-size:22px">person_outline</span>
+            <span class="text-[9px] font-medium text-neutral-500">Profile</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<script>
+const labels = ['Discover','Search','Post','Inbox','Profile'];
+const icons = ['explore','search','add','chat_bubble_outline','person_outline'];
+
+function v1Tab(el, idx) {
+  const bar = el.parentElement;
+  bar.querySelectorAll('.tab').forEach((t,i) => {
+    if (i === 2) return; // skip center button
+    t.classList.remove('bg-red-50');
+    const ic = t.querySelector('.ms');
+    const lb = t.querySelector('span:last-child');
+    if (ic) { ic.classList.remove('filled','text-brand'); ic.classList.add('text-neutral-400'); }
+    if (lb) { lb.classList.remove('text-brand','font-semibold'); lb.classList.add('text-neutral-400','font-medium'); }
+  });
+  if (idx !== 2) {
+    el.classList.add('bg-red-50');
+    const ic = el.querySelector('.ms');
+    const lb = el.querySelector('span:last-child');
+    if (ic) { ic.classList.add('filled','text-brand'); ic.classList.remove('text-neutral-400'); }
+    if (lb) { lb.classList.add('text-brand','font-semibold'); lb.classList.remove('text-neutral-400','font-medium'); }
+  }
+  document.getElementById('v1-label').textContent = labels[idx];
+}
+
+function v2Tab(el, idx) {
+  const bar = el.parentElement;
+  bar.querySelectorAll('.tab').forEach((t,i) => {
+    if (i === 2) return;
+    const ic = t.querySelector('.ms');
+    const lb = t.querySelectorAll('span')[1] || t.querySelector('span:last-of-type');
+    const dot = t.querySelector('div:last-child');
+    if (ic) { ic.classList.remove('filled','text-brand'); ic.classList.add('text-neutral-400'); }
+    if (lb && lb.classList) { lb.classList.remove('text-brand'); lb.classList.add('text-neutral-400'); }
+    if (dot && dot.classList.contains('rounded-full') && dot.offsetWidth <= 6) { dot.classList.remove('bg-brand'); dot.classList.add('bg-transparent'); }
+  });
+  if (idx !== 2) {
+    const ic = el.querySelector('.ms');
+    const spans = el.querySelectorAll('span');
+    const lb = spans[1];
+    const dot = el.querySelector('div:last-child');
+    if (ic) { ic.classList.add('filled','text-brand'); ic.classList.remove('text-neutral-400'); }
+    if (lb) { lb.classList.add('text-brand'); lb.classList.remove('text-neutral-400'); }
+    if (dot && dot.offsetWidth <= 6) { dot.classList.add('bg-brand'); dot.classList.remove('bg-transparent'); }
+  }
+  document.getElementById('v2-label').textContent = labels[idx];
+}
+
+function v3Tab(el, idx) {
+  const bar = el.parentElement;
+  const indicator = document.getElementById('v3-indicator');
+  // Move indicator
+  if (idx !== 2) {
+    const positions = [6, 68, 0, 182, 244]; // approximate pixel positions
+    indicator.style.left = positions[idx] + 'px';
+    indicator.style.opacity = '1';
+  } else {
+    indicator.style.opacity = '0';
+  }
+  bar.querySelectorAll('.tab').forEach((t,i) => {
+    if (i === 2) return;
+    const ic = t.querySelector('.ms');
+    const lb = t.querySelector('span:last-child');
+    if (ic) { ic.classList.remove('filled','text-brand'); ic.classList.add('text-neutral-500'); }
+    if (lb && lb.textContent !== '+') { lb.classList.remove('text-brand','font-semibold'); lb.classList.add('text-neutral-500','font-medium'); }
+  });
+  if (idx !== 2) {
+    const ic = el.querySelector('.ms');
+    const lb = el.querySelector('span:last-child');
+    if (ic) { ic.classList.add('filled','text-brand'); ic.classList.remove('text-neutral-500'); }
+    if (lb) { lb.classList.add('text-brand','font-semibold'); lb.classList.remove('text-neutral-500','font-medium'); }
+  }
+  document.getElementById('v3-label').textContent = labels[idx];
+}
+</script>
+</body>
+</html>

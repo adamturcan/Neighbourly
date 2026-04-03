@@ -13,9 +13,11 @@ import {
   useWindowDimensions,
   NativeSyntheticEvent,
   NativeScrollEvent,
+  Modal,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import { useNavigation } from "@react-navigation/native";
 import { createTask } from "../../../shared/lib/api";
 import { COLORS } from "../../../shared/lib/constants";
 
@@ -39,12 +41,16 @@ export default function PostTaskScreen() {
   const scrollX = useRef(new Animated.Value(0)).current;
   const [step, setStep] = useState(0); // 0-indexed for pager
 
+  const nav = useNavigation<any>();
   const [category, setCategory] = useState("");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [budget, setBudget] = useState("");
   const [paymentType, setPaymentType] = useState("cash");
   const [submitting, setSubmitting] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const successScale = useRef(new Animated.Value(0)).current;
+  const successOpacity = useRef(new Animated.Value(0)).current;
 
   const selectedCat = CATEGORIES.find((c) => c.key === category);
 
@@ -76,16 +82,40 @@ export default function PostTaskScreen() {
     goToPage(step - 1);
   };
 
+  const showSuccessAnimation = () => {
+    setShowSuccess(true);
+    successScale.setValue(0);
+    successOpacity.setValue(0);
+
+    Animated.parallel([
+      Animated.spring(successScale, { toValue: 1, useNativeDriver: true, damping: 12, stiffness: 200 }),
+      Animated.timing(successOpacity, { toValue: 1, duration: 200, useNativeDriver: true }),
+    ]).start(() => {
+      // Hold for 1.5s then fade out and navigate
+      setTimeout(() => {
+        Animated.timing(successOpacity, { toValue: 0, duration: 300, useNativeDriver: true }).start(() => {
+          setShowSuccess(false);
+          // Reset form
+          setCategory(""); setTitle(""); setDescription(""); setBudget(""); setPaymentType("cash");
+          goToPage(0);
+          // Navigate to Discover tab
+          nav.navigate("Discover");
+        });
+      }, 1500);
+    });
+  };
+
   const handleSubmit = async () => {
     if (!Number(budget) || Number(budget) < 1) { Alert.alert("Set a budget", "At least €1"); return; }
     setSubmitting(true);
     try {
       await createTask({ title: title.trim(), description: description.trim(), category, budget: Number(budget), payment_type: paymentType, lat: 48.1482, lng: 17.1067 });
-      Alert.alert("Task posted!", "Helpers nearby will see your task.");
-      setCategory(""); setTitle(""); setDescription(""); setBudget(""); setPaymentType("cash");
-      goToPage(0);
-    } catch (e: any) { Alert.alert("Error", e.message); }
-    setSubmitting(false);
+      setSubmitting(false);
+      showSuccessAnimation();
+    } catch (e: any) {
+      Alert.alert("Error", e.message);
+      setSubmitting(false);
+    }
   };
 
   // Progress bar interpolation: smooth fill as you swipe
@@ -275,6 +305,54 @@ export default function PostTaskScreen() {
           </Pressable>
         </View>
       </KeyboardAvoidingView>
+
+      {/* Success overlay */}
+      <Modal visible={showSuccess} transparent animationType="none">
+        <Animated.View
+          style={{
+            flex: 1,
+            backgroundColor: "rgba(0,0,0,0.4)",
+            alignItems: "center",
+            justifyContent: "center",
+            opacity: successOpacity,
+          }}
+        >
+          <Animated.View
+            style={{
+              backgroundColor: "#fff",
+              borderRadius: 24,
+              padding: 32,
+              alignItems: "center",
+              gap: 16,
+              shadowColor: "#000",
+              shadowOpacity: 0.15,
+              shadowRadius: 30,
+              shadowOffset: { width: 0, height: 10 },
+              elevation: 10,
+              transform: [{ scale: successScale }],
+            }}
+          >
+            <View
+              style={{
+                width: 64,
+                height: 64,
+                borderRadius: 32,
+                backgroundColor: "#22C55E",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <MaterialCommunityIcons name="check" size={36} color="#fff" />
+            </View>
+            <Text style={{ fontSize: 20, fontWeight: "700", color: "#000" }}>
+              Task posted!
+            </Text>
+            <Text style={{ fontSize: 14, color: "#71717A", textAlign: "center" }}>
+              Helpers nearby will be notified
+            </Text>
+          </Animated.View>
+        </Animated.View>
+      </Modal>
     </SafeAreaView>
   );
 }

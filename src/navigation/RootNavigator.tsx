@@ -1,70 +1,144 @@
 import React from "react";
+import { View, Pressable, Text, StyleSheet } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import HomeStack from "./HomeStack";
 import PostTaskScreen from "../features/tasks/screens/PostTaskScreen";
 import InboxScreen from "../features/chat/screens/InboxScreen";
 import ProfileScreen from "../features/profile/screens/ProfileScreen";
 import SearchScreen from "../features/services/screens/SearchScreen";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { COLORS } from "../shared/lib/constants";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const Tab = createBottomTabNavigator();
 
-export default function MainTabs() {
+const TABS = [
+  { name: "Discover", icon: "compass-outline", iconFilled: "compass", label: "Discover" },
+  { name: "Search", icon: "magnify", iconFilled: "magnify", label: "Search" },
+  { name: "Post", icon: "plus", iconFilled: "plus", label: "Post" },
+  { name: "Inbox", icon: "chat-outline", iconFilled: "chat", label: "Inbox" },
+  { name: "Profile", icon: "account-outline", iconFilled: "account", label: "Profile" },
+] as const;
+
+function FloatingTabBar({ state, descriptors, navigation }: any) {
+  const insets = useSafeAreaInsets();
+
   return (
-      <Tab.Navigator
-        screenOptions={{
-          headerShown: false,
-          tabBarActiveTintColor: COLORS.red,
-          tabBarInactiveTintColor: COLORS.black,
-          tabBarStyle: { backgroundColor: COLORS.white },
-        }}
-      >
-        <Tab.Screen
-          name="Discover"
-          component={HomeStack}
-          options={{
-            tabBarIcon: ({ size }) => (
-              <MaterialCommunityIcons name="compass-outline" size={size} />
-            ),
-          }}
-        />
-        <Tab.Screen
-          name="Search"
-          component={SearchScreen}
-          options={{
-            tabBarIcon: ({ size }) => (
-              <MaterialCommunityIcons name="magnify" size={size} />
-            ),
-          }}
-        />
-        <Tab.Screen
-          name="Post"
-          component={PostTaskScreen}
-          options={{
-            tabBarIcon: ({ size }) => (
-              <MaterialCommunityIcons name="plus-circle-outline" size={size} />
-            ),
-          }}
-        />
-        <Tab.Screen
-          name="Inbox"
-          component={InboxScreen}
-          options={{
-            tabBarIcon: ({ size }) => (
-              <MaterialCommunityIcons name="message-text-outline" size={size} />
-            ),
-          }}
-        />
-        <Tab.Screen
-          name="Profile"
-          component={ProfileScreen}
-          options={{
-            tabBarIcon: ({ size }) => (
-              <MaterialCommunityIcons name="account-circle-outline" size={size} />
-            ),
-          }}
-        />
-      </Tab.Navigator>
+    <View style={[tb.wrap, { paddingBottom: Math.max(insets.bottom, 8) }]}>
+      <View style={tb.pill}>
+        {state.routes.map((route: any, index: number) => {
+          const focused = state.index === index;
+          const tab = TABS[index];
+          const isCenter = index === 2;
+
+          const onPress = () => {
+            const event = navigation.emit({ type: "tabPress", target: route.key, canPreventDefault: true });
+            if (!event.defaultPrevented) {
+              navigation.navigate(route.name);
+            }
+          };
+
+          if (isCenter) {
+            return (
+              <Pressable key={route.key} onPress={onPress} style={tb.centerWrap}>
+                <View style={tb.centerBtn}>
+                  <MaterialCommunityIcons name="plus" size={24} color="#fff" />
+                </View>
+              </Pressable>
+            );
+          }
+
+          return (
+            <Pressable key={route.key} onPress={onPress} style={[tb.tab, focused && tb.tabActive]}>
+              <MaterialCommunityIcons
+                name={focused ? tab.iconFilled : tab.icon}
+                size={22}
+                color={focused ? COLORS.red : "#9CA3AF"}
+              />
+              <Text style={[tb.label, focused && tb.labelActive]}>
+                {tab.label}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </View>
+    </View>
   );
 }
+
+export default function MainTabs() {
+  return (
+    <Tab.Navigator
+      tabBar={(props) => <FloatingTabBar {...props} />}
+      screenOptions={{ headerShown: false }}
+    >
+      <Tab.Screen name="Discover" component={HomeStack} />
+      <Tab.Screen name="Search" component={SearchScreen} />
+      <Tab.Screen name="Post" component={PostTaskScreen} />
+      <Tab.Screen name="Inbox" component={InboxScreen} />
+      <Tab.Screen name="Profile" component={ProfileScreen} />
+    </Tab.Navigator>
+  );
+}
+
+const tb = StyleSheet.create({
+  wrap: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    paddingHorizontal: 16,
+    paddingTop: 4,
+  },
+  pill: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#fff",
+    borderRadius: 9999,
+    paddingHorizontal: 6,
+    paddingVertical: 4,
+    shadowColor: "#000",
+    shadowOpacity: 0.08,
+    shadowRadius: 20,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 8,
+  },
+  tab: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 1,
+    paddingVertical: 6,
+    borderRadius: 9999,
+  },
+  tabActive: {
+    backgroundColor: "#FEF2F2",
+  },
+  label: {
+    fontSize: 10,
+    fontWeight: "500",
+    color: "#9CA3AF",
+  },
+  labelActive: {
+    color: COLORS.red,
+    fontWeight: "600",
+  },
+  centerWrap: {
+    alignItems: "center",
+    justifyContent: "center",
+    marginHorizontal: 4,
+  },
+  centerBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: COLORS.red,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: COLORS.red,
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 6,
+  },
+});
