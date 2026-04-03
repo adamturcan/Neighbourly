@@ -26,8 +26,9 @@
 - Use conventional commit style: `feat:`, `fix:`, `refactor:`, `docs:`, `chore:`, `test:`
 
 ### 3. Test
-- After every code change, verify it works on the iPhone Simulator
-- Run `npx expo start --ios` and confirm no crashes or regressions
+- After every code change, relaunch the app on the iPhone Simulator so the user sees changes immediately
+- Run `npx expo start --ios --clear` to ensure a fresh bundle (Expo Go does NOT hot-reload reliably)
+- Leave the Expo process running so the user can interact with the app
 - Run `npx tsc --noEmit` to catch type errors before committing
 - If tests exist, run them before committing
 - Report test results to the user
