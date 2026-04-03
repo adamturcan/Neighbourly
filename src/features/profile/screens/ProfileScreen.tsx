@@ -69,10 +69,26 @@ export default function ProfileScreen() {
     }, [refetchTasks, refetchOffers, refetchReviews]),
   );
 
-  const postedTasks = myTasks.filter((t) => t.requesterId === user?.id);
-  const helperTasks = myTasks.filter((t) => t.helperId === user?.id && t.requesterId !== user?.id);
-  const helperTaskIds = new Set(helperTasks.map((t) => t.id));
-  const filteredOffers = myOffers.filter((o) => !helperTaskIds.has(o.taskId));
+  // Categorize tasks (exclude completed)
+  const activeTasks = myTasks.filter((t) => t.status !== "completed");
+
+  // Tasks I posted (asking for help)
+  const myPostedTasks = activeTasks.filter(
+    (t) => t.requesterId === user?.id && !t.title.startsWith("Booking:"),
+  );
+  // Services I booked (booking requests I sent)
+  const myBookings = activeTasks.filter(
+    (t) => t.requesterId === user?.id && t.title.startsWith("Booking:"),
+  );
+  // Tasks I'm helping on (matched as helper)
+  const helpingOn = activeTasks.filter(
+    (t) => t.helperId === user?.id && t.requesterId !== user?.id,
+  );
+  // Active offers (exclude tasks where already matched as helper)
+  const helperTaskIds = new Set(helpingOn.map((t) => t.id));
+  const activeOffers = myOffers.filter(
+    (o) => !helperTaskIds.has(o.taskId) && (o as any).status !== "rejected",
+  );
 
   const goToTask = (taskId: string) => {
     nav.dispatch(
@@ -185,21 +201,40 @@ export default function ProfileScreen() {
           )}
         </View>
 
-        {/* My Tasks Card */}
-        {postedTasks.length > 0 && (
+        {/* My Tasks — tasks I posted asking for help */}
+        {myPostedTasks.length > 0 && (
           <View style={s.card}>
-            <Text style={s.sectionTitle}>My Tasks</Text>
-            {postedTasks.map((t) => (
+            <View style={s.sectionHeader}>
+              <Text style={s.sectionTitle}>Tasks I Posted</Text>
+              <Text style={s.countBadge}>{myPostedTasks.length}</Text>
+            </View>
+            {myPostedTasks.map((t) => (
               <TaskRow key={t.id} task={t} onPress={() => goToTask(t.id)} />
             ))}
           </View>
         )}
 
-        {/* My Offers Card */}
-        {filteredOffers.length > 0 && (
+        {/* My Bookings — services I booked */}
+        {myBookings.length > 0 && (
           <View style={s.card}>
-            <Text style={s.sectionTitle}>My Offers</Text>
-            {filteredOffers.map((o) => (
+            <View style={s.sectionHeader}>
+              <Text style={s.sectionTitle}>My Bookings</Text>
+              <Text style={s.countBadge}>{myBookings.length}</Text>
+            </View>
+            {myBookings.map((t) => (
+              <TaskRow key={t.id} task={{ ...t, title: t.title.replace("Booking: ", "") }} onPress={() => goToTask(t.id)} />
+            ))}
+          </View>
+        )}
+
+        {/* My Offers — offers I made on other tasks */}
+        {activeOffers.length > 0 && (
+          <View style={s.card}>
+            <View style={s.sectionHeader}>
+              <Text style={s.sectionTitle}>My Offers</Text>
+              <Text style={s.countBadge}>{activeOffers.length}</Text>
+            </View>
+            {activeOffers.map((o) => (
               <Pressable
                 key={o.id}
                 onPress={() => goToTask(o.taskId)}
@@ -219,11 +254,14 @@ export default function ProfileScreen() {
           </View>
         )}
 
-        {/* Helping On Card */}
-        {helperTasks.length > 0 && (
+        {/* Helping On — tasks I'm matched as helper */}
+        {helpingOn.length > 0 && (
           <View style={s.card}>
-            <Text style={s.sectionTitle}>Helping On</Text>
-            {helperTasks.map((t) => (
+            <View style={s.sectionHeader}>
+              <Text style={s.sectionTitle}>Helping On</Text>
+              <Text style={s.countBadge}>{helpingOn.length}</Text>
+            </View>
+            {helpingOn.map((t) => (
               <TaskRow key={t.id} task={t} onPress={() => goToTask(t.id)} />
             ))}
           </View>
@@ -413,6 +451,7 @@ const s = StyleSheet.create({
   },
   sectionTitle: { fontSize: 16, fontWeight: "700", color: "#000", marginBottom: 14 },
   seeAll: { fontSize: 13, color: COLORS.red, fontWeight: "600", marginBottom: 14 },
+  countBadge: { fontSize: 12, color: "#9CA3AF", fontWeight: "500", backgroundColor: "#F3F4F6", paddingHorizontal: 10, paddingVertical: 2, borderRadius: 12, marginBottom: 14 },
   skillsRow: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   skillChip: {
     backgroundColor: "#FEF2F2",

@@ -239,7 +239,7 @@ export default function InboxScreen() {
         <View style={styles.center}>
           <ActivityIndicator size="large" color={COLORS.red} />
         </View>
-      ) : conversations.length === 0 && bookingRequests.length === 0 && myPendingTasks.length === 0 ? (
+      ) : conversations.filter((c) => c.taskStatus !== "completed").length === 0 && bookingRequests.length === 0 && myPendingTasks.length === 0 ? (
         <View style={styles.center}>
           <MaterialCommunityIcons
             name="chat-outline"
@@ -253,7 +253,7 @@ export default function InboxScreen() {
         </View>
       ) : (
         <FlatList
-          data={conversations}
+          data={conversations.filter((c) => c.taskStatus !== "completed")}
           renderItem={renderItem}
           keyExtractor={(item) => item.taskId}
           contentContainerStyle={{
