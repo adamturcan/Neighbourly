@@ -14,7 +14,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import { listMessages, sendMessage, getTask } from "../../../shared/lib/api";
+import { listMessages, sendMessage, getTask, markAsRead, getOtherReadReceipt } from "../../../shared/lib/api";
 import type { Message } from "../../../shared/lib/api";
 import { useAuth } from "../../auth/store/useAuth";
 import { supabase } from "../../../shared/lib/supabase";
@@ -61,6 +61,7 @@ export default function ChatScreen() {
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
   const [otherTyping, setOtherTyping] = useState(false);
+  const [otherSeenAt, setOtherSeenAt] = useState<string | null>(null);
   const flatListRef = useRef<FlatList>(null);
   const typingTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const typingChannelRef = useRef<any>(null);
@@ -76,6 +77,29 @@ export default function ChatScreen() {
     queryFn: () => getTask(taskId),
     enabled: !!taskId,
   });
+
+  // Mark as read on open + when new messages arrive
+  useEffect(() => {
+    if (taskId) markAsRead(taskId);
+  }, [taskId, messages.length]);
+
+  // Fetch other person's read receipt
+  const otherUserId = task?.requesterId === user?.id ? task?.helperId : task?.requesterId;
+  useEffect(() => {
+    if (!taskId || !otherUserId) return;
+    getOtherReadReceipt(taskId, otherUserId).then(setOtherSeenAt);
+
+    const ch = supabase
+      .channel(`read-${taskId}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "read_receipts", filter: `task_id=eq.${taskId}` }, (payload: any) => {
+        if (payload.new?.user_id === otherUserId) {
+          setOtherSeenAt(payload.new.last_read_at);
+        }
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(ch); };
+  }, [taskId, otherUserId]);
 
   // Real-time subscription
   useEffect(() => {
@@ -157,9 +181,20 @@ export default function ChatScreen() {
       otherName.charCodeAt(0) % AVATAR_COLORS.length
     ];
 
+  // Find the last message I sent that the other person has seen
+  const lastSeenMessageId = (() => {
+    if (!otherSeenAt) return null;
+    const myMsgs = messages.filter((m) => m.senderId === user?.id);
+    for (let i = myMsgs.length - 1; i >= 0; i--) {
+      if (myMsgs[i].createdAt <= otherSeenAt) return myMsgs[i].id;
+    }
+    return null;
+  })();
+
   const renderMessage = useCallback(
     ({ item }: { item: Message }) => {
       const isMine = item.senderId === user?.id;
+      const showSeen = isMine && item.id === lastSeenMessageId;
       return (
         <View
           style={[
@@ -182,18 +217,27 @@ export default function ChatScreen() {
               {item.content}
             </Text>
           </View>
-          <Text
-            style={[
-              styles.timestamp,
-              isMine ? styles.timestampRight : styles.timestampLeft,
-            ]}
-          >
-            {formatTime(item.createdAt)}
-          </Text>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 4, justifyContent: isMine ? "flex-end" : "flex-start" }}>
+            <Text
+              style={[
+                styles.timestamp,
+                isMine ? styles.timestampRight : styles.timestampLeft,
+              ]}
+            >
+              {formatTime(item.createdAt)}
+            </Text>
+            {showSeen && (
+              <View style={styles.seenRow}>
+                <View style={[styles.seenAvatar, { backgroundColor: avatarColor }]}>
+                  <Text style={styles.seenAvatarText}>{otherName.charAt(0).toUpperCase()}</Text>
+                </View>
+              </View>
+            )}
+          </View>
         </View>
       );
     },
-    [user?.id],
+    [user?.id, lastSeenMessageId, avatarColor, otherName],
   );
 
   const categoryColor =
@@ -505,5 +549,21 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: "#9CA3AF",
     fontWeight: "500",
+  },
+  seenRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  seenAvatar: {
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  seenAvatarText: {
+    color: "#fff",
+    fontSize: 7,
+    fontWeight: "700",
   },
 });

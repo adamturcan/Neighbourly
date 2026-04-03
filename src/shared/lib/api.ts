@@ -403,6 +403,7 @@ export type Conversation = {
   lastMessage: string | null;
   lastMessageAt: string | null;
   lastMessageSenderId: string | null;
+  myLastReadAt: string | null;
 };
 
 export type Message = {
@@ -459,6 +460,17 @@ export async function listConversations(): Promise<Conversation[]> {
     }
   }
 
+  // Get read receipts for current user
+  const { data: receipts } = await supabase
+    .from("read_receipts")
+    .select("task_id, last_read_at")
+    .eq("user_id", user.id)
+    .in("task_id", taskIds);
+
+  const readMap = new Map(
+    (receipts ?? []).map((r: any) => [r.task_id, r.last_read_at]),
+  );
+
   return tasks.map((t: any) => {
     const otherId = t.creator_id === user.id ? t.helper_id : t.creator_id;
     const latest = latestMessageMap.get(t.id);
@@ -473,6 +485,7 @@ export async function listConversations(): Promise<Conversation[]> {
       lastMessage: latest?.content ?? null,
       lastMessageAt: latest?.created_at ?? t.created_at ?? null,
       lastMessageSenderId: latest?.sender_id ?? null,
+      myLastReadAt: readMap.get(t.id) ?? null,
     } as Conversation;
   }).sort((a, b) => {
     const aTime = a.lastMessageAt ?? "";
@@ -522,4 +535,36 @@ export async function sendMessage(taskId: string, content: string): Promise<Mess
     content: data.content,
     createdAt: data.created_at,
   };
+}
+
+// ============================================================
+// READ RECEIPTS
+// ============================================================
+
+export async function markAsRead(taskId: string): Promise<void> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return;
+
+  await supabase
+    .from("read_receipts")
+    .upsert(
+      { task_id: taskId, user_id: user.id, last_read_at: new Date().toISOString() },
+      { onConflict: "task_id,user_id" },
+    );
+}
+
+export async function getOtherReadReceipt(
+  taskId: string,
+  otherUserId: string,
+): Promise<string | null> {
+  const { data } = await supabase
+    .from("read_receipts")
+    .select("last_read_at")
+    .eq("task_id", taskId)
+    .eq("user_id", otherUserId)
+    .single();
+
+  return data?.last_read_at ?? null;
 }
