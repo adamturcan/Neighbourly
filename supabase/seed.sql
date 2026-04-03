@@ -1,12 +1,6 @@
 -- Seed data for development
 -- Run this AFTER 001_schema.sql and 002_services.sql
--- Run this while signed in as a user (or use service_role key)
 
--- Insert demo services for the dev user
--- (provider_id will need to be updated to match your dev user's ID)
--- You can find your dev user ID in Authentication → Users in the Supabase dashboard
-
--- Helper: we'll use a function so it auto-detects the first user
 do $$
 declare
   dev_uid uuid;
@@ -49,8 +43,8 @@ begin
      'https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?q=80&w=1400&auto=format&fit=crop',
      20, 48.1482 - 0.007, 17.1067 + 0.005, 4.5, 19);
 
-  -- Insert a demo task
-  insert into public.tasks (creator_id, title, description, category, budget, payment_type, lat, lng, address, location_point)
+  -- Insert a demo task (no lat/lng columns — uses location_point geography only)
+  insert into public.tasks (creator_id, title, description, category, budget, payment_type, address, location_point)
   values (
     dev_uid,
     'Help me move a desk',
@@ -58,8 +52,6 @@ begin
     'moving',
     40,
     'cash',
-    48.1482,
-    17.1067,
     'Kovanecká 14, Praha 9',
     ST_SetSRID(ST_MakePoint(17.1067, 48.1482), 4326)::geography
   );
