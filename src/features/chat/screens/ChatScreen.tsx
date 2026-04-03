@@ -487,7 +487,7 @@ export default function ChatScreen() {
   const categoryIcon = CATEGORY_ICONS[task?.category ?? ""] ?? "help-circle-outline";
 
   return (
-    <SafeAreaView style={styles.container} edges={["top"]}>
+    <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
       {/* Header */}
       <View style={styles.header}>
         <Pressable onPress={() => {
@@ -556,8 +556,8 @@ export default function ChatScreen() {
           </View>
         )}
 
-        {/* Input bar — no bottom safe area when keyboard is open */}
-        <View style={[styles.inputBarSafe, !keyboardVisible && { paddingBottom: insets.bottom }]}>
+        {/* Input bar */}
+        <View style={styles.inputBarSafe}>
           <View style={styles.inputBar}>
             <Pressable style={styles.attachBtn} onPress={handleAttach}>
               <MaterialCommunityIcons name="plus" size={20} color={COLORS.textMuted} />
