@@ -9,13 +9,23 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
+  Animated as RNAnimated,
+  Modal,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRoute, useNavigation, useIsFocused } from "@react-navigation/native";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import { listMessages, sendMessage, getTask, markAsRead, getOtherReadReceipt } from "../../../shared/lib/api";
-import type { Message } from "../../../shared/lib/api";
+import {
+  listMessages,
+  sendMessage,
+  getTask,
+  markAsRead,
+  getOtherReadReceipt,
+  getReactionsForMessages,
+  toggleReaction,
+} from "../../../shared/lib/api";
+import type { Message, MessageReaction } from "../../../shared/lib/api";
 import { useAuth } from "../../auth/store/useAuth";
 import { supabase } from "../../../shared/lib/supabase";
 import { onTyping, broadcastTyping } from "../../../shared/lib/typingService";
@@ -34,14 +44,10 @@ const CATEGORY_ICONS: Record<string, string> = {
 };
 
 const AVATAR_COLORS = [
-  "#E31B23",
-  "#2563EB",
-  "#16A34A",
-  "#7C3AED",
-  "#D97706",
-  "#0891B2",
-  "#EA580C",
+  "#E31B23", "#2563EB", "#16A34A", "#7C3AED", "#D97706", "#0891B2", "#EA580C",
 ];
+
+const REACTION_EMOJIS = ["❤️", "😂", "😮", "😢", "👍"];
 
 function formatTime(dateStr: string): string {
   const d = new Date(dateStr);
@@ -65,6 +71,7 @@ export default function ChatScreen() {
   const [sending, setSending] = useState(false);
   const [otherTyping, setOtherTyping] = useState(false);
   const [otherSeenAt, setOtherSeenAt] = useState<string | null>(null);
+  const [reactionTarget, setReactionTarget] = useState<{ messageId: string; y: number } | null>(null);
   const flatListRef = useRef<FlatList>(null);
   const typingTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -78,6 +85,13 @@ export default function ChatScreen() {
     queryKey: ["task", taskId],
     queryFn: () => getTask(taskId),
     enabled: !!taskId,
+  });
+
+  // Fetch reactions for all messages
+  const { data: reactionsMap = new Map(), refetch: refetchReactions } = useQuery({
+    queryKey: ["reactions", taskId, messages.length],
+    queryFn: () => getReactionsForMessages(messages.map((m) => m.id)),
+    enabled: messages.length > 0,
   });
 
   // Mark as read only when the chat is actually focused
@@ -107,30 +121,25 @@ export default function ChatScreen() {
     return () => { supabase.removeChannel(ch); };
   }, [taskId, otherUserId]);
 
-  // Real-time subscription
+  // Real-time subscription for messages
   useEffect(() => {
     if (!taskId) return;
-
     const channel = supabase
       .channel(`messages-${taskId}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "messages",
-          filter: `task_id=eq.${taskId}`,
-        },
-        () => {
-          refetch();
-        },
-      )
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages", filter: `task_id=eq.${taskId}` }, () => refetch())
       .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    return () => { supabase.removeChannel(channel); };
   }, [taskId, refetch]);
+
+  // Real-time subscription for reactions
+  useEffect(() => {
+    if (!taskId) return;
+    const channel = supabase
+      .channel(`reactions-${taskId}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "message_reactions" }, () => refetchReactions())
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [taskId, refetchReactions]);
 
   // Typing indicator via shared service
   useEffect(() => {
@@ -157,24 +166,26 @@ export default function ChatScreen() {
   const handleSend = useCallback(async () => {
     const trimmed = text.trim();
     if (!trimmed || sending) return;
-
     setSending(true);
     try {
       await sendMessage(taskId, trimmed);
       setText("");
       refetch();
-    } catch (e) {
-      // silently fail
-    }
+    } catch (e) {}
     setSending(false);
   }, [text, sending, taskId, refetch]);
 
-  const avatarColor =
-    AVATAR_COLORS[
-      otherName.charCodeAt(0) % AVATAR_COLORS.length
-    ];
+  const handleReaction = useCallback(async (messageId: string, emoji: string) => {
+    setReactionTarget(null);
+    try {
+      await toggleReaction(messageId, emoji);
+      refetchReactions();
+    } catch (e) {}
+  }, [refetchReactions]);
 
-  // Find the last message (by either person) that the other person has seen
+  const avatarColor = AVATAR_COLORS[otherName.charCodeAt(0) % AVATAR_COLORS.length];
+
+  // Find the last message that the other person has seen
   const lastSeenMessageId = (() => {
     if (!otherSeenAt) return null;
     for (let i = messages.length - 1; i >= 0; i--) {
@@ -189,31 +200,64 @@ export default function ChatScreen() {
     ({ item }: { item: Message }) => {
       const isMine = item.senderId === user?.id;
       const showSeen = item.id === lastSeenMessageId;
+      const reactions = reactionsMap.get(item.id) ?? [];
+
+      // Group reactions by emoji
+      const emojiCounts = new Map<string, { count: number; myReaction: boolean }>();
+      for (const r of reactions) {
+        const existing = emojiCounts.get(r.emoji) ?? { count: 0, myReaction: false };
+        existing.count++;
+        if (r.userId === user?.id) existing.myReaction = true;
+        emojiCounts.set(r.emoji, existing);
+      }
+
       return (
-        <View style={{ marginBottom: 12 }}>
-          <View
-            style={[
-              styles.messageBubbleWrap,
-              isMine ? styles.messageBubbleWrapRight : styles.messageBubbleWrapLeft,
-            ]}
+        <View style={{ marginBottom: reactions.length > 0 ? 18 : 12 }}>
+          <Pressable
+            onLongPress={() => setReactionTarget({ messageId: item.id, y: 0 })}
+            delayLongPress={300}
           >
             <View
               style={[
-                styles.messageBubble,
-                isMine ? styles.messageBubbleMine : styles.messageBubbleOther,
+                styles.messageBubbleWrap,
+                isMine ? styles.messageBubbleWrapRight : styles.messageBubbleWrapLeft,
               ]}
             >
-              <Text
+              <View
                 style={[
-                  styles.messageText,
-                  isMine ? styles.messageTextMine : styles.messageTextOther,
+                  styles.messageBubble,
+                  isMine ? styles.messageBubbleMine : styles.messageBubbleOther,
                 ]}
               >
-                {item.content}
-              </Text>
+                <Text
+                  style={[
+                    styles.messageText,
+                    isMine ? styles.messageTextMine : styles.messageTextOther,
+                  ]}
+                >
+                  {item.content}
+                </Text>
+              </View>
+
+              {/* Reaction pills below the bubble */}
+              {emojiCounts.size > 0 && (
+                <View style={[styles.reactionsRow, isMine ? { justifyContent: "flex-end" } : {}]}>
+                  {Array.from(emojiCounts.entries()).map(([emoji, { count, myReaction }]) => (
+                    <Pressable
+                      key={emoji}
+                      onPress={() => handleReaction(item.id, emoji)}
+                      style={[styles.reactionPill, myReaction && styles.reactionPillMine]}
+                    >
+                      <Text style={styles.reactionEmoji}>{emoji}</Text>
+                      {count > 1 && <Text style={styles.reactionCount}>{count}</Text>}
+                    </Pressable>
+                  ))}
+                </View>
+              )}
             </View>
-          </View>
-          {/* Timestamp + seen avatar row — always full width */}
+          </Pressable>
+
+          {/* Timestamp + seen avatar row */}
           <View style={{ flexDirection: "row", alignItems: "center", marginTop: 2, paddingHorizontal: 4 }}>
             {isMine && <View style={{ flex: 1 }} />}
             <Text style={[styles.timestamp, { textAlign: isMine ? "right" : "left" }]}>
@@ -231,22 +275,18 @@ export default function ChatScreen() {
         </View>
       );
     },
-    [user?.id, lastSeenMessageId, avatarColor, otherName],
+    [user?.id, lastSeenMessageId, avatarColor, otherName, reactionsMap, handleReaction],
   );
 
-  const categoryColor =
-    CATEGORY_COLORS[task?.category ?? ""] ?? CATEGORY_COLORS.other;
-  const categoryIcon =
-    CATEGORY_ICONS[task?.category ?? ""] ?? "help-circle-outline";
+  const categoryColor = CATEGORY_COLORS[task?.category ?? ""] ?? CATEGORY_COLORS.other;
+  const categoryIcon = CATEGORY_ICONS[task?.category ?? ""] ?? "help-circle-outline";
 
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
       {/* Header */}
       <View style={styles.header}>
         <Pressable onPress={() => {
-          // Always go back in the stack first (clears ChatScreen from Discover stack)
           navigation.goBack();
-          // If we came from Inbox, also switch to the Inbox tab
           if (fromInbox) {
             setTimeout(() => {
               (navigation as any).getParent?.()?.navigate("Inbox");
@@ -256,14 +296,10 @@ export default function ChatScreen() {
           <MaterialCommunityIcons name="arrow-left" size={24} color="#000" />
         </Pressable>
         <View style={[styles.avatar, { backgroundColor: avatarColor }]}>
-          <Text style={styles.avatarText}>
-            {otherName.charAt(0).toUpperCase()}
-          </Text>
+          <Text style={styles.avatarText}>{otherName.charAt(0).toUpperCase()}</Text>
         </View>
         <View style={styles.headerInfo}>
-          <Text style={styles.headerName} numberOfLines={1}>
-            {otherName}
-          </Text>
+          <Text style={styles.headerName} numberOfLines={1}>{otherName}</Text>
           <Text style={styles.headerStatus}>Online</Text>
         </View>
       </View>
@@ -271,23 +307,14 @@ export default function ChatScreen() {
       {/* Task context banner */}
       {task && (
         <View style={styles.taskBanner}>
-          <View
-            style={[styles.taskIconBox, { backgroundColor: categoryColor }]}
-          >
-            <MaterialCommunityIcons
-              name={categoryIcon as any}
-              size={16}
-              color="#fff"
-            />
+          <View style={[styles.taskIconBox, { backgroundColor: categoryColor }]}>
+            <MaterialCommunityIcons name={categoryIcon as any} size={16} color="#fff" />
           </View>
           <View style={styles.taskBannerInfo}>
-            <Text style={styles.taskBannerTitle} numberOfLines={1}>
-              {task.title}
-            </Text>
+            <Text style={styles.taskBannerTitle} numberOfLines={1}>{task.title}</Text>
             <Text style={styles.taskBannerMeta}>
               {task.category.charAt(0).toUpperCase() + task.category.slice(1)}{" "}
-              · {task.budget ? `\u20AC${task.budget}` : "TBD"} ·{" "}
-              {task.status.replace("_", " ")}
+              · {task.budget ? `\u20AC${task.budget}` : "TBD"} · {task.status.replace("_", " ")}
             </Text>
           </View>
         </View>
@@ -316,6 +343,28 @@ export default function ChatScreen() {
         </View>
       )}
 
+      {/* Reaction picker modal */}
+      <Modal
+        visible={reactionTarget !== null}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setReactionTarget(null)}
+      >
+        <Pressable style={styles.reactionOverlay} onPress={() => setReactionTarget(null)}>
+          <View style={styles.reactionPicker}>
+            {REACTION_EMOJIS.map((emoji) => (
+              <Pressable
+                key={emoji}
+                onPress={() => reactionTarget && handleReaction(reactionTarget.messageId, emoji)}
+                style={styles.reactionOption}
+              >
+                <Text style={styles.reactionOptionText}>{emoji}</Text>
+              </Pressable>
+            ))}
+          </View>
+        </Pressable>
+      </Modal>
+
       {/* Input bar */}
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : undefined}
@@ -324,11 +373,7 @@ export default function ChatScreen() {
         <SafeAreaView edges={["bottom"]} style={styles.inputBarSafe}>
           <View style={styles.inputBar}>
             <Pressable style={styles.attachBtn}>
-              <MaterialCommunityIcons
-                name="plus"
-                size={20}
-                color={COLORS.textMuted}
-              />
+              <MaterialCommunityIcons name="plus" size={20} color={COLORS.textMuted} />
             </Pressable>
             <TextInput
               style={styles.textInput}
@@ -342,10 +387,7 @@ export default function ChatScreen() {
             <Pressable
               onPress={handleSend}
               disabled={!text.trim() || sending}
-              style={[
-                styles.sendBtn,
-                (!text.trim() || sending) && styles.sendBtnDisabled,
-              ]}
+              style={[styles.sendBtn, (!text.trim() || sending) && styles.sendBtnDisabled]}
             >
               {sending ? (
                 <ActivityIndicator size="small" color="#fff" />
@@ -361,10 +403,7 @@ export default function ChatScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-  },
+  container: { flex: 1, backgroundColor: "#fff" },
   header: {
     flexDirection: "row",
     alignItems: "center",
@@ -373,196 +412,136 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#F1F1F1",
   },
-  backBtn: {
-    padding: 4,
-    marginRight: 8,
-  },
+  backBtn: { padding: 4, marginRight: 8 },
   avatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 9999,
-    alignItems: "center",
-    justifyContent: "center",
+    width: 40, height: 40, borderRadius: 9999,
+    alignItems: "center", justifyContent: "center",
   },
-  avatarText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "700",
-  },
-  headerInfo: {
-    flex: 1,
-    marginLeft: 10,
-  },
-  headerName: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#000",
-  },
-  headerStatus: {
-    fontSize: 12,
-    color: "#22C55E",
-    marginTop: 1,
-  },
+  avatarText: { color: "#fff", fontSize: 16, fontWeight: "700" },
+  headerInfo: { flex: 1, marginLeft: 10 },
+  headerName: { fontSize: 16, fontWeight: "700", color: "#000" },
+  headerStatus: { fontSize: 12, color: "#22C55E", marginTop: 1 },
   taskBanner: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    backgroundColor: "#F9FAFB",
-    borderBottomWidth: 1,
-    borderBottomColor: "#F1F1F1",
+    flexDirection: "row", alignItems: "center",
+    paddingHorizontal: 16, paddingVertical: 10,
+    backgroundColor: "#F9FAFB", borderBottomWidth: 1, borderBottomColor: "#F1F1F1",
   },
   taskIconBox: {
-    width: 32,
-    height: 32,
-    borderRadius: 8,
-    alignItems: "center",
-    justifyContent: "center",
+    width: 32, height: 32, borderRadius: 8,
+    alignItems: "center", justifyContent: "center",
   },
-  taskBannerInfo: {
-    flex: 1,
-    marginLeft: 10,
-  },
-  taskBannerTitle: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: "#000",
-  },
-  taskBannerMeta: {
-    fontSize: 11,
-    color: COLORS.textMuted,
-    marginTop: 1,
-  },
-  messagesList: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  messageBubbleWrap: {
-    maxWidth: "80%",
-  },
-  messageBubbleWrapLeft: {
-    alignSelf: "flex-start",
-  },
-  messageBubbleWrapRight: {
-    alignSelf: "flex-end",
-  },
-  messageBubble: {
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-  },
+  taskBannerInfo: { flex: 1, marginLeft: 10 },
+  taskBannerTitle: { fontSize: 13, fontWeight: "600", color: "#000" },
+  taskBannerMeta: { fontSize: 11, color: COLORS.textMuted, marginTop: 1 },
+  messagesList: { paddingHorizontal: 16, paddingVertical: 12 },
+  messageBubbleWrap: { maxWidth: "80%" },
+  messageBubbleWrapLeft: { alignSelf: "flex-start" },
+  messageBubbleWrapRight: { alignSelf: "flex-end" },
+  messageBubble: { paddingHorizontal: 14, paddingVertical: 10 },
   messageBubbleMine: {
-    backgroundColor: COLORS.red,
-    borderRadius: 20,
-    borderBottomRightRadius: 6,
+    backgroundColor: COLORS.red, borderRadius: 20, borderBottomRightRadius: 6,
   },
   messageBubbleOther: {
-    backgroundColor: "#F1F5F9",
-    borderRadius: 20,
-    borderBottomLeftRadius: 6,
+    backgroundColor: "#F1F5F9", borderRadius: 20, borderBottomLeftRadius: 6,
   },
-  messageText: {
-    fontSize: 14,
-    lineHeight: 20,
+  messageText: { fontSize: 14, lineHeight: 20 },
+  messageTextMine: { color: "#fff" },
+  messageTextOther: { color: "#000" },
+  timestamp: { fontSize: 10, color: "#9CA3AF", marginTop: 4 },
+  // Reactions
+  reactionsRow: {
+    flexDirection: "row",
+    gap: 4,
+    marginTop: -6,
+    paddingHorizontal: 8,
   },
-  messageTextMine: {
-    color: "#fff",
-  },
-  messageTextOther: {
-    color: "#000",
-  },
-  timestamp: {
-    fontSize: 10,
-    color: "#9CA3AF",
-    marginTop: 4,
-  },
-  timestampLeft: {
-    textAlign: "left",
-  },
-  timestampRight: {
-    textAlign: "right",
-  },
-  inputBarSafe: {
-    borderTopWidth: 1,
-    borderTopColor: "#F1F1F1",
+  reactionPill: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 2,
     backgroundColor: "#fff",
+    borderRadius: 12,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 1 },
+  },
+  reactionPillMine: {
+    borderColor: COLORS.red,
+    backgroundColor: "#FEF2F2",
+  },
+  reactionEmoji: { fontSize: 14 },
+  reactionCount: { fontSize: 11, color: "#6B7280", fontWeight: "600" },
+  // Reaction picker
+  reactionOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.3)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  reactionPicker: {
+    flexDirection: "row",
+    backgroundColor: "#fff",
+    borderRadius: 28,
+    paddingHorizontal: 8,
+    paddingVertical: 8,
+    gap: 4,
+    shadowColor: "#000",
+    shadowOpacity: 0.15,
+    shadowRadius: 20,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 10,
+  },
+  reactionOption: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  reactionOptionText: { fontSize: 28 },
+  // Input
+  inputBarSafe: {
+    borderTopWidth: 1, borderTopColor: "#F1F1F1", backgroundColor: "#fff",
   },
   inputBar: {
-    flexDirection: "row",
-    alignItems: "flex-end",
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    gap: 8,
+    flexDirection: "row", alignItems: "flex-end",
+    paddingHorizontal: 12, paddingVertical: 8, gap: 8,
   },
   attachBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 9999,
-    backgroundColor: "#F1F5F9",
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 2,
+    width: 36, height: 36, borderRadius: 9999,
+    backgroundColor: "#F1F5F9", alignItems: "center", justifyContent: "center", marginBottom: 2,
   },
   textInput: {
-    flex: 1,
-    backgroundColor: "#F1F5F9",
-    borderRadius: 9999,
-    paddingHorizontal: 16,
-    paddingTop: 9,
-    paddingBottom: 9,
-    fontSize: 14,
-    maxHeight: 100,
-    color: "#000",
+    flex: 1, backgroundColor: "#F1F5F9", borderRadius: 9999,
+    paddingHorizontal: 16, paddingTop: 9, paddingBottom: 9,
+    fontSize: 14, maxHeight: 100, color: "#000",
   },
   sendBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 9999,
-    backgroundColor: COLORS.red,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 2,
+    width: 36, height: 36, borderRadius: 9999,
+    backgroundColor: COLORS.red, alignItems: "center", justifyContent: "center", marginBottom: 2,
   },
-  sendBtnDisabled: {
-    opacity: 0.5,
-  },
+  sendBtnDisabled: { opacity: 0.5 },
+  // Typing
   typingWrap: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 6,
+    flexDirection: "row", alignItems: "center", gap: 8,
+    paddingHorizontal: 16, paddingVertical: 6,
   },
   typingBubble: {
-    flexDirection: "row",
-    gap: 3,
-    backgroundColor: "#F1F1F1",
-    borderRadius: 12,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-    borderBottomLeftRadius: 4,
+    flexDirection: "row", gap: 3,
+    backgroundColor: "#F1F1F1", borderRadius: 12,
+    paddingHorizontal: 10, paddingVertical: 8, borderBottomLeftRadius: 4,
   },
-  typingDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: "#9CA3AF",
-  },
-  typingText: {
-    fontSize: 11,
-    color: "#9CA3AF",
-    fontWeight: "500",
-  },
-  seenRow: {},
+  typingDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: "#9CA3AF" },
+  typingText: { fontSize: 11, color: "#9CA3AF", fontWeight: "500" },
+  // Seen
   seenAvatar: {
-    width: 14,
-    height: 14,
-    borderRadius: 7,
-    alignItems: "center",
-    justifyContent: "center",
+    width: 14, height: 14, borderRadius: 7,
+    alignItems: "center", justifyContent: "center",
   },
-  seenAvatarText: {
-    color: "#fff",
-    fontSize: 7,
-    fontWeight: "700",
-  },
+  seenAvatarText: { color: "#fff", fontSize: 7, fontWeight: "700" },
 });

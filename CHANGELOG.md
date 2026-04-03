@@ -4,6 +4,18 @@ All notable changes to the Neighborly project will be documented in this file.
 
 Format: [Keep a Changelog](https://keepachangelog.com/)
 
+## [2026-04-03] — Message Reactions
+
+### Added
+- Long-press on any message to react with 5 emojis (❤️ 😂 😮 😢 👍)
+- Reaction pills displayed below message bubbles with count
+- Tap existing reaction to toggle it off or change emoji
+- Real-time reaction sync via Supabase Realtime
+- message_reactions table migration (006_message_reactions.sql)
+- Own reactions highlighted with red border
+
+---
+
 ## [2026-04-03] — Phase 5: Reviews & Trust
 
 ### Added

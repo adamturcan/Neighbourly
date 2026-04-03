@@ -638,6 +638,74 @@ export async function markAsRead(taskId: string): Promise<void> {
     );
 }
 
+// ============================================================
+// MESSAGE REACTIONS
+// ============================================================
+
+export type MessageReaction = {
+  id: string;
+  messageId: string;
+  userId: string;
+  emoji: string;
+};
+
+export async function getReactionsForMessages(messageIds: string[]): Promise<Map<string, MessageReaction[]>> {
+  if (messageIds.length === 0) return new Map();
+
+  const { data, error } = await supabase
+    .from("message_reactions")
+    .select("*")
+    .in("message_id", messageIds);
+
+  if (error) throw error;
+
+  const map = new Map<string, MessageReaction[]>();
+  for (const row of data ?? []) {
+    const reaction: MessageReaction = {
+      id: row.id,
+      messageId: row.message_id,
+      userId: row.user_id,
+      emoji: row.emoji,
+    };
+    const existing = map.get(row.message_id) ?? [];
+    existing.push(reaction);
+    map.set(row.message_id, existing);
+  }
+  return map;
+}
+
+export async function toggleReaction(messageId: string, emoji: string): Promise<void> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Not authenticated");
+
+  // Check if user already reacted to this message
+  const { data: existing } = await supabase
+    .from("message_reactions")
+    .select("id, emoji")
+    .eq("message_id", messageId)
+    .eq("user_id", user.id)
+    .single();
+
+  if (existing) {
+    if (existing.emoji === emoji) {
+      // Same emoji — remove reaction
+      await supabase.from("message_reactions").delete().eq("id", existing.id);
+    } else {
+      // Different emoji — update
+      await supabase.from("message_reactions").update({ emoji }).eq("id", existing.id);
+    }
+  } else {
+    // No reaction yet — insert
+    await supabase.from("message_reactions").insert({
+      message_id: messageId,
+      user_id: user.id,
+      emoji,
+    });
+  }
+}
+
 export async function getOtherReadReceipt(
   taskId: string,
   otherUserId: string,
