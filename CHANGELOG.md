@@ -9,6 +9,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/)
 ## [2026-04-03] — Phase 1: Supabase Foundation & Auth
 
 ### Changed
+- Added "Dev Sign In" button on WelcomeScreen (auto-creates dev@neighbourly.local account)
 - Replaced phone/SMS auth with Apple Sign-In + Google OAuth + Email magic link
 - WelcomeScreen now has 3 sign-in options (Apple on iOS, Google, Email)
 - Simplified AuthStack to single WelcomeScreen (no more phone/OTP flow)

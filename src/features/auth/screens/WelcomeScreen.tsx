@@ -48,7 +48,6 @@ export default function WelcomeScreen() {
   };
 
   const handleEmailSignIn = async () => {
-    // For dev/testing: magic link via email
     Alert.prompt(
       "Sign in with email",
       "Enter your email to receive a magic link",
@@ -66,6 +65,30 @@ export default function WelcomeScreen() {
         }
       },
     );
+  };
+
+  const handleDevSignIn = async () => {
+    setLoading(true);
+    const { error } = await supabase.auth.signInWithPassword({
+      email: "dev@neighbourly.local",
+      password: "dev123456",
+    });
+    if (error?.message?.includes("Invalid login")) {
+      // Account doesn't exist yet — create it
+      const { error: signUpError } = await supabase.auth.signUp({
+        email: "dev@neighbourly.local",
+        password: "dev123456",
+        options: {
+          data: { full_name: "Dev User" },
+        },
+      });
+      if (signUpError) {
+        Alert.alert("Dev sign-in failed", signUpError.message);
+      }
+    } else if (error) {
+      Alert.alert("Dev sign-in failed", error.message);
+    }
+    setLoading(false);
   };
 
   return (
@@ -129,6 +152,13 @@ export default function WelcomeScreen() {
           <Text className="text-gray-500 text-sm mt-2">Signing in…</Text>
         )}
       </View>
+
+      {/* Dev sign-in at the bottom */}
+      <Pressable onPress={handleDevSignIn} disabled={loading} className="mb-2 py-3">
+        <Text className="text-gray-600 text-xs text-center">
+          Dev Sign In
+        </Text>
+      </Pressable>
 
       <Text className="text-gray-600 text-xs text-center pb-4 px-8">
         By continuing, you agree to our Terms of Service and Privacy Policy.
