@@ -70,28 +70,27 @@ export default function InboxScreen() {
 
     const channels: any[] = [];
 
-    // Typing channels
-    conversations.forEach((conv) => {
-      const ch = supabase.channel(`typing-inbox-${conv.taskId}`);
-      ch.on("broadcast", { event: "typing" }, ({ payload }) => {
-        if (payload.userId !== user.id) {
-          setTypingTasks((prev) => new Set(prev).add(conv.taskId));
-          const existing = typingTimeouts.current.get(conv.taskId);
-          if (existing) clearTimeout(existing);
-          typingTimeouts.current.set(
-            conv.taskId,
-            setTimeout(() => {
-              setTypingTasks((prev) => {
-                const next = new Set(prev);
-                next.delete(conv.taskId);
-                return next;
-              });
-            }, 3000),
-          );
-        }
-      }).subscribe();
-      channels.push(ch);
-    });
+    // Single global typing channel for all conversations
+    const taskIds = new Set(conversations.map((c) => c.taskId));
+    const typingCh = supabase.channel("global-typing");
+    typingCh.on("broadcast", { event: "typing" }, ({ payload }) => {
+      if (payload.userId !== user.id && taskIds.has(payload.taskId)) {
+        setTypingTasks((prev) => new Set(prev).add(payload.taskId));
+        const existing = typingTimeouts.current.get(payload.taskId);
+        if (existing) clearTimeout(existing);
+        typingTimeouts.current.set(
+          payload.taskId,
+          setTimeout(() => {
+            setTypingTasks((prev) => {
+              const next = new Set(prev);
+              next.delete(payload.taskId);
+              return next;
+            });
+          }, 3000),
+        );
+      }
+    }).subscribe();
+    channels.push(typingCh);
 
     // Listen for new messages on each conversation
     conversations.forEach((conv) => {

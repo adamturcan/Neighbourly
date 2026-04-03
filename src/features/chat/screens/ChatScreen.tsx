@@ -67,7 +67,6 @@ export default function ChatScreen() {
   const flatListRef = useRef<FlatList>(null);
   const typingTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const typingChannelRef = useRef<any>(null);
-  const inboxTypingChannelRef = useRef<any>(null);
 
   const { data: messages = [], refetch } = useQuery({
     queryKey: ["messages", taskId],
@@ -133,39 +132,34 @@ export default function ChatScreen() {
     };
   }, [taskId, refetch]);
 
-  // Typing indicator broadcast
+  // Typing indicator — use a global channel so both chat + inbox can receive
   useEffect(() => {
     if (!taskId || !user) return;
 
-    const typingChannel = supabase.channel(`typing-${taskId}`);
-    typingChannel
-      .on("broadcast", { event: "typing" }, ({ payload }) => {
-        if (payload.userId !== user.id) {
-          setOtherTyping(true);
-          if (typingTimeout.current) clearTimeout(typingTimeout.current);
-          typingTimeout.current = setTimeout(() => setOtherTyping(false), 3000);
-        }
-      })
-      .subscribe();
+    const ch = supabase.channel("global-typing", { config: { broadcast: { self: true } } });
+    ch.on("broadcast", { event: "typing" }, ({ payload }) => {
+      if (payload.taskId === taskId && payload.userId !== user.id) {
+        setOtherTyping(true);
+        if (typingTimeout.current) clearTimeout(typingTimeout.current);
+        typingTimeout.current = setTimeout(() => setOtherTyping(false), 3000);
+      }
+    }).subscribe();
 
-    typingChannelRef.current = typingChannel;
-
-    // Also subscribe to the inbox typing channel so we can broadcast to it
-    const inboxTypingChannel = supabase.channel(`typing-inbox-${taskId}`).subscribe();
-    inboxTypingChannelRef.current = inboxTypingChannel;
+    typingChannelRef.current = ch;
 
     return () => {
-      supabase.removeChannel(typingChannel);
-      supabase.removeChannel(inboxTypingChannel);
+      supabase.removeChannel(ch);
       if (typingTimeout.current) clearTimeout(typingTimeout.current);
     };
   }, [taskId, user]);
 
   const broadcastTyping = useCallback(() => {
-    const payload = { userId: user?.id };
-    typingChannelRef.current?.send({ type: "broadcast", event: "typing", payload });
-    inboxTypingChannelRef.current?.send({ type: "broadcast", event: "typing", payload });
-  }, [user]);
+    typingChannelRef.current?.send({
+      type: "broadcast",
+      event: "typing",
+      payload: { userId: user?.id, taskId },
+    });
+  }, [user, taskId]);
 
   const handleTextChange = useCallback((val: string) => {
     setText(val);
