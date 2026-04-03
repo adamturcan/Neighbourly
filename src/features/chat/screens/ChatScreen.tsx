@@ -190,7 +190,7 @@ export default function ChatScreen() {
       const isMine = item.senderId === user?.id;
       const showSeen = item.id === lastSeenMessageId;
       return (
-        <>
+        <View style={{ marginBottom: 12 }}>
           <View
             style={[
               styles.messageBubbleWrap,
@@ -212,23 +212,23 @@ export default function ChatScreen() {
                 {item.content}
               </Text>
             </View>
-            <Text
-              style={[
-                styles.timestamp,
-                isMine ? styles.timestampRight : styles.timestampLeft,
-              ]}
-            >
+          </View>
+          {/* Timestamp + seen avatar row — always full width */}
+          <View style={{ flexDirection: "row", alignItems: "center", marginTop: 2, paddingHorizontal: 4 }}>
+            {isMine && <View style={{ flex: 1 }} />}
+            <Text style={[styles.timestamp, { textAlign: isMine ? "right" : "left" }]}>
               {formatTime(item.createdAt)}
             </Text>
+            {showSeen && (
+              <>
+                <View style={{ flex: isMine ? 0 : 1 }} />
+                <View style={[styles.seenAvatar, { backgroundColor: avatarColor, marginLeft: 4 }]}>
+                  <Text style={styles.seenAvatarText}>{otherName.charAt(0).toUpperCase()}</Text>
+                </View>
+              </>
+            )}
           </View>
-          {showSeen && (
-            <View style={styles.seenRow}>
-              <View style={[styles.seenAvatar, { backgroundColor: avatarColor }]}>
-                <Text style={styles.seenAvatarText}>{otherName.charAt(0).toUpperCase()}</Text>
-              </View>
-            </View>
-          )}
-        </>
+        </View>
       );
     },
     [user?.id, lastSeenMessageId, avatarColor, otherName],
@@ -438,7 +438,6 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   messageBubbleWrap: {
-    marginBottom: 12,
     maxWidth: "80%",
   },
   messageBubbleWrapLeft: {
@@ -553,13 +552,7 @@ const styles = StyleSheet.create({
     color: "#9CA3AF",
     fontWeight: "500",
   },
-  seenRow: {
-    flexDirection: "row",
-    justifyContent: "flex-end",
-    marginTop: -4,
-    marginBottom: 8,
-    paddingRight: 4,
-  },
+  seenRow: {},
   seenAvatar: {
     width: 14,
     height: 14,
