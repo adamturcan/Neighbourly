@@ -222,23 +222,21 @@ export default function ChatScreen() {
               {item.content}
             </Text>
           </View>
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 4, justifyContent: isMine ? "flex-end" : "flex-start" }}>
-            <Text
-              style={[
-                styles.timestamp,
-                isMine ? styles.timestampRight : styles.timestampLeft,
-              ]}
-            >
-              {formatTime(item.createdAt)}
-            </Text>
-            {showSeen && (
-              <View style={styles.seenRow}>
-                <View style={[styles.seenAvatar, { backgroundColor: avatarColor }]}>
-                  <Text style={styles.seenAvatarText}>{otherName.charAt(0).toUpperCase()}</Text>
-                </View>
+          <Text
+            style={[
+              styles.timestamp,
+              isMine ? styles.timestampRight : styles.timestampLeft,
+            ]}
+          >
+            {formatTime(item.createdAt)}
+          </Text>
+          {showSeen && (
+            <View style={styles.seenRow}>
+              <View style={[styles.seenAvatar, { backgroundColor: avatarColor }]}>
+                <Text style={styles.seenAvatarText}>{otherName.charAt(0).toUpperCase()}</Text>
               </View>
-            )}
-          </View>
+            </View>
+          )}
         </View>
       );
     },
@@ -562,8 +560,8 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   seenRow: {
-    flexDirection: "row",
-    alignItems: "center",
+    alignItems: "flex-end",
+    marginTop: 2,
   },
   seenAvatar: {
     width: 14,
