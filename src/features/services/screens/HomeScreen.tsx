@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { listServices, listTasks } from "../../../shared/lib/api";
+import { TAB_BAR_HEIGHT } from "../../../navigation/RootNavigator";
 import { useQuery } from "@tanstack/react-query";
 import ServiceCard from "../components/ServiceCard";
 import { useNavigation } from "@react-navigation/native";
@@ -216,7 +217,7 @@ export default function HomeScreen() {
             <Animated.ScrollView
               onScroll={onScroll}
               scrollEventThrottle={16}
-              contentContainerStyle={{ paddingBottom: 16 }}
+              contentContainerStyle={{ paddingBottom: TAB_BAR_HEIGHT + 16 }}
               showsVerticalScrollIndicator={false}
               refreshControl={<RefreshControl refreshing={false} onRefresh={refetchServices} tintColor={COLORS.red} />}
             >
@@ -274,7 +275,7 @@ export default function HomeScreen() {
             )}
             stickySectionHeadersEnabled={false}
             showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingBottom: 16 }}
+            contentContainerStyle={{ paddingBottom: TAB_BAR_HEIGHT + 16 }}
           />
         )}
       </View>

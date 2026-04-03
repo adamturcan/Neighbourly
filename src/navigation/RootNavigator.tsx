@@ -81,34 +81,37 @@ export default function MainTabs() {
   );
 }
 
+// Export tab bar height so screens can add bottom padding
+export const TAB_BAR_HEIGHT = 80;
+
 const tb = StyleSheet.create({
   wrap: {
     position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
-    paddingHorizontal: 16,
-    paddingTop: 4,
+    paddingHorizontal: 12,
+    paddingTop: 6,
   },
   pill: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#fff",
     borderRadius: 9999,
-    paddingHorizontal: 6,
-    paddingVertical: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 6,
     shadowColor: "#000",
-    shadowOpacity: 0.08,
-    shadowRadius: 20,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 8,
+    shadowOpacity: 0.1,
+    shadowRadius: 24,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 10,
   },
   tab: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    gap: 1,
-    paddingVertical: 6,
+    gap: 2,
+    paddingVertical: 8,
     borderRadius: 9999,
   },
   tabActive: {
@@ -126,12 +129,12 @@ const tb = StyleSheet.create({
   centerWrap: {
     alignItems: "center",
     justifyContent: "center",
-    marginHorizontal: 4,
+    marginHorizontal: 6,
   },
   centerBtn: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     backgroundColor: COLORS.red,
     alignItems: "center",
     justifyContent: "center",

@@ -7,6 +7,7 @@ import { listMyTasks } from "../../../shared/lib/api";
 import { useNavigation } from "@react-navigation/native";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import type { Task } from "../../../shared/types";
+import { TAB_BAR_HEIGHT } from "../../../navigation/RootNavigator";
 
 const STATUS_COLORS: Record<string, string> = {
   open: "#22C55E",
@@ -31,7 +32,7 @@ export default function ProfileScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-white">
-      <ScrollView className="flex-1" contentContainerClassName="px-4 pt-8 pb-12 gap-6">
+      <ScrollView className="flex-1" contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 32, paddingBottom: TAB_BAR_HEIGHT + 24, gap: 24 }}>
         {/* Profile header */}
         <View className="items-center gap-3">
           <View className="w-20 h-20 rounded-full bg-surface-dim items-center justify-center">

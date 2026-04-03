@@ -6,6 +6,7 @@ import ServiceCard from "../components/ServiceCard";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useDebounced } from "../../../shared/hooks/useDebounced";
 import { ORIGIN } from "../../../shared/lib/constants";
+import { TAB_BAR_HEIGHT } from "../../../navigation/RootNavigator";
 
 export default function SearchScreen() {
   const [q, setQ] = useState("");
@@ -50,7 +51,7 @@ export default function SearchScreen() {
           ItemSeparatorComponent={() => <View className="h-3" />}
           contentContainerStyle={{
             paddingHorizontal: 16,
-            paddingBottom: insets.bottom + 12,
+            paddingBottom: TAB_BAR_HEIGHT + 16,
           }}
           showsVerticalScrollIndicator={false}
         />

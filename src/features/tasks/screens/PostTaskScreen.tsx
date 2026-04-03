@@ -20,6 +20,7 @@ import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { useNavigation } from "@react-navigation/native";
 import { createTask } from "../../../shared/lib/api";
 import { COLORS } from "../../../shared/lib/constants";
+import { TAB_BAR_HEIGHT } from "../../../navigation/RootNavigator";
 
 const CATEGORIES = [
   { key: "cleaning", label: "Cleaning", desc: "Home, office, deep clean", icon: "broom" as const, bg: "#FEF2F2", fg: "#E31B23" },
@@ -397,7 +398,7 @@ const st = StyleSheet.create({
   settingsLabel: { fontSize: 14, fontWeight: "500", color: "#000" },
   settingsValue: { fontSize: 13, fontWeight: "500", color: "#A1A1AA" },
 
-  bottomBar: { paddingHorizontal: 16, paddingVertical: 8, borderTopWidth: 0.5, borderTopColor: "#F0F0F0", backgroundColor: "#fff" },
+  bottomBar: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: TAB_BAR_HEIGHT + 12, borderTopWidth: 0.5, borderTopColor: "#F0F0F0", backgroundColor: "#fff" },
   cta: { backgroundColor: COLORS.red, borderRadius: 14, paddingVertical: 16, alignItems: "center" },
   ctaText: { color: "#fff", fontSize: 15, fontWeight: "600" },
 });
