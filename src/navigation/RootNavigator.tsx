@@ -24,7 +24,7 @@ const TABS = [
   { name: "Profile", icon: "account-outline", iconFilled: "account", label: "Profile" },
 ] as const;
 
-const HIDDEN_ROUTES = ["ChatScreen"];
+const HIDDEN_ROUTES = ["ChatScreen", "MyServices", "CreateService"];
 
 function FloatingTabBar({ state, navigation, descriptors }: any) {
   const insets = useSafeAreaInsets();

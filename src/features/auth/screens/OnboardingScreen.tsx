@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, Pressable, ScrollView } from "react-native";
+import { View, Text, TextInput, Pressable, ScrollView, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useNavigation, CommonActions } from "@react-navigation/native";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { useAuth } from "../store/useAuth";
 import { COLORS } from "../../../shared/lib/constants";
@@ -18,6 +19,7 @@ const SKILL_OPTIONS = [
 
 export default function OnboardingScreen() {
   const { updateProfile, fetchProfile } = useAuth();
+  const nav = useNavigation<any>();
   const [name, setName] = useState("");
   const [role, setRole] = useState<"seeker" | "helper" | "both">("both");
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
@@ -41,6 +43,30 @@ export default function OnboardingScreen() {
     });
     await fetchProfile();
     setSaving(false);
+
+    // Offer to create a service if helper/both
+    if (role !== "seeker") {
+      Alert.alert(
+        "Create your first service?",
+        "List what you offer so neighbours can find and hire you.",
+        [
+          { text: "Later", style: "cancel" },
+          {
+            text: "Create Service",
+            onPress: () => {
+              setTimeout(() => {
+                nav.dispatch(
+                  CommonActions.navigate({
+                    name: "Discover",
+                    params: { screen: "CreateService" },
+                  }),
+                );
+              }, 300);
+            },
+          },
+        ],
+      );
+    }
   };
 
   return (

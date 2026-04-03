@@ -12,9 +12,9 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRoute, useNavigation } from "@react-navigation/native";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import { createService } from "../../../shared/lib/api";
+import { createService, updateService, getService } from "../../../shared/lib/api";
 import { COLORS, CATEGORY_COLORS } from "../../../shared/lib/constants";
 
 const { width: SCREEN_W } = Dimensions.get("window");
@@ -35,17 +35,35 @@ export default function CreateServiceScreen() {
   const route = useRoute<any>();
   const queryClient = useQueryClient();
   const editId = route.params?.editId;
+  const isEditing = !!editId;
 
   const [step, setStep] = useState(0);
   const slideAnim = useRef(new Animated.Value(0)).current;
   const [submitting, setSubmitting] = useState(false);
+  const [loaded, setLoaded] = useState(!isEditing);
 
   // Form state
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [categories, setCategories] = useState<string[]>([]);
+  const [category, setCategory] = useState<string | null>(null);
   const [priceFrom, setPriceFrom] = useState("");
   const [priceType, setPriceType] = useState<"service" | "hourly">("service");
+
+  // Load existing service data when editing
+  useQuery({
+    queryKey: ["service", editId],
+    queryFn: async () => {
+      const svc = await getService(editId!);
+      if (svc) {
+        setTitle(svc.title);
+        setCategory(svc.categories[0] ?? null);
+        setPriceFrom(String(svc.priceFrom));
+        setLoaded(true);
+      }
+      return svc;
+    },
+    enabled: isEditing && !loaded,
+  });
 
   const totalSteps = 3;
 
@@ -71,10 +89,8 @@ export default function CreateServiceScreen() {
     setStep(nextStep);
   };
 
-  const toggleCategory = (key: string) => {
-    setCategories((prev) =>
-      prev.includes(key) ? prev.filter((c) => c !== key) : [...prev, key],
-    );
+  const selectCategory = (key: string) => {
+    setCategory((prev) => (prev === key ? null : key));
   };
 
   const validateStep = (): boolean => {
@@ -83,7 +99,7 @@ export default function CreateServiceScreen() {
       return true;
     }
     if (step === 1) {
-      if (categories.length === 0) { Alert.alert("Select at least one category"); return false; }
+      if (!category) { Alert.alert("Select a category"); return false; }
       if (!priceFrom || Number(priceFrom) <= 0) { Alert.alert("Enter a valid starting price"); return false; }
       return true;
     }
@@ -110,15 +126,22 @@ export default function CreateServiceScreen() {
   const handlePublish = async () => {
     setSubmitting(true);
     try {
-      await createService({
-        title: title.trim(),
-        description: description.trim() || undefined,
-        categories,
-        priceFrom: Number(priceFrom),
-      });
+      if (isEditing) {
+        await updateService(editId!, {
+          title: title.trim(),
+          categories: category ? [category] : [],
+          priceFrom: Number(priceFrom),
+        });
+      } else {
+        await createService({
+          title: title.trim(),
+          description: description.trim() || undefined,
+          categories: category ? [category] : [],
+          priceFrom: Number(priceFrom),
+        });
+      }
       queryClient.invalidateQueries({ queryKey: ["services"] });
-      // Show success
-      setStep(3); // success state
+      setStep(3);
     } catch (e: any) {
       Alert.alert("Error", e.message);
     }
@@ -133,7 +156,7 @@ export default function CreateServiceScreen() {
           <View style={s.successIcon}>
             <MaterialCommunityIcons name="check" size={48} color="#fff" />
           </View>
-          <Text style={s.successTitle}>Service Published!</Text>
+          <Text style={s.successTitle}>{isEditing ? "Service Updated!" : "Service Published!"}</Text>
           <Text style={s.successSub}>Your service is now visible to seekers nearby</Text>
           <Pressable
             style={s.successBtn}
@@ -147,7 +170,7 @@ export default function CreateServiceScreen() {
               setStep(0);
               setTitle("");
               setDescription("");
-              setCategories([]);
+              setCategory(null);
               setPriceFrom("");
             }}
           >
@@ -215,15 +238,15 @@ export default function CreateServiceScreen() {
               <Text style={s.stepTitle}>What do you offer?</Text>
               <Text style={s.stepSub}>Select categories and set your starting price.</Text>
 
-              <Text style={[s.label, { marginBottom: 12 }]}>Categories</Text>
+              <Text style={[s.label, { marginBottom: 12 }]}>Category</Text>
               <View style={s.catGrid}>
                 {CATEGORIES.map((cat) => {
-                  const selected = categories.includes(cat.key);
+                  const selected = category === cat.key;
                   return (
                     <Pressable
                       key={cat.key}
                       style={[s.catOpt, selected && s.catOptSelected]}
-                      onPress={() => toggleCategory(cat.key)}
+                      onPress={() => selectCategory(cat.key)}
                     >
                       <View style={[s.catDot, { backgroundColor: cat.color }]} />
                       <Text style={[s.catName, selected && { color: COLORS.red }]}>{cat.label}</Text>
@@ -281,18 +304,18 @@ export default function CreateServiceScreen() {
                 {description ? (
                   <Text style={s.previewDesc}>{description}</Text>
                 ) : null}
-                <View style={s.previewCats}>
-                  {categories.map((c) => (
-                    <View key={c} style={[s.previewCat, { backgroundColor: (CATEGORY_COLORS[c] ?? "#6B7280") + "18" }]}>
-                      <Text style={[s.previewCatText, { color: CATEGORY_COLORS[c] ?? "#6B7280" }]}>{c}</Text>
+                {category && (
+                  <View style={s.previewCats}>
+                    <View style={[s.previewCat, { backgroundColor: (CATEGORY_COLORS[category] ?? "#6B7280") + "18" }]}>
+                      <Text style={[s.previewCatText, { color: CATEGORY_COLORS[category] ?? "#6B7280" }]}>{category}</Text>
                     </View>
-                  ))}
-                </View>
+                  </View>
+                )}
               </View>
 
               <View style={s.checkList}>
                 <CheckItem label="Service title" done={!!title.trim()} />
-                <CheckItem label="Categories selected" done={categories.length > 0} />
+                <CheckItem label="Category selected" done={!!category} />
                 <CheckItem label="Price set" done={!!priceFrom && Number(priceFrom) > 0} />
               </View>
             </>
