@@ -61,13 +61,12 @@ export default function PostTaskScreen() {
       return;
     }
     if (step === 2) {
-      const result = taskSchema.safeParse({
-        title,
-        description,
-        budget: Number(budget) || 0,
-      });
-      if (!result.success) {
-        Alert.alert("Check your input", result.error.issues[0].message);
+      if (title.trim().length < 3) {
+        Alert.alert("Check your input", "Title must be at least 3 characters");
+        return;
+      }
+      if (description.trim().length < 5) {
+        Alert.alert("Check your input", "Please add a short description");
         return;
       }
     }
