@@ -337,15 +337,19 @@ export default function TaskDetailScreen() {
           </View>
         )}
 
-        {/* Message button */}
+        {/* Message button — dismiss modal and go to Inbox chat */}
         {(task.status === "matched" || task.status === "in_progress") && (
           <Pressable
-            onPress={() =>
-              navigation.navigate("ChatScreen", {
-                taskId: task.id,
-                otherName: otherPartyName ?? "User",
-              })
-            }
+            onPress={() => {
+              // Close the modal first, then navigate to chat via Inbox tab
+              navigation.goBack();
+              setTimeout(() => {
+                (navigation as any).getParent?.()?.navigate("Discover", {
+                  screen: "ChatScreen",
+                  params: { taskId: task.id, otherName: otherPartyName ?? "User", fromInbox: true },
+                });
+              }, 100);
+            }}
             style={{
               backgroundColor: COLORS.red,
               borderRadius: 14,
