@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>V3 — Dark Premium</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Rounded:opsz,wght,FILL@20..48,100..700,0..1" rel="stylesheet">
+  <script>tailwind.config={theme:{extend:{colors:{brand:'#E31B23',card:'#1c1c1e',bg:'#000000',surf:'#2c2c2e',surfb:'#3a3a3c'},fontFamily:{sans:['Inter','system-ui']}}}}</script>
+  <style>
+    body{font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased}
+    .ph{width:375px;height:812px;border-radius:50px;border:10px solid #000;overflow:hidden;position:relative;background:#000;box-shadow:0 40px 80px -20px rgba(0,0,0,.5),inset 0 0 0 2px #2a2a2a}
+    .ph::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:150px;height:30px;background:#000;border-radius:0 0 20px 20px;z-index:10}
+    .ms{font-family:'Material Symbols Rounded';font-weight:normal;font-style:normal;font-size:24px;line-height:1;display:inline-block;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24}
+    .ms-s{font-size:20px;font-variation-settings:'FILL' 1,'wght' 500,'GRAD' 0,'opsz' 20}
+    .dc{cursor:pointer;transition:all .15s}.dc:hover{transform:scale(1.02)}
+    .dc.on{background:rgba(227,27,35,.12) !important;border-color:rgba(227,27,35,.5) !important}
+    .dc.on .dc-i{background:#E31B23 !important;color:#fff !important}
+    .dc.on .dc-n{color:#fff !important}
+  </style>
+</head>
+<body class="bg-neutral-900 min-h-screen flex items-start justify-center gap-6 p-6 flex-wrap">
+
+<p class="w-full text-center text-[11px] font-semibold text-neutral-500 uppercase tracking-[.15em]">Variant 3 — Dark premium, context doc vision, subtle glow accents</p>
+
+<!-- STEP 1 -->
+<div class="ph">
+  <div class="flex flex-col h-full pt-[42px]">
+    <div class="flex justify-between px-6 py-1 text-[12px] font-semibold text-white"><span>9:41</span><div class="flex gap-1 items-center"><span class="ms" style="font-size:15px">signal_cellular_alt</span><span class="ms" style="font-size:15px">wifi</span><span class="ms" style="font-size:16px">battery_full</span></div></div>
+    <div class="flex items-center px-4 h-11">
+      <span class="text-[15px] font-medium text-brand">Cancel</span>
+      <div class="flex-1 text-center"><span class="text-[15px] font-semibold text-white">New Task</span></div>
+      <span class="text-[15px] text-transparent">Cancel</span>
+    </div>
+    <div class="px-4 pt-1 pb-3 flex gap-1.5">
+      <div class="flex-1 h-[2px] rounded-full bg-brand"></div>
+      <div class="flex-1 h-[2px] rounded-full bg-surfb"></div>
+      <div class="flex-1 h-[2px] rounded-full bg-surfb"></div>
+    </div>
+
+    <div class="flex-1 overflow-auto px-4">
+      <p class="text-[22px] font-bold text-white leading-tight">Category</p>
+      <p class="text-[13px] text-neutral-500 mt-0.5 mb-4">What do you need help with?</p>
+
+      <div class="grid grid-cols-3 gap-2">
+        <div class="dc on rounded-[14px] border border-brand/50 bg-brand/10 p-2.5 flex flex-col items-center gap-1.5" onclick="s3(this)">
+          <div class="dc-i w-10 h-10 rounded-xl bg-brand flex items-center justify-center"><span class="ms text-white" style="font-size:22px">cleaning_services</span></div>
+          <span class="dc-n text-[11px] font-semibold text-white">Cleaning</span>
+        </div>
+        <div class="dc rounded-[14px] border border-surfb bg-card p-2.5 flex flex-col items-center gap-1.5" onclick="s3(this)">
+          <div class="dc-i w-10 h-10 rounded-xl bg-surf flex items-center justify-center"><span class="ms text-green-400" style="font-size:22px">yard</span></div>
+          <span class="dc-n text-[11px] font-semibold text-neutral-400">Garden</span>
+        </div>
+        <div class="dc rounded-[14px] border border-surfb bg-card p-2.5 flex flex-col items-center gap-1.5" onclick="s3(this)">
+          <div class="dc-i w-10 h-10 rounded-xl bg-surf flex items-center justify-center"><span class="ms text-blue-400" style="font-size:22px">local_shipping</span></div>
+          <span class="dc-n text-[11px] font-semibold text-neutral-400">Moving</span>
+        </div>
+        <div class="dc rounded-[14px] border border-surfb bg-card p-2.5 flex flex-col items-center gap-1.5" onclick="s3(this)">
+          <div class="dc-i w-10 h-10 rounded-xl bg-surf flex items-center justify-center"><span class="ms text-violet-400" style="font-size:22px">school</span></div>
+          <span class="dc-n text-[11px] font-semibold text-neutral-400">Tutoring</span>
+        </div>
+        <div class="dc rounded-[14px] border border-surfb bg-card p-2.5 flex flex-col items-center gap-1.5" onclick="s3(this)">
+          <div class="dc-i w-10 h-10 rounded-xl bg-surf flex items-center justify-center"><span class="ms text-cyan-400" style="font-size:22px">plumbing</span></div>
+          <span class="dc-n text-[11px] font-semibold text-neutral-400">Plumbing</span>
+        </div>
+        <div class="dc rounded-[14px] border border-surfb bg-card p-2.5 flex flex-col items-center gap-1.5" onclick="s3(this)">
+          <div class="dc-i w-10 h-10 rounded-xl bg-surf flex items-center justify-center"><span class="ms text-amber-400" style="font-size:22px">bolt</span></div>
+          <span class="dc-n text-[11px] font-semibold text-neutral-400">Electrical</span>
+        </div>
+        <div class="dc rounded-[14px] border border-surfb bg-card p-2.5 flex flex-col items-center gap-1.5" onclick="s3(this)">
+          <div class="dc-i w-10 h-10 rounded-xl bg-surf flex items-center justify-center"><span class="ms text-orange-400" style="font-size:22px">format_paint</span></div>
+          <span class="dc-n text-[11px] font-semibold text-neutral-400">Painting</span>
+        </div>
+        <div class="dc rounded-[14px] border border-surfb bg-card p-2.5 flex flex-col items-center gap-1.5" onclick="s3(this)">
+          <div class="dc-i w-10 h-10 rounded-xl bg-surf flex items-center justify-center"><span class="ms text-rose-400" style="font-size:22px">directions_car</span></div>
+          <span class="dc-n text-[11px] font-semibold text-neutral-400">Car help</span>
+        </div>
+        <div class="dc rounded-[14px] border border-surfb bg-card p-2.5 flex flex-col items-center gap-1.5" onclick="s3(this)">
+          <div class="dc-i w-10 h-10 rounded-xl bg-surf flex items-center justify-center"><span class="ms text-neutral-500" style="font-size:22px">more_horiz</span></div>
+          <span class="dc-n text-[11px] font-semibold text-neutral-400">Other</span>
+        </div>
+      </div>
+    </div>
+    <div class="px-4 pb-8 pt-2"><button class="w-full bg-brand text-white text-[15px] font-semibold py-[14px] rounded-[14px]" style="box-shadow:0 4px 20px rgba(227,27,35,.35)">Continue</button></div>
+  </div>
+</div>
+
+<!-- STEP 2 -->
+<div class="ph">
+  <div class="flex flex-col h-full pt-[42px]">
+    <div class="flex justify-between px-6 py-1 text-[12px] font-semibold text-white"><span>9:41</span><div class="flex gap-1 items-center"><span class="ms" style="font-size:15px">signal_cellular_alt</span><span class="ms" style="font-size:15px">wifi</span><span class="ms" style="font-size:16px">battery_full</span></div></div>
+    <div class="flex items-center px-4 h-11">
+      <span class="ms text-neutral-400 cursor-pointer" style="font-size:22px">arrow_back_ios_new</span>
+      <div class="flex-1 text-center"><span class="text-[15px] font-semibold text-white">New Task</span></div>
+      <span class="text-transparent">x</span>
+    </div>
+    <div class="px-4 pt-1 pb-3 flex gap-1.5">
+      <div class="flex-1 h-[2px] rounded-full bg-brand"></div>
+      <div class="flex-1 h-[2px] rounded-full bg-brand"></div>
+      <div class="flex-1 h-[2px] rounded-full bg-surfb"></div>
+    </div>
+
+    <div class="flex-1 overflow-auto px-4">
+      <div class="inline-flex items-center gap-1 bg-brand/15 rounded-lg px-2 py-1 mb-4">
+        <span class="ms text-brand" style="font-size:13px;font-variation-settings:'FILL' 1,'wght' 500,'opsz' 20">cleaning_services</span>
+        <span class="text-[11px] font-semibold text-brand">Cleaning</span>
+      </div>
+
+      <p class="text-[22px] font-bold text-white leading-tight mb-5">Details</p>
+
+      <div class="space-y-3">
+        <div class="bg-card rounded-xl overflow-hidden border border-surfb">
+          <div class="px-3 pt-2 pb-0.5"><span class="text-[10px] font-medium text-neutral-500 uppercase tracking-wider">Title</span></div>
+          <input type="text" value="Deep clean my apartment" class="w-full px-3 pb-2.5 text-[15px] text-white font-medium bg-transparent outline-none" />
+        </div>
+        <div class="bg-card rounded-xl overflow-hidden border border-surfb">
+          <div class="px-3 pt-2 pb-0.5"><span class="text-[10px] font-medium text-neutral-500 uppercase tracking-wider">Description</span></div>
+          <textarea rows="4" class="w-full px-3 pb-2.5 text-[15px] text-white bg-transparent outline-none resize-none leading-relaxed">2-bedroom flat, kitchen and bathroom need extra attention.</textarea>
+        </div>
+        <div>
+          <span class="text-[10px] font-medium text-neutral-500 uppercase tracking-wider block mb-2 px-0.5">Photos</span>
+          <div class="flex gap-2">
+            <div class="w-[60px] h-[60px] rounded-xl border border-dashed border-surfb bg-card flex items-center justify-center cursor-pointer">
+              <span class="ms-s text-neutral-500">add_a_photo</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="px-4 pb-8 pt-2"><button class="w-full bg-brand text-white text-[15px] font-semibold py-[14px] rounded-[14px]" style="box-shadow:0 4px 20px rgba(227,27,35,.35)">Continue</button></div>
+  </div>
+</div>
+
+<!-- STEP 3 -->
+<div class="ph">
+  <div class="flex flex-col h-full pt-[42px]">
+    <div class="flex justify-between px-6 py-1 text-[12px] font-semibold text-white"><span>9:41</span><div class="flex gap-1 items-center"><span class="ms" style="font-size:15px">signal_cellular_alt</span><span class="ms" style="font-size:15px">wifi</span><span class="ms" style="font-size:16px">battery_full</span></div></div>
+    <div class="flex items-center px-4 h-11">
+      <span class="ms text-neutral-400 cursor-pointer" style="font-size:22px">arrow_back_ios_new</span>
+      <div class="flex-1 text-center"><span class="text-[15px] font-semibold text-white">New Task</span></div>
+      <span class="text-transparent">x</span>
+    </div>
+    <div class="px-4 pt-1 pb-3 flex gap-1.5">
+      <div class="flex-1 h-[2px] rounded-full bg-brand"></div>
+      <div class="flex-1 h-[2px] rounded-full bg-brand"></div>
+      <div class="flex-1 h-[2px] rounded-full bg-brand"></div>
+    </div>
+
+    <div class="flex-1 overflow-auto px-4">
+      <!-- Summary -->
+      <div class="bg-card border border-surfb rounded-xl px-3 py-2.5 mb-5 flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-[8px] bg-brand flex items-center justify-center"><span class="ms text-white" style="font-size:15px;font-variation-settings:'FILL' 1,'wght' 500,'opsz' 20">cleaning_services</span></div>
+        <div><p class="text-[13px] font-semibold text-white">Deep clean my apartment</p><p class="text-[11px] text-neutral-500">Cleaning</p></div>
+      </div>
+
+      <p class="text-[22px] font-bold text-white leading-tight mb-5">Budget</p>
+
+      <div class="bg-card border border-surfb rounded-xl px-3.5 py-3 flex items-center gap-1 mb-2.5">
+        <span class="text-[22px] font-bold text-neutral-600">€</span>
+        <input type="text" value="45" class="text-[22px] font-bold text-white bg-transparent outline-none flex-1" />
+      </div>
+      <div class="flex gap-1.5 mb-5">
+        <button class="h-[28px] px-3 rounded-lg bg-card border border-surfb text-[11px] font-semibold text-neutral-400">€20</button>
+        <button class="h-[28px] px-3 rounded-lg bg-brand/15 border border-brand/40 text-[11px] font-semibold text-brand">€45</button>
+        <button class="h-[28px] px-3 rounded-lg bg-card border border-surfb text-[11px] font-semibold text-neutral-400">€60</button>
+        <button class="h-[28px] px-3 rounded-lg bg-card border border-surfb text-[11px] font-semibold text-neutral-400">€80</button>
+        <button class="h-[28px] px-3 rounded-lg bg-card border border-surfb text-[11px] font-semibold text-neutral-400">€100</button>
+      </div>
+
+      <div class="bg-card border border-surfb rounded-xl overflow-hidden">
+        <div class="flex items-center justify-between px-3 py-[10px] border-b border-surfb cursor-pointer">
+          <div class="flex items-center gap-2"><span class="ms-s text-neutral-500">payments</span><span class="text-[14px] text-white">Payment</span></div>
+          <div class="flex items-center gap-0.5"><span class="text-[13px] text-neutral-500">Cash</span><span class="ms text-neutral-600" style="font-size:16px">chevron_right</span></div>
+        </div>
+        <div class="flex items-center justify-between px-3 py-[10px] border-b border-surfb cursor-pointer">
+          <div class="flex items-center gap-2"><span class="ms-s text-neutral-500">schedule</span><span class="text-[14px] text-white">When</span></div>
+          <div class="flex items-center gap-0.5"><span class="text-[13px] text-neutral-500">ASAP</span><span class="ms text-neutral-600" style="font-size:16px">chevron_right</span></div>
+        </div>
+        <div class="flex items-center justify-between px-3 py-[10px] cursor-pointer">
+          <div class="flex items-center gap-2"><span class="ms-s text-neutral-500">location_on</span><span class="text-[14px] text-white">Location</span></div>
+          <div class="flex items-center gap-0.5"><span class="text-[13px] text-neutral-500">Current</span><span class="ms text-neutral-600" style="font-size:16px">chevron_right</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="px-4 pb-8 pt-2"><button class="w-full bg-brand text-white text-[15px] font-semibold py-[14px] rounded-[14px]" style="box-shadow:0 4px 20px rgba(227,27,35,.35)">Post task — €45</button></div>
+  </div>
+</div>
+
+<script>
+function s3(el){el.closest('.grid').querySelectorAll('.dc').forEach(c=>c.classList.remove('on'));el.classList.add('on')}
+</script>
+</body>
+</html>

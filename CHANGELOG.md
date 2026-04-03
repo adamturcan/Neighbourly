@@ -8,6 +8,19 @@ Format: [Keep a Changelog](https://keepachangelog.com/)
 
 ## [2026-04-03] — Phase 1: Supabase Foundation & Auth
 
+## [2026-04-03] — Post Task UI Redesign (V2 iOS Native)
+
+### Changed
+- PostTaskScreen redesigned with iOS native style:
+  - Step 1: 4-column icon grid with white shadow cards, colored icons, check badge
+  - Step 2: iOS grouped table inputs (title/description in one white card), photo upload
+  - Step 3: Budget with quick-pick presets, iOS settings rows (payment/when/location), review card
+- iOS system gray background (#f2f2f7) instead of white
+- "Post task — €45" dynamic CTA button
+- Proper iOS spacing, typography, and shadow treatment
+
+---
+
 ## [2026-04-03] — Phase 2: Task Lifecycle
 
 ### Added

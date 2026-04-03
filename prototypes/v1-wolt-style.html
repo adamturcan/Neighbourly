@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>V1 — Wolt Style</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Rounded:opsz,wght,FILL@20..48,100..700,0..1" rel="stylesheet">
+  <script>tailwind.config={theme:{extend:{colors:{brand:'#E31B23',bg:'#f5f5f5'},fontFamily:{sans:['Inter','system-ui']}}}}</script>
+  <style>
+    body{font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased}
+    .ph{width:375px;height:812px;border-radius:50px;border:10px solid #1d1d1f;overflow:hidden;position:relative;background:#fff;box-shadow:0 40px 80px -20px rgba(0,0,0,.3),inset 0 0 0 2px #3a3a3c}
+    .ph::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:150px;height:30px;background:#1d1d1f;border-radius:0 0 20px 20px;z-index:10}
+    .ms{font-family:'Material Symbols Rounded';font-weight:normal;font-style:normal;font-size:24px;line-height:1;letter-spacing:normal;text-transform:none;display:inline-block;white-space:nowrap;word-wrap:normal;direction:ltr;-webkit-font-smoothing:antialiased;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24}
+    .ms-20{font-size:20px;font-variation-settings:'FILL' 1,'wght' 500,'GRAD' 0,'opsz' 20}
+    .ms-22{font-size:22px;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24}
+    .cat:hover{background:#fafafa}.cat.on{background:#fef2f2;border-color:#E31B23}
+    .cat.on .cat-ic{background:#E31B23;color:#fff}
+    .cat.on .cat-t{color:#E31B23}
+  </style>
+</head>
+<body class="bg-neutral-200 min-h-screen flex items-start justify-center gap-6 p-6 flex-wrap">
+
+<p class="w-full text-center text-[11px] font-semibold text-neutral-400 uppercase tracking-[.15em] mb-0">Variant 1 — Wolt / Bolt inspired, light, horizontal category chips on step 1</p>
+
+<!-- STEP 1 -->
+<div class="ph">
+  <div class="flex flex-col h-full pt-[42px]">
+    <!-- Status bar mock -->
+    <div class="flex justify-between px-6 py-1 text-[12px] font-semibold text-black">
+      <span>9:41</span>
+      <div class="flex gap-1 items-center">
+        <span class="ms" style="font-size:15px">signal_cellular_alt</span>
+        <span class="ms" style="font-size:15px">wifi</span>
+        <span class="ms" style="font-size:16px">battery_full</span>
+      </div>
+    </div>
+
+    <!-- Nav -->
+    <div class="flex items-center px-4 h-11">
+      <span class="text-[15px] font-semibold text-brand">Cancel</span>
+      <div class="flex-1 text-center">
+        <span class="text-[15px] font-semibold text-black">New Task</span>
+      </div>
+      <span class="text-[15px] font-semibold text-transparent">Cancel</span>
+    </div>
+
+    <!-- Progress -->
+    <div class="px-4 pt-1 pb-3 flex gap-1.5">
+      <div class="flex-1 h-[3px] rounded-full bg-brand"></div>
+      <div class="flex-1 h-[3px] rounded-full bg-neutral-200"></div>
+      <div class="flex-1 h-[3px] rounded-full bg-neutral-200"></div>
+    </div>
+
+    <div class="flex-1 overflow-auto px-4">
+      <p class="text-[22px] font-bold text-black leading-tight">What do you<br>need help with?</p>
+      <p class="text-[13px] text-neutral-400 mt-1 mb-4">Choose a category</p>
+
+      <div class="space-y-[6px]">
+        <div class="cat on flex items-center gap-3 px-3 py-[10px] rounded-xl border border-brand transition-all cursor-pointer" onclick="s1(this)">
+          <div class="cat-ic w-9 h-9 rounded-[10px] bg-brand text-white flex items-center justify-center"><span class="ms-20">cleaning_services</span></div>
+          <div class="flex-1"><p class="cat-t text-[14px] font-semibold text-brand">Cleaning</p><p class="text-[11px] text-neutral-400">Home, office, deep clean</p></div>
+          <span class="ms-20 text-brand">check_circle</span>
+        </div>
+        <div class="cat flex items-center gap-3 px-3 py-[10px] rounded-xl border border-neutral-200 transition-all cursor-pointer" onclick="s1(this)">
+          <div class="cat-ic w-9 h-9 rounded-[10px] bg-green-50 text-green-600 flex items-center justify-center"><span class="ms-20">yard</span></div>
+          <div class="flex-1"><p class="cat-t text-[14px] font-semibold text-black">Garden</p><p class="text-[11px] text-neutral-400">Mowing, trimming, planting</p></div>
+          <span class="ms-20 text-brand" style="display:none">check_circle</span>
+        </div>
+        <div class="cat flex items-center gap-3 px-3 py-[10px] rounded-xl border border-neutral-200 transition-all cursor-pointer" onclick="s1(this)">
+          <div class="cat-ic w-9 h-9 rounded-[10px] bg-blue-50 text-blue-600 flex items-center justify-center"><span class="ms-20">local_shipping</span></div>
+          <div class="flex-1"><p class="cat-t text-[14px] font-semibold text-black">Moving</p><p class="text-[11px] text-neutral-400">Furniture, boxes, transport</p></div>
+        </div>
+        <div class="cat flex items-center gap-3 px-3 py-[10px] rounded-xl border border-neutral-200 transition-all cursor-pointer" onclick="s1(this)">
+          <div class="cat-ic w-9 h-9 rounded-[10px] bg-violet-50 text-violet-600 flex items-center justify-center"><span class="ms-20">school</span></div>
+          <div class="flex-1"><p class="cat-t text-[14px] font-semibold text-black">Tutoring</p><p class="text-[11px] text-neutral-400">Math, languages, music</p></div>
+        </div>
+        <div class="cat flex items-center gap-3 px-3 py-[10px] rounded-xl border border-neutral-200 transition-all cursor-pointer" onclick="s1(this)">
+          <div class="cat-ic w-9 h-9 rounded-[10px] bg-cyan-50 text-cyan-600 flex items-center justify-center"><span class="ms-20">plumbing</span></div>
+          <div class="flex-1"><p class="cat-t text-[14px] font-semibold text-black">Plumbing</p><p class="text-[11px] text-neutral-400">Leaks, pipes, installation</p></div>
+        </div>
+        <div class="cat flex items-center gap-3 px-3 py-[10px] rounded-xl border border-neutral-200 transition-all cursor-pointer" onclick="s1(this)">
+          <div class="cat-ic w-9 h-9 rounded-[10px] bg-amber-50 text-amber-600 flex items-center justify-center"><span class="ms-20">bolt</span></div>
+          <div class="flex-1"><p class="cat-t text-[14px] font-semibold text-black">Electrical</p><p class="text-[11px] text-neutral-400">Wiring, outlets, fixtures</p></div>
+        </div>
+        <div class="cat flex items-center gap-3 px-3 py-[10px] rounded-xl border border-neutral-200 transition-all cursor-pointer" onclick="s1(this)">
+          <div class="cat-ic w-9 h-9 rounded-[10px] bg-orange-50 text-orange-500 flex items-center justify-center"><span class="ms-20">format_paint</span></div>
+          <div class="flex-1"><p class="cat-t text-[14px] font-semibold text-black">Painting</p><p class="text-[11px] text-neutral-400">Walls, furniture, exterior</p></div>
+        </div>
+        <div class="cat flex items-center gap-3 px-3 py-[10px] rounded-xl border border-neutral-200 transition-all cursor-pointer" onclick="s1(this)">
+          <div class="cat-ic w-9 h-9 rounded-[10px] bg-rose-50 text-rose-500 flex items-center justify-center"><span class="ms-20">directions_car</span></div>
+          <div class="flex-1"><p class="cat-t text-[14px] font-semibold text-black">Car help</p><p class="text-[11px] text-neutral-400">Jump start, wash, tyre</p></div>
+        </div>
+      </div>
+      <div class="h-4"></div>
+    </div>
+
+    <!-- Bottom -->
+    <div class="px-4 pb-8 pt-2 bg-white border-t border-neutral-100">
+      <button class="w-full bg-brand text-white text-[15px] font-semibold py-[14px] rounded-[14px]">Continue</button>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 2 -->
+<div class="ph">
+  <div class="flex flex-col h-full pt-[42px]">
+    <div class="flex justify-between px-6 py-1 text-[12px] font-semibold text-black">
+      <span>9:41</span>
+      <div class="flex gap-1 items-center">
+        <span class="ms" style="font-size:15px">signal_cellular_alt</span>
+        <span class="ms" style="font-size:15px">wifi</span>
+        <span class="ms" style="font-size:16px">battery_full</span>
+      </div>
+    </div>
+    <div class="flex items-center px-4 h-11">
+      <span class="ms-22 text-black cursor-pointer">arrow_back_ios_new</span>
+      <div class="flex-1 text-center"><span class="text-[15px] font-semibold text-black">New Task</span></div>
+      <span class="ms-22 text-transparent">x</span>
+    </div>
+    <div class="px-4 pt-1 pb-3 flex gap-1.5">
+      <div class="flex-1 h-[3px] rounded-full bg-brand"></div>
+      <div class="flex-1 h-[3px] rounded-full bg-brand"></div>
+      <div class="flex-1 h-[3px] rounded-full bg-neutral-200"></div>
+    </div>
+
+    <div class="flex-1 overflow-auto px-4">
+      <!-- Chip -->
+      <div class="inline-flex items-center gap-1.5 bg-red-50 rounded-lg px-2.5 py-1 mb-4">
+        <span class="ms text-brand" style="font-size:14px;font-variation-settings:'FILL' 1,'wght' 500,'opsz' 20">cleaning_services</span>
+        <span class="text-[12px] font-semibold text-brand">Cleaning</span>
+      </div>
+
+      <p class="text-[22px] font-bold text-black leading-tight mb-5">Describe your task</p>
+
+      <div class="space-y-4">
+        <div>
+          <label class="text-[12px] font-medium text-neutral-500 block mb-1.5">Title</label>
+          <input type="text" value="Deep clean my apartment" class="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-3.5 py-3 text-[14px] text-black outline-none focus:border-brand focus:ring-1 focus:ring-brand/20 font-medium placeholder:text-neutral-300" />
+        </div>
+        <div>
+          <label class="text-[12px] font-medium text-neutral-500 block mb-1.5">Description</label>
+          <textarea rows="4" class="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-3.5 py-3 text-[14px] text-black outline-none focus:border-brand focus:ring-1 focus:ring-brand/20 resize-none placeholder:text-neutral-300 leading-relaxed">2-bedroom flat, kitchen and bathroom need extra attention. Weekday afternoon preferred.</textarea>
+        </div>
+        <div>
+          <label class="text-[12px] font-medium text-neutral-500 block mb-1.5">Photos <span class="text-neutral-300">(optional)</span></label>
+          <div class="flex gap-2">
+            <div class="w-[68px] h-[68px] rounded-xl border border-dashed border-neutral-300 bg-neutral-50 flex flex-col items-center justify-center gap-0.5 cursor-pointer hover:border-brand hover:bg-red-50 transition-colors">
+              <span class="ms-20 text-neutral-400">photo_camera</span>
+              <span class="text-[9px] text-neutral-400 font-medium">Add</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="px-4 pb-8 pt-2 bg-white border-t border-neutral-100">
+      <button class="w-full bg-brand text-white text-[15px] font-semibold py-[14px] rounded-[14px]">Continue</button>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 3 -->
+<div class="ph">
+  <div class="flex flex-col h-full pt-[42px]">
+    <div class="flex justify-between px-6 py-1 text-[12px] font-semibold text-black">
+      <span>9:41</span>
+      <div class="flex gap-1 items-center">
+        <span class="ms" style="font-size:15px">signal_cellular_alt</span>
+        <span class="ms" style="font-size:15px">wifi</span>
+        <span class="ms" style="font-size:16px">battery_full</span>
+      </div>
+    </div>
+    <div class="flex items-center px-4 h-11">
+      <span class="ms-22 text-black cursor-pointer">arrow_back_ios_new</span>
+      <div class="flex-1 text-center"><span class="text-[15px] font-semibold text-black">New Task</span></div>
+      <span class="ms-22 text-transparent">x</span>
+    </div>
+    <div class="px-4 pt-1 pb-3 flex gap-1.5">
+      <div class="flex-1 h-[3px] rounded-full bg-brand"></div>
+      <div class="flex-1 h-[3px] rounded-full bg-brand"></div>
+      <div class="flex-1 h-[3px] rounded-full bg-brand"></div>
+    </div>
+
+    <div class="flex-1 overflow-auto px-4">
+      <!-- Summary -->
+      <div class="flex items-center gap-3 bg-neutral-50 rounded-xl px-3 py-2.5 mb-5">
+        <div class="w-8 h-8 rounded-lg bg-brand flex items-center justify-center"><span class="ms text-white" style="font-size:16px;font-variation-settings:'FILL' 1,'wght' 500,'opsz' 20">cleaning_services</span></div>
+        <div><p class="text-[13px] font-semibold text-black">Deep clean my apartment</p><p class="text-[11px] text-neutral-400">Cleaning</p></div>
+      </div>
+
+      <p class="text-[22px] font-bold text-black leading-tight mb-5">Budget & details</p>
+
+      <!-- Budget -->
+      <div>
+        <label class="text-[12px] font-medium text-neutral-500 block mb-1.5">Your budget</label>
+        <div class="bg-neutral-50 border border-neutral-200 rounded-xl px-3.5 py-3 flex items-center gap-1 focus-within:border-brand focus-within:ring-1 focus-within:ring-brand/20">
+          <span class="text-[20px] font-bold text-neutral-300">€</span>
+          <input type="text" value="45" class="text-[20px] font-bold text-black bg-transparent outline-none flex-1" />
+        </div>
+      </div>
+      <div class="flex gap-1.5 mt-2 mb-5">
+        <button class="h-8 px-3.5 rounded-lg border border-neutral-200 text-[12px] font-semibold text-neutral-500 hover:border-brand hover:text-brand transition-colors">€20</button>
+        <button class="h-8 px-3.5 rounded-lg border border-brand bg-red-50 text-[12px] font-semibold text-brand">€45</button>
+        <button class="h-8 px-3.5 rounded-lg border border-neutral-200 text-[12px] font-semibold text-neutral-500 hover:border-brand hover:text-brand transition-colors">€60</button>
+        <button class="h-8 px-3.5 rounded-lg border border-neutral-200 text-[12px] font-semibold text-neutral-500 hover:border-brand hover:text-brand transition-colors">€80</button>
+        <button class="h-8 px-3.5 rounded-lg border border-neutral-200 text-[12px] font-semibold text-neutral-500 hover:border-brand hover:text-brand transition-colors">€100</button>
+      </div>
+
+      <!-- Settings rows -->
+      <div class="space-y-[1px] bg-neutral-100 rounded-xl overflow-hidden">
+        <div class="flex items-center justify-between bg-white px-3.5 py-3 cursor-pointer">
+          <div class="flex items-center gap-2.5">
+            <span class="ms-20 text-neutral-400">payments</span>
+            <span class="text-[14px] font-medium text-black">Payment</span>
+          </div>
+          <div class="flex items-center gap-1">
+            <span class="text-[13px] font-medium text-neutral-400">Cash</span>
+            <span class="ms text-neutral-300" style="font-size:18px">chevron_right</span>
+          </div>
+        </div>
+        <div class="flex items-center justify-between bg-white px-3.5 py-3 cursor-pointer">
+          <div class="flex items-center gap-2.5">
+            <span class="ms-20 text-neutral-400">schedule</span>
+            <span class="text-[14px] font-medium text-black">When</span>
+          </div>
+          <div class="flex items-center gap-1">
+            <span class="text-[13px] font-medium text-neutral-400">As soon as possible</span>
+            <span class="ms text-neutral-300" style="font-size:18px">chevron_right</span>
+          </div>
+        </div>
+        <div class="flex items-center justify-between bg-white px-3.5 py-3 cursor-pointer">
+          <div class="flex items-center gap-2.5">
+            <span class="ms-20 text-neutral-400">location_on</span>
+            <span class="text-[14px] font-medium text-black">Location</span>
+          </div>
+          <div class="flex items-center gap-1">
+            <span class="text-[13px] font-medium text-neutral-400">Current location</span>
+            <span class="ms text-neutral-300" style="font-size:18px">chevron_right</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="px-4 pb-8 pt-2 bg-white border-t border-neutral-100">
+      <button class="w-full bg-brand text-white text-[15px] font-semibold py-[14px] rounded-[14px]">Post task</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function s1(el){
+  el.closest('.space-y-\\[6px\\]').querySelectorAll('.cat').forEach(c=>{c.classList.remove('on');c.classList.add('border-neutral-200');c.classList.remove('border-brand')});
+  el.classList.add('on');el.classList.remove('border-neutral-200');el.classList.add('border-brand');
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>V2 — iOS Native Style</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Rounded:opsz,wght,FILL@20..48,100..700,0..1" rel="stylesheet">
+  <script>tailwind.config={theme:{extend:{colors:{brand:'#E31B23',ios:'#007AFF'},fontFamily:{sans:['Inter','system-ui']}}}}</script>
+  <style>
+    body{font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased}
+    .ph{width:375px;height:812px;border-radius:50px;border:10px solid #1d1d1f;overflow:hidden;position:relative;background:#f2f2f7;box-shadow:0 40px 80px -20px rgba(0,0,0,.3),inset 0 0 0 2px #3a3a3c}
+    .ph::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:150px;height:30px;background:#1d1d1f;border-radius:0 0 20px 20px;z-index:10}
+    .ms{font-family:'Material Symbols Rounded';font-weight:normal;font-style:normal;font-size:24px;line-height:1;display:inline-block;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24}
+    .ms-s{font-size:20px;font-variation-settings:'FILL' 1,'wght' 500,'GRAD' 0,'opsz' 20}
+    .g-item{cursor:pointer;transition:all .1s}.g-item:active{transform:scale(.97)}
+    .g-item.on .g-ring{box-shadow:0 0 0 2px #E31B23}
+    .g-item.on .g-dot{display:block}
+  </style>
+</head>
+<body class="bg-neutral-200 min-h-screen flex items-start justify-center gap-6 p-6 flex-wrap">
+
+<p class="w-full text-center text-[11px] font-semibold text-neutral-400 uppercase tracking-[.15em]">Variant 2 — iOS native grouped-table style, grid category icons, SF-like feel</p>
+
+<!-- STEP 1 -->
+<div class="ph">
+  <div class="flex flex-col h-full pt-[42px]">
+    <div class="flex justify-between px-6 py-1 text-[12px] font-semibold text-black"><span>9:41</span><div class="flex gap-1 items-center"><span class="ms" style="font-size:15px">signal_cellular_alt</span><span class="ms" style="font-size:15px">wifi</span><span class="ms" style="font-size:16px">battery_full</span></div></div>
+    <div class="flex items-center justify-between px-4 h-11">
+      <span class="text-[15px] font-medium text-ios">Cancel</span>
+      <span class="text-[15px] font-semibold text-black">New Task</span>
+      <span class="text-[15px] font-medium text-transparent">Cancel</span>
+    </div>
+
+    <div class="flex-1 overflow-auto px-4 pt-2">
+      <p class="text-[28px] font-bold text-black leading-tight">Category</p>
+      <p class="text-[13px] text-neutral-500 mt-0.5 mb-4">What kind of help do you need?</p>
+
+      <div class="grid grid-cols-4 gap-x-2 gap-y-3">
+        <div class="g-item on flex flex-col items-center gap-1" onclick="s2(this)">
+          <div class="g-ring w-[60px] h-[60px] rounded-2xl bg-white flex items-center justify-center shadow-sm relative" style="box-shadow:0 0 0 2px #E31B23">
+            <span class="ms text-brand" style="font-size:26px">cleaning_services</span>
+            <div class="g-dot absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-brand flex items-center justify-center"><span class="ms text-white" style="font-size:10px;font-variation-settings:'FILL' 1,'wght' 700,'opsz' 20">check</span></div>
+          </div>
+          <span class="text-[10px] font-medium text-black">Cleaning</span>
+        </div>
+        <div class="g-item flex flex-col items-center gap-1" onclick="s2(this)">
+          <div class="g-ring w-[60px] h-[60px] rounded-2xl bg-white flex items-center justify-center shadow-sm relative">
+            <span class="ms text-green-600" style="font-size:26px">yard</span>
+            <div class="g-dot hidden absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-brand flex items-center justify-center"><span class="ms text-white" style="font-size:10px;font-variation-settings:'FILL' 1,'wght' 700,'opsz' 20">check</span></div>
+          </div>
+          <span class="text-[10px] font-medium text-black">Garden</span>
+        </div>
+        <div class="g-item flex flex-col items-center gap-1" onclick="s2(this)">
+          <div class="g-ring w-[60px] h-[60px] rounded-2xl bg-white flex items-center justify-center shadow-sm relative">
+            <span class="ms text-blue-600" style="font-size:26px">local_shipping</span>
+            <div class="g-dot hidden absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-brand flex items-center justify-center"><span class="ms text-white" style="font-size:10px;font-variation-settings:'FILL' 1,'wght' 700,'opsz' 20">check</span></div>
+          </div>
+          <span class="text-[10px] font-medium text-black">Moving</span>
+        </div>
+        <div class="g-item flex flex-col items-center gap-1" onclick="s2(this)">
+          <div class="g-ring w-[60px] h-[60px] rounded-2xl bg-white flex items-center justify-center shadow-sm relative">
+            <span class="ms text-violet-600" style="font-size:26px">school</span>
+            <div class="g-dot hidden absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-brand flex items-center justify-center"><span class="ms text-white" style="font-size:10px;font-variation-settings:'FILL' 1,'wght' 700,'opsz' 20">check</span></div>
+          </div>
+          <span class="text-[10px] font-medium text-black">Tutoring</span>
+        </div>
+        <div class="g-item flex flex-col items-center gap-1" onclick="s2(this)">
+          <div class="g-ring w-[60px] h-[60px] rounded-2xl bg-white flex items-center justify-center shadow-sm relative">
+            <span class="ms text-cyan-600" style="font-size:26px">plumbing</span>
+            <div class="g-dot hidden absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-brand flex items-center justify-center"><span class="ms text-white" style="font-size:10px;font-variation-settings:'FILL' 1,'wght' 700,'opsz' 20">check</span></div>
+          </div>
+          <span class="text-[10px] font-medium text-black">Plumbing</span>
+        </div>
+        <div class="g-item flex flex-col items-center gap-1" onclick="s2(this)">
+          <div class="g-ring w-[60px] h-[60px] rounded-2xl bg-white flex items-center justify-center shadow-sm relative">
+            <span class="ms text-amber-500" style="font-size:26px">bolt</span>
+            <div class="g-dot hidden absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-brand flex items-center justify-center"><span class="ms text-white" style="font-size:10px;font-variation-settings:'FILL' 1,'wght' 700,'opsz' 20">check</span></div>
+          </div>
+          <span class="text-[10px] font-medium text-black">Electrical</span>
+        </div>
+        <div class="g-item flex flex-col items-center gap-1" onclick="s2(this)">
+          <div class="g-ring w-[60px] h-[60px] rounded-2xl bg-white flex items-center justify-center shadow-sm relative">
+            <span class="ms text-orange-500" style="font-size:26px">format_paint</span>
+            <div class="g-dot hidden absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-brand flex items-center justify-center"><span class="ms text-white" style="font-size:10px;font-variation-settings:'FILL' 1,'wght' 700,'opsz' 20">check</span></div>
+          </div>
+          <span class="text-[10px] font-medium text-black">Painting</span>
+        </div>
+        <div class="g-item flex flex-col items-center gap-1" onclick="s2(this)">
+          <div class="g-ring w-[60px] h-[60px] rounded-2xl bg-white flex items-center justify-center shadow-sm relative">
+            <span class="ms text-rose-500" style="font-size:26px">directions_car</span>
+            <div class="g-dot hidden absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-brand flex items-center justify-center"><span class="ms text-white" style="font-size:10px;font-variation-settings:'FILL' 1,'wght' 700,'opsz' 20">check</span></div>
+          </div>
+          <span class="text-[10px] font-medium text-black">Car help</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="px-4 pb-8 pt-2 bg-transparent">
+      <button class="w-full bg-brand text-white text-[15px] font-semibold py-[14px] rounded-[14px]">Continue</button>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 2 -->
+<div class="ph">
+  <div class="flex flex-col h-full pt-[42px]">
+    <div class="flex justify-between px-6 py-1 text-[12px] font-semibold text-black"><span>9:41</span><div class="flex gap-1 items-center"><span class="ms" style="font-size:15px">signal_cellular_alt</span><span class="ms" style="font-size:15px">wifi</span><span class="ms" style="font-size:16px">battery_full</span></div></div>
+    <div class="flex items-center px-4 h-11">
+      <span class="ms text-ios cursor-pointer" style="font-size:22px">arrow_back_ios_new</span>
+      <div class="flex-1 text-center"><span class="text-[15px] font-semibold text-black">New Task</span></div>
+      <span class="text-[15px] text-transparent">x</span>
+    </div>
+
+    <div class="flex-1 overflow-auto px-4 pt-2">
+      <p class="text-[28px] font-bold text-black leading-tight">Details</p>
+      <p class="text-[13px] text-neutral-500 mt-0.5 mb-4">Tell helpers what you need</p>
+
+      <!-- iOS grouped table -->
+      <div class="bg-white rounded-xl overflow-hidden shadow-sm mb-4">
+        <div class="px-3.5 py-2.5 border-b border-neutral-100">
+          <label class="text-[11px] font-medium text-neutral-400 block">TITLE</label>
+          <input type="text" value="Deep clean my apartment" class="w-full text-[15px] text-black font-medium outline-none mt-0.5 bg-transparent" />
+        </div>
+        <div class="px-3.5 py-2.5">
+          <label class="text-[11px] font-medium text-neutral-400 block">DESCRIPTION</label>
+          <textarea rows="4" class="w-full text-[15px] text-black outline-none mt-0.5 resize-none bg-transparent leading-relaxed">2-bedroom flat, kitchen and bathroom need extra attention. Weekday afternoon preferred.</textarea>
+        </div>
+      </div>
+
+      <p class="text-[11px] font-medium text-neutral-400 uppercase px-1 mb-2">Photos</p>
+      <div class="bg-white rounded-xl p-3 shadow-sm flex gap-2">
+        <div class="w-[64px] h-[64px] rounded-lg bg-neutral-100 flex items-center justify-center cursor-pointer hover:bg-neutral-200 transition-colors">
+          <span class="ms-s text-neutral-400">add_a_photo</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="px-4 pb-8 pt-2">
+      <button class="w-full bg-brand text-white text-[15px] font-semibold py-[14px] rounded-[14px]">Continue</button>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 3 -->
+<div class="ph">
+  <div class="flex flex-col h-full pt-[42px]">
+    <div class="flex justify-between px-6 py-1 text-[12px] font-semibold text-black"><span>9:41</span><div class="flex gap-1 items-center"><span class="ms" style="font-size:15px">signal_cellular_alt</span><span class="ms" style="font-size:15px">wifi</span><span class="ms" style="font-size:16px">battery_full</span></div></div>
+    <div class="flex items-center px-4 h-11">
+      <span class="ms text-ios cursor-pointer" style="font-size:22px">arrow_back_ios_new</span>
+      <div class="flex-1 text-center"><span class="text-[15px] font-semibold text-black">New Task</span></div>
+      <span class="text-[15px] text-transparent">x</span>
+    </div>
+
+    <div class="flex-1 overflow-auto px-4 pt-2">
+      <p class="text-[28px] font-bold text-black leading-tight">Budget</p>
+      <p class="text-[13px] text-neutral-500 mt-0.5 mb-5">Set your price and preferences</p>
+
+      <!-- Price -->
+      <div class="bg-white rounded-xl shadow-sm overflow-hidden mb-3">
+        <div class="px-3.5 py-3 flex items-center gap-2">
+          <span class="text-[22px] font-bold text-neutral-300">€</span>
+          <input type="text" value="45" class="text-[22px] font-bold text-black bg-transparent outline-none flex-1" />
+        </div>
+      </div>
+      <div class="flex gap-1.5 mb-5 px-0.5">
+        <button class="h-[30px] px-3 rounded-lg bg-white shadow-sm text-[12px] font-medium text-neutral-500">€20</button>
+        <button class="h-[30px] px-3 rounded-lg bg-brand text-[12px] font-medium text-white">€45</button>
+        <button class="h-[30px] px-3 rounded-lg bg-white shadow-sm text-[12px] font-medium text-neutral-500">€60</button>
+        <button class="h-[30px] px-3 rounded-lg bg-white shadow-sm text-[12px] font-medium text-neutral-500">€80</button>
+        <button class="h-[30px] px-3 rounded-lg bg-white shadow-sm text-[12px] font-medium text-neutral-500">€100</button>
+      </div>
+
+      <!-- iOS grouped settings -->
+      <p class="text-[11px] font-medium text-neutral-400 uppercase px-1 mb-2">Preferences</p>
+      <div class="bg-white rounded-xl overflow-hidden shadow-sm">
+        <div class="flex items-center justify-between px-3.5 py-[11px] border-b border-neutral-100 cursor-pointer">
+          <div class="flex items-center gap-2.5">
+            <span class="ms-s text-neutral-400">payments</span>
+            <span class="text-[15px] text-black">Payment</span>
+          </div>
+          <div class="flex items-center gap-0.5">
+            <span class="text-[14px] text-neutral-400">Cash</span>
+            <span class="ms text-neutral-300" style="font-size:18px">chevron_right</span>
+          </div>
+        </div>
+        <div class="flex items-center justify-between px-3.5 py-[11px] border-b border-neutral-100 cursor-pointer">
+          <div class="flex items-center gap-2.5">
+            <span class="ms-s text-neutral-400">schedule</span>
+            <span class="text-[15px] text-black">When</span>
+          </div>
+          <div class="flex items-center gap-0.5">
+            <span class="text-[14px] text-neutral-400">ASAP</span>
+            <span class="ms text-neutral-300" style="font-size:18px">chevron_right</span>
+          </div>
+        </div>
+        <div class="flex items-center justify-between px-3.5 py-[11px] cursor-pointer">
+          <div class="flex items-center gap-2.5">
+            <span class="ms-s text-neutral-400">location_on</span>
+            <span class="text-[15px] text-black">Location</span>
+          </div>
+          <div class="flex items-center gap-0.5">
+            <span class="text-[14px] text-neutral-400">Current</span>
+            <span class="ms text-neutral-300" style="font-size:18px">chevron_right</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Review -->
+      <p class="text-[11px] font-medium text-neutral-400 uppercase px-1 mb-2 mt-5">Review</p>
+      <div class="bg-white rounded-xl overflow-hidden shadow-sm px-3.5 py-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-brand flex items-center justify-center"><span class="ms text-white" style="font-size:16px;font-variation-settings:'FILL' 1,'wght' 500,'opsz' 20">cleaning_services</span></div>
+          <div><p class="text-[14px] font-semibold text-black">Deep clean my apartment</p><p class="text-[11px] text-neutral-400">Cleaning · Cash · ASAP</p></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="px-4 pb-8 pt-2">
+      <button class="w-full bg-brand text-white text-[15px] font-semibold py-[14px] rounded-[14px]">Post task — €45</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function s2(el){el.closest('.grid').querySelectorAll('.g-item').forEach(c=>{c.classList.remove('on')});el.classList.add('on')}
+</script>
+</body>
+</html>
