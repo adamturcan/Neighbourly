@@ -52,9 +52,10 @@ function formatTime(dateStr: string): string {
 export default function ChatScreen() {
   const route = useRoute<any>();
   const navigation = useNavigation();
-  const { taskId, otherName } = route.params as {
+  const { taskId, otherName, fromInbox } = route.params as {
     taskId: string;
     otherName: string;
+    fromInbox?: boolean;
   };
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -80,8 +81,12 @@ export default function ChatScreen() {
 
   // Mark as read on open + when new messages arrive
   useEffect(() => {
-    if (taskId) markAsRead(taskId);
-  }, [taskId, messages.length]);
+    if (taskId) {
+      markAsRead(taskId).then(() => {
+        queryClient.invalidateQueries({ queryKey: ["conversations"] });
+      });
+    }
+  }, [taskId, messages.length, queryClient]);
 
   // Fetch other person's read receipt
   const otherUserId = task?.requesterId === user?.id ? task?.helperId : task?.requesterId;
@@ -249,7 +254,13 @@ export default function ChatScreen() {
     <SafeAreaView style={styles.container} edges={["top"]}>
       {/* Header */}
       <View style={styles.header}>
-        <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
+        <Pressable onPress={() => {
+          if (fromInbox) {
+            (navigation as any).getParent?.()?.navigate("Inbox");
+          } else {
+            navigation.goBack();
+          }
+        }} style={styles.backBtn}>
           <MaterialCommunityIcons name="arrow-left" size={24} color="#000" />
         </Pressable>
         <View style={[styles.avatar, { backgroundColor: avatarColor }]}>

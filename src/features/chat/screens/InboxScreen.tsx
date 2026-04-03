@@ -100,7 +100,7 @@ export default function InboxScreen() {
     (conv: Conversation) => {
       navigation.navigate("Discover", {
         screen: "ChatScreen",
-        params: { taskId: conv.taskId, otherName: conv.otherUserName },
+        params: { taskId: conv.taskId, otherName: conv.otherUserName, fromInbox: true },
       });
     },
     [navigation],

@@ -13,7 +13,7 @@ export type HomeStackParamList = {
   FullMap: undefined;
   ServiceDetail: { serviceId: string };
   LocationPicker: undefined;
-  ChatScreen: { taskId: string; otherName: string };
+  ChatScreen: { taskId: string; otherName: string; fromInbox?: boolean };
 };
 
 const Stack = createNativeStackNavigator<HomeStackParamList>();
