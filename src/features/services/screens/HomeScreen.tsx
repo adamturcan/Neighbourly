@@ -22,6 +22,7 @@ import LocationBar from "../../../shared/components/LocationBar";
 import LocationPickerSheet from "../../../shared/components/LocationPickerSheet";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { COLORS } from "../../../shared/lib/constants";
+import DiscoverMapView from "../../map/components/DiscoverMapView";
 
 const CARD_W = Math.min(240, Dimensions.get("window").width * 0.72);
 
@@ -31,6 +32,7 @@ export default function HomeScreen() {
   const nav = useNavigation<any>();
   const { width } = useWindowDimensions();
   const [mode, setMode] = useState<Mode>("providers");
+  const [viewMode, setViewMode] = useState<"list" | "map">("list");
   const [locSheet, setLocSheet] = useState(false);
 
   const scrollY = useRef(new Animated.Value(0)).current;
@@ -216,8 +218,38 @@ export default function HomeScreen() {
         </Animated.View>
       </Animated.View>
 
+      {/* List / Map toggle */}
+      <View style={{ flexDirection: "row", gap: 8, paddingHorizontal: 16, paddingBottom: 8 }}>
+        <Pressable
+          onPress={() => setViewMode("list")}
+          style={{
+            flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 4,
+            paddingVertical: 8, borderRadius: 999,
+            backgroundColor: viewMode === "list" ? "#fff" : "transparent",
+            borderWidth: 1, borderColor: viewMode === "list" ? "#E5E5EA" : "#E5E5EA",
+          }}
+        >
+          <MaterialCommunityIcons name="view-list" size={18} color={viewMode === "list" ? "#000" : "#A1A1AA"} />
+          <Text style={{ fontSize: 12, fontWeight: "600", color: viewMode === "list" ? "#000" : "#A1A1AA" }}>List</Text>
+        </Pressable>
+        <Pressable
+          onPress={() => setViewMode("map")}
+          style={{
+            flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 4,
+            paddingVertical: 8, borderRadius: 999,
+            backgroundColor: viewMode === "map" ? COLORS.red : "transparent",
+            borderWidth: 1, borderColor: viewMode === "map" ? COLORS.red : "#E5E5EA",
+          }}
+        >
+          <MaterialCommunityIcons name="map-outline" size={18} color={viewMode === "map" ? "#fff" : "#A1A1AA"} />
+          <Text style={{ fontSize: 12, fontWeight: "600", color: viewMode === "map" ? "#fff" : "#A1A1AA" }}>Map</Text>
+        </Pressable>
+      </View>
+
       <View className="flex-1 bg-white">
-        {mode === "providers" ? (
+        {viewMode === "map" ? (
+          <DiscoverMapView onTaskPress={(id) => nav.navigate("TaskDetail", { taskId: id })} />
+        ) : mode === "providers" ? (
           loadingServices ? (
             <View className="flex-1 items-center justify-center">
               <Text className="text-text-muted">Loading…</Text>

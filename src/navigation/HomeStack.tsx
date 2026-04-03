@@ -4,12 +4,14 @@ import HomeScreen from "../features/services/screens/HomeScreen";
 import TaskDetailScreen from "../features/tasks/screens/TaskDetailScreen";
 import FullMapScreen from "../features/map/screens/FullMapScreen";
 import ServiceDetailScreen from "../features/services/screens/ServiceDetailScreen";
+import LocationPickerScreen from "../features/map/screens/LocationPickerScreen";
 
 export type HomeStackParamList = {
   HomeMain: undefined;
   TaskDetail: { taskId: string };
   FullMap: undefined;
   ServiceDetail: { serviceId: string };
+  LocationPicker: undefined;
 };
 
 const Stack = createNativeStackNavigator<HomeStackParamList>();

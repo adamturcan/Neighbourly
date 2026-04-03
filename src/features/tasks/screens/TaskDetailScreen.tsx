@@ -18,8 +18,9 @@ import {
 } from "../../../shared/lib/api";
 import { useAuth } from "../../auth/store/useAuth";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import { COLORS } from "../../../shared/lib/constants";
+import { COLORS, CATEGORY_COLORS } from "../../../shared/lib/constants";
 import { supabase } from "../../../shared/lib/supabase";
+import MapView, { Marker } from "react-native-maps";
 
 const STATUS_COLORS: Record<string, string> = {
   open: "#22C55E",
@@ -165,13 +166,50 @@ export default function TaskDetailScreen() {
         <Text style={{ fontSize: 24, fontWeight: "800", color: "#000" }}>{task.title}</Text>
         <Text style={{ fontSize: 15, color: "#71717A", lineHeight: 22 }}>{task.description}</Text>
 
-        {/* Budget */}
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-          <MaterialCommunityIcons name="cash" size={20} color={COLORS.red} />
-          <Text style={{ fontSize: 18, fontWeight: "700", color: "#000" }}>
-            {task.budget ? `€${task.budget}` : "Budget TBD"}
-          </Text>
+        {/* Budget + info row */}
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 16 }}>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+            <MaterialCommunityIcons name="cash" size={18} color={COLORS.red} />
+            <Text style={{ fontSize: 15, fontWeight: "700", color: "#000" }}>
+              {task.budget ? `€${task.budget}` : "Budget TBD"}
+            </Text>
+          </View>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+            <MaterialCommunityIcons name="clock-outline" size={18} color="#A1A1AA" />
+            <Text style={{ fontSize: 13, fontWeight: "600", color: "#A1A1AA" }}>ASAP</Text>
+          </View>
         </View>
+
+        {/* Inline map */}
+        {task.lat !== 0 && task.lng !== 0 && (
+          <View style={{ borderRadius: 16, overflow: "hidden", height: 150 }}>
+            <MapView
+              style={{ flex: 1 }}
+              initialRegion={{
+                latitude: task.lat,
+                longitude: task.lng,
+                latitudeDelta: 0.015,
+                longitudeDelta: 0.015,
+              }}
+              scrollEnabled={false}
+              zoomEnabled={false}
+              pitchEnabled={false}
+              rotateEnabled={false}
+            >
+              <Marker coordinate={{ latitude: task.lat, longitude: task.lng }}>
+                <View style={{
+                  width: 32, height: 32, borderRadius: 16,
+                  backgroundColor: CATEGORY_COLORS[task.category] ?? CATEGORY_COLORS.other,
+                  alignItems: "center", justifyContent: "center",
+                  borderWidth: 2.5, borderColor: "#fff",
+                  shadowColor: "#000", shadowOpacity: 0.2, shadowRadius: 4, shadowOffset: { width: 0, height: 2 },
+                }}>
+                  <MaterialCommunityIcons name="map-marker" size={16} color="#fff" />
+                </View>
+              </Marker>
+            </MapView>
+          </View>
+        )}
 
         {/* Make offer / show existing offer (for non-owners on open tasks) */}
         {task.status === "open" && !isOwner && (

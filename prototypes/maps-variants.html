@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Phase 3 — Maps UI Prototypes</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Rounded:opsz,wght,FILL@20..48,100..700,0..1" rel="stylesheet">
+  <script>tailwind.config={theme:{extend:{colors:{brand:'#E31B23'},fontFamily:{sans:['Inter','system-ui']}}}}</script>
+  <style>
+    body{font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased}
+    .ph{width:375px;height:812px;border-radius:50px;border:10px solid #1d1d1f;overflow:hidden;position:relative;background:#fff;box-shadow:0 40px 80px -20px rgba(0,0,0,.3),inset 0 0 0 2px #3a3a3c}
+    .ph::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:150px;height:30px;background:#1d1d1f;border-radius:0 0 20px 20px;z-index:10}
+    .ms{font-family:'Material Symbols Rounded';font-size:24px;line-height:1;display:inline-block;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24}
+    .map-bg{background:linear-gradient(135deg,#e8f0e8 0%,#d4e4d4 30%,#c8dcc8 50%,#dce8dc 70%,#e0ece0 100%);position:relative}
+    .map-bg::after{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='200' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 50h200M0 100h200M0 150h200M50 0v200M100 0v200M150 0v200' stroke='%23ccc' stroke-width='0.5' fill='none' opacity='0.3'/%3E%3C/svg%3E");opacity:0.5}
+    .pin{position:absolute;z-index:5;cursor:pointer;transition:transform .15s}
+    .pin:hover{transform:scale(1.15)}
+    .pin-dot{width:32px;height:32px;border-radius:16px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.2);border:2.5px solid #fff}
+    .tab-pill{transition:all .2s;cursor:pointer}
+  </style>
+</head>
+<body class="bg-neutral-200 min-h-screen flex flex-col items-center gap-6 p-6">
+
+<h1 class="text-sm font-bold text-neutral-400 uppercase tracking-[.15em]">Phase 3 — Maps & Location Prototypes</h1>
+
+<div class="flex gap-8 flex-wrap justify-center">
+
+<!-- ============ V1: Discover with Map/List toggle ============ -->
+<div>
+  <p class="text-[11px] font-semibold text-neutral-400 mb-2 text-center uppercase tracking-wider">Discover — Map View</p>
+  <p class="text-[10px] text-neutral-400 mb-2 text-center max-w-[375px]">Toggle between list and map. Pins colored by category. Tap pin → preview card slides up.</p>
+  <div class="ph">
+    <div class="flex flex-col h-full pt-[42px]">
+      <!-- Status bar -->
+      <div class="flex justify-between px-6 py-1 text-[12px] font-semibold text-black">
+        <span>9:41</span>
+        <div class="flex gap-1 items-center"><span class="ms" style="font-size:15px">signal_cellular_alt</span><span class="ms" style="font-size:15px">wifi</span><span class="ms" style="font-size:16px">battery_full</span></div>
+      </div>
+
+      <!-- Location bar -->
+      <div class="px-4 py-2 flex items-center gap-2.5">
+        <div class="w-7 h-7 rounded-full bg-red-100 flex items-center justify-center">
+          <span class="ms text-brand" style="font-size:16px">location_on</span>
+        </div>
+        <span class="text-[14px] font-bold text-black flex-1">Domov · Kovanecká 14, Praha 9</span>
+        <span class="ms text-neutral-400" style="font-size:18px">expand_more</span>
+      </div>
+
+      <!-- Toggle: List / Map -->
+      <div class="px-4 pb-2 flex gap-2">
+        <div class="tab-pill flex-1 flex items-center justify-center gap-1.5 py-2 rounded-full border border-neutral-200 bg-white">
+          <span class="ms text-neutral-400" style="font-size:18px">view_list</span>
+          <span class="text-[12px] font-semibold text-neutral-400">List</span>
+        </div>
+        <div class="tab-pill flex-1 flex items-center justify-center gap-1.5 py-2 rounded-full bg-brand">
+          <span class="ms text-white" style="font-size:18px">map</span>
+          <span class="text-[12px] font-bold text-white">Map</span>
+        </div>
+      </div>
+
+      <!-- Map area -->
+      <div class="flex-1 map-bg relative">
+        <!-- Pins -->
+        <div class="pin" style="top:20%;left:30%">
+          <div class="pin-dot bg-blue-500"><span class="ms text-white" style="font-size:15px">local_shipping</span></div>
+        </div>
+        <div class="pin" style="top:35%;left:55%">
+          <div class="pin-dot bg-brand"><span class="ms text-white" style="font-size:15px">cleaning_services</span></div>
+        </div>
+        <div class="pin" style="top:28%;left:70%">
+          <div class="pin-dot bg-green-500"><span class="ms text-white" style="font-size:15px">yard</span></div>
+        </div>
+        <div class="pin" style="top:50%;left:40%">
+          <div class="pin-dot bg-violet-500"><span class="ms text-white" style="font-size:15px">school</span></div>
+        </div>
+        <div class="pin" style="top:45%;left:65%">
+          <div class="pin-dot bg-amber-500"><span class="ms text-white" style="font-size:15px">bolt</span></div>
+        </div>
+        <div class="pin" style="top:60%;left:25%">
+          <div class="pin-dot bg-cyan-500"><span class="ms text-white" style="font-size:15px">plumbing</span></div>
+        </div>
+
+        <!-- Current location dot -->
+        <div class="absolute z-10" style="top:42%;left:48%">
+          <div class="w-4 h-4 rounded-full bg-blue-500 border-[3px] border-white shadow-lg"></div>
+          <div class="w-8 h-8 rounded-full bg-blue-500/20 absolute -top-2 -left-2 animate-ping" style="animation-duration:2s"></div>
+        </div>
+
+        <!-- Recenter button -->
+        <div class="absolute bottom-28 right-4 w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center z-10">
+          <span class="ms text-neutral-600" style="font-size:20px">my_location</span>
+        </div>
+
+        <!-- Task preview card (slides up from bottom) -->
+        <div class="absolute bottom-0 left-0 right-0 z-10">
+          <div class="bg-white rounded-t-2xl shadow-[0_-4px_20px_rgba(0,0,0,0.08)] px-4 pt-3 pb-5">
+            <div class="w-10 h-1 bg-neutral-200 rounded-full mx-auto mb-3"></div>
+            <div class="flex items-start gap-3">
+              <div class="w-10 h-10 rounded-xl bg-brand flex items-center justify-center shrink-0">
+                <span class="ms text-white" style="font-size:18px">cleaning_services</span>
+              </div>
+              <div class="flex-1">
+                <p class="text-[14px] font-bold text-black">Deep clean my apartment</p>
+                <p class="text-[12px] text-neutral-400 mt-0.5">Cleaning · 0.3 km away</p>
+              </div>
+              <div class="text-right">
+                <p class="text-[15px] font-bold text-brand">€45</p>
+                <p class="text-[11px] text-neutral-400">ASAP</p>
+              </div>
+            </div>
+            <button class="w-full mt-3 bg-brand text-white text-[13px] font-semibold py-2.5 rounded-xl">View task</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab bar -->
+      <div class="px-3 pb-2">
+        <div class="bg-white rounded-full px-2 py-1.5 flex items-center justify-between shadow-[0_2px_20px_rgba(0,0,0,0.08)]">
+          <div class="flex-1 flex flex-col items-center gap-0.5 py-1.5 rounded-full bg-red-50">
+            <span class="ms text-brand" style="font-size:20px">explore</span>
+            <span class="text-[9px] font-semibold text-brand">Discover</span>
+          </div>
+          <div class="flex-1 flex flex-col items-center gap-0.5 py-1.5"><span class="ms text-neutral-400" style="font-size:20px">search</span><span class="text-[9px] text-neutral-400">Search</span></div>
+          <div class="flex items-center justify-center mx-1"><div class="w-11 h-11 rounded-full bg-brand flex items-center justify-center shadow-[0_4px_12px_rgba(227,27,35,0.3)]"><span class="ms text-white" style="font-size:22px">add</span></div></div>
+          <div class="flex-1 flex flex-col items-center gap-0.5 py-1.5"><span class="ms text-neutral-400" style="font-size:20px">chat_bubble_outline</span><span class="text-[9px] text-neutral-400">Inbox</span></div>
+          <div class="flex-1 flex flex-col items-center gap-0.5 py-1.5"><span class="ms text-neutral-400" style="font-size:20px">person_outline</span><span class="text-[9px] text-neutral-400">Profile</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ V2: Location Picker (Post Task) ============ -->
+<div>
+  <p class="text-[11px] font-semibold text-neutral-400 mb-2 text-center uppercase tracking-wider">Location Picker — Post Task</p>
+  <p class="text-[10px] text-neutral-400 mb-2 text-center max-w-[375px]">Modal with map, draggable pin, search bar, and "Use current location" shortcut.</p>
+  <div class="ph">
+    <div class="flex flex-col h-full pt-[42px]">
+      <div class="flex justify-between px-6 py-1 text-[12px] font-semibold text-black">
+        <span>9:41</span>
+        <div class="flex gap-1 items-center"><span class="ms" style="font-size:15px">signal_cellular_alt</span><span class="ms" style="font-size:15px">wifi</span><span class="ms" style="font-size:16px">battery_full</span></div>
+      </div>
+
+      <!-- Header -->
+      <div class="flex items-center px-4 h-11">
+        <span class="ms text-neutral-400" style="font-size:22px">close</span>
+        <span class="flex-1 text-center text-[15px] font-semibold text-black">Choose location</span>
+        <span style="width:22px"></span>
+      </div>
+
+      <!-- Search bar -->
+      <div class="px-4 pb-3">
+        <div class="bg-neutral-100 rounded-xl px-3.5 py-2.5 flex items-center gap-2.5">
+          <span class="ms text-neutral-400" style="font-size:18px">search</span>
+          <span class="text-[14px] text-neutral-400">Search address…</span>
+        </div>
+      </div>
+
+      <!-- Map -->
+      <div class="flex-1 map-bg relative">
+        <!-- Center pin -->
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-full z-10">
+          <div class="flex flex-col items-center">
+            <div class="w-10 h-10 rounded-full bg-brand flex items-center justify-center shadow-lg">
+              <span class="ms text-white" style="font-size:20px">location_on</span>
+            </div>
+            <div class="w-2 h-2 rounded-full bg-brand/40 mt-0.5"></div>
+          </div>
+        </div>
+
+        <!-- Current location button -->
+        <div class="absolute bottom-4 right-4 z-10">
+          <div class="bg-white rounded-xl shadow-md px-3.5 py-2.5 flex items-center gap-2">
+            <span class="ms text-blue-500" style="font-size:18px">my_location</span>
+            <span class="text-[12px] font-semibold text-black">Use my location</span>
+          </div>
+        </div>
+
+        <!-- Current location dot -->
+        <div class="absolute z-5" style="top:55%;left:45%">
+          <div class="w-3.5 h-3.5 rounded-full bg-blue-500 border-[2.5px] border-white shadow-md"></div>
+        </div>
+      </div>
+
+      <!-- Bottom card -->
+      <div class="bg-white px-4 pt-3 pb-8 border-t border-neutral-100">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="w-9 h-9 rounded-xl bg-red-50 flex items-center justify-center">
+            <span class="ms text-brand" style="font-size:18px">location_on</span>
+          </div>
+          <div>
+            <p class="text-[14px] font-semibold text-black">Kovanecká 14</p>
+            <p class="text-[12px] text-neutral-400">Praha 9, 190 00</p>
+          </div>
+        </div>
+        <button class="w-full bg-brand text-white text-[15px] font-semibold py-3.5 rounded-[14px]">Confirm location</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ V3: Task Detail with mini map ============ -->
+<div>
+  <p class="text-[11px] font-semibold text-neutral-400 mb-2 text-center uppercase tracking-wider">Task Detail — With Map</p>
+  <p class="text-[10px] text-neutral-400 mb-2 text-center max-w-[375px]">Task detail modal showing location on an inline map with distance indicator.</p>
+  <div class="ph">
+    <div class="flex flex-col h-full pt-[42px]">
+      <div class="flex justify-between px-6 py-1 text-[12px] font-semibold text-black">
+        <span>9:41</span>
+        <div class="flex gap-1 items-center"><span class="ms" style="font-size:15px">signal_cellular_alt</span><span class="ms" style="font-size:15px">wifi</span><span class="ms" style="font-size:16px">battery_full</span></div>
+      </div>
+
+      <!-- Modal header with grabber -->
+      <div class="flex flex-col items-center pt-2 pb-1">
+        <div class="w-10 h-1 bg-neutral-200 rounded-full mb-2"></div>
+        <span class="text-[15px] font-semibold text-black">Task</span>
+      </div>
+
+      <!-- Content -->
+      <div class="flex-1 overflow-auto px-4">
+        <!-- Status -->
+        <div class="flex items-center gap-2 mt-2">
+          <div class="px-2.5 py-1 rounded-full bg-green-500/10"><span class="text-[11px] font-bold text-green-600">Open</span></div>
+          <span class="text-[12px] text-neutral-400">Cleaning</span>
+        </div>
+
+        <p class="text-[22px] font-bold text-black mt-3">Deep clean my apartment</p>
+        <p class="text-[14px] text-neutral-500 mt-2 leading-relaxed">2-bedroom flat, kitchen and bathroom need extra attention. Weekday afternoon preferred.</p>
+
+        <!-- Budget + distance row -->
+        <div class="flex items-center gap-4 mt-3">
+          <div class="flex items-center gap-1.5">
+            <span class="ms text-brand" style="font-size:18px">payments</span>
+            <span class="text-[15px] font-bold text-black">€45</span>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <span class="ms text-blue-500" style="font-size:18px">near_me</span>
+            <span class="text-[13px] font-semibold text-neutral-500">0.3 km away</span>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <span class="ms text-neutral-400" style="font-size:18px">schedule</span>
+            <span class="text-[13px] font-semibold text-neutral-500">ASAP</span>
+          </div>
+        </div>
+
+        <!-- Inline map -->
+        <div class="mt-4 rounded-2xl overflow-hidden h-[150px] map-bg relative">
+          <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
+            <div class="w-8 h-8 rounded-full bg-brand flex items-center justify-center shadow-md border-2 border-white">
+              <span class="ms text-white" style="font-size:16px">cleaning_services</span>
+            </div>
+          </div>
+          <!-- Address overlay -->
+          <div class="absolute bottom-2 left-2 right-2 z-10">
+            <div class="bg-white/90 backdrop-blur rounded-lg px-2.5 py-1.5 flex items-center gap-2">
+              <span class="ms text-neutral-400" style="font-size:14px">location_on</span>
+              <span class="text-[11px] font-medium text-black">Kovanecká 14, Praha 9</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Make offer button -->
+        <button class="w-full mt-4 bg-brand text-white text-[15px] font-semibold py-3.5 rounded-[14px]">Make an offer</button>
+
+        <div class="h-4"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+</body>
+</html>

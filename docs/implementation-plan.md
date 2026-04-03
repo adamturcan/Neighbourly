@@ -146,31 +146,43 @@
 
 ---
 
-## Phase 3: Maps & Location
+## Phase 3: Maps & Location ✅ COMPLETED (2026-04-03)
 
 **Why:** Location is the core differentiator. Everything is hyper-local.
 
-### 3.1 - Map provider setup
-- [ ] Choose Mapbox or Google Maps (context doc allows either)
-- [ ] Install and configure with API key
-- [ ] Apply custom dark/red map theme to match brand
+### 3.1 - Map provider setup ✅
+- [x] Using react-native-maps (Apple Maps on iOS, Google Maps on Android)
+- [ ] Apply custom dark/red map theme — _deferred to Phase 8_
+- [ ] Google Maps API key for Android — _needed when targeting Android_
 
-### 3.2 - Home Screen map view
-- [ ] "Live Tasks" map with pins for open tasks nearby
-- [ ] Pin color/icon by category
-- [ ] Tap pin -> task preview card -> tap card -> TaskDetail screen
-- [ ] Cluster pins when zoomed out
+### 3.2 - Home Screen map view ✅
+- [x] List/Map toggle pills on Discover screen
+- [x] "Live Tasks" map with pins for open tasks nearby
+- [x] Pin color/icon by category (colored circles with white icons)
+- [x] Tap pin → task preview card slides up (title, price, category, "View task")
+- [x] Tap "View task" → opens TaskDetail modal
+- [x] Recenter button to jump to current location
+- [x] Shows user location blue dot
+- [ ] Cluster pins when zoomed out — _deferred to Phase 8_
 
-### 3.3 - Location picker for task posting
-- [ ] Map with draggable pin for precise location
-- [ ] "Use current location" button
-- [ ] Address search autocomplete (geocoding API)
-- [ ] Reverse geocode pin position to readable address
+### 3.3 - Location picker for task posting ✅
+- [x] LocationPickerScreen: modal with map + draggable center pin
+- [x] "Use current location" button
+- [x] Search bar UI (placeholder — needs geocoding API for full autocomplete)
+- [x] Bottom card shows resolved address + "Confirm location" button
+- [ ] Address search autocomplete (geocoding API) — _deferred, needs API key_
+- [ ] Reverse geocode pin to readable address — _deferred, needs API key_
 
-### 3.4 - Real user geolocation
-- [ ] Replace hardcoded Prague coordinates with `expo-location` permissions + live GPS
-- [ ] Update `useLocation` store to persist real coordinates
-- [ ] Background location tracking opt-in for helpers (to surface nearby tasks via push)
+### 3.4 - Real user geolocation ✅
+- [x] `useCurrentLocation` hook with expo-location permissions + live GPS
+- [x] Map centers on real user position
+- [x] Category color constants (`CATEGORY_COLORS`) for consistent pin colors
+- [ ] Background location tracking opt-in — _deferred to Phase 8_
+
+### 3.5 - Task Detail inline map ✅
+- [x] Mini map embedded in TaskDetailScreen showing task location
+- [x] Category-colored pin marker
+- [x] Budget + time info row
 
 ---
 
@@ -317,7 +329,7 @@
 | 1 | Phase 0: Restructure & NativeWind | ✅ Done | Nothing |
 | 2 | Phase 1: Auth & Supabase | ✅ Done | Phase 0 |
 | 3 | Phase 2: Task Lifecycle | ✅ Done | Phase 1 |
-| 4 | Phase 3: Maps & Location | ⬜ | Phase 1 |
+| 4 | Phase 3: Maps & Location | ✅ Done | Phase 1 |
 | 5 | Phase 4: Chat & Notifications | ⬜ | Phase 2 |
 | 6 | Phase 5: Reviews & Profile | ⬜ | Phase 2 |
 | 7 | Phase 6: Payments | ⬜ | Phase 2 |

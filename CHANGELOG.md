@@ -8,6 +8,21 @@ Format: [Keep a Changelog](https://keepachangelog.com/)
 
 ## [2026-04-03] — Phase 1: Supabase Foundation & Auth
 
+## [2026-04-03] — Phase 3: Maps & Location
+
+### Added
+- Discover screen: List/Map toggle pills — tap Map to see tasks as colored pins
+- DiscoverMapView component with category-colored custom pins
+- Tap pin → task preview card slides up with title, price, category, "View task" button
+- Recenter button to jump back to current location
+- LocationPickerScreen: modal with draggable center pin, search bar, "Use my location" button
+- Inline map on TaskDetailScreen showing task location with category-colored pin
+- `useCurrentLocation` hook: expo-location permissions + GPS coordinates
+- Category color constants for consistent pin/badge colors across the app
+- Real user geolocation replaces hardcoded Prague coordinates
+
+---
+
 ## [2026-04-03] — Post Task UI Redesign (V2 iOS Native)
 
 ### Changed
