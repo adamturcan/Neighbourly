@@ -20,6 +20,7 @@ import { useAuth } from "../../auth/store/useAuth";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { COLORS } from "../../../shared/lib/constants";
 import { supabase } from "../../../shared/lib/supabase";
+import { TAB_BAR_HEIGHT } from "../../../navigation/RootNavigator";
 
 const STATUS_COLORS: Record<string, string> = {
   open: "#22C55E",
@@ -135,7 +136,7 @@ export default function TaskDetailScreen() {
   };
 
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: "#fff" }} contentContainerStyle={{ paddingBottom: 40 }}>
+    <ScrollView style={{ flex: 1, backgroundColor: "#fff" }} contentContainerStyle={{ paddingBottom: TAB_BAR_HEIGHT + 24 }}>
       <View style={{ padding: 16, gap: 16 }}>
         {/* Status badge */}
         <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>

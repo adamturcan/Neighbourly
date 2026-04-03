@@ -3,6 +3,7 @@ import { View, Text, Pressable, ScrollView } from "react-native";
 import { Image } from "expo-image";
 import MapView, { Marker } from "react-native-maps";
 import { useRoute } from "@react-navigation/native";
+import { TAB_BAR_HEIGHT } from "../../../navigation/RootNavigator";
 import { useQuery } from "@tanstack/react-query";
 import { getService } from "../../../shared/lib/api";
 import { COLORS } from "../../../shared/lib/constants";
@@ -26,7 +27,7 @@ export default function ServiceDetailScreen() {
   const lng = Number(service.lng);
 
   return (
-    <ScrollView className="flex-1 bg-white">
+    <ScrollView className="flex-1 bg-white" contentContainerStyle={{ paddingBottom: TAB_BAR_HEIGHT + 24 }}>
       <View className="h-60 bg-gray-100">
         <Image
           source={{ uri: hero }}
