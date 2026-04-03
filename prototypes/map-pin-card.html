@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Map Pin + Preview Card — 3 Variants</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Rounded:opsz,wght,FILL@20..48,100..700,0..1" rel="stylesheet">
+  <script>tailwind.config={theme:{extend:{colors:{brand:'#E31B23'},fontFamily:{sans:['Inter','system-ui']}}}}</script>
+  <style>
+    body{font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased}
+    .ph{width:375px;height:812px;border-radius:50px;border:10px solid #1d1d1f;overflow:hidden;position:relative;background:#fff;box-shadow:0 40px 80px -20px rgba(0,0,0,.3),inset 0 0 0 2px #3a3a3c}
+    .ph::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:150px;height:30px;background:#1d1d1f;border-radius:0 0 20px 20px;z-index:10}
+    .ms{font-family:'Material Symbols Rounded';font-size:24px;line-height:1;display:inline-block;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24}
+    .map-bg{background:linear-gradient(135deg,#e8f0e8 0%,#d4e4d4 30%,#c8dcc8 50%,#dce8dc 70%,#e0ece0 100%);position:relative}
+    .map-bg::after{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='200' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 50h200M0 100h200M0 150h200M50 0v200M100 0v200M150 0v200' stroke='%23bbb' stroke-width='0.3' fill='none' opacity='0.4'/%3E%3C/svg%3E");opacity:0.5}
+    .pin{position:absolute;z-index:5;cursor:pointer;transition:transform .15s;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.25))}
+    .pin:hover{transform:scale(1.1)}
+  </style>
+</head>
+<body class="bg-neutral-200 min-h-screen flex flex-col items-center gap-6 p-6">
+
+<h1 class="text-sm font-bold text-neutral-400 uppercase tracking-[.15em]">Map Pin + Preview Card — 3 Variants</h1>
+
+<div class="flex gap-8 flex-wrap justify-center">
+
+<!-- ============ V1: Floating card with image ============ -->
+<div>
+  <p class="text-[11px] font-semibold text-neutral-400 mb-2 text-center uppercase tracking-wider">V1 — Image Card</p>
+  <p class="text-[10px] text-neutral-400 mb-2 text-center max-w-[375px]">Rich card with task photo, compact info, one-tap open</p>
+  <div class="ph">
+    <div class="flex flex-col h-full pt-[42px]">
+      <div class="flex justify-between px-6 py-1 text-[12px] font-semibold text-black">
+        <span>9:41</span>
+        <div class="flex gap-1 items-center"><span class="ms" style="font-size:15px">signal_cellular_alt</span><span class="ms" style="font-size:15px">wifi</span><span class="ms" style="font-size:16px">battery_full</span></div>
+      </div>
+
+      <!-- Map toggle -->
+      <div class="px-4 py-2 flex items-center gap-2.5">
+        <div class="w-7 h-7 rounded-full bg-red-100 flex items-center justify-center"><span class="ms text-brand" style="font-size:16px">location_on</span></div>
+        <span class="text-[14px] font-bold text-black flex-1">Praha 9</span>
+        <div class="flex gap-1.5">
+          <div class="px-3 py-1.5 rounded-full border border-neutral-200"><span class="text-[11px] font-semibold text-neutral-400">List</span></div>
+          <div class="px-3 py-1.5 rounded-full bg-brand"><span class="text-[11px] font-bold text-white">Map</span></div>
+        </div>
+      </div>
+
+      <div class="flex-1 map-bg relative">
+        <!-- Custom pins with icon -->
+        <div class="pin" style="top:18%;left:28%">
+          <svg width="36" height="44" viewBox="0 0 36 44"><path d="M18 0C8.06 0 0 8.06 0 18c0 12.6 18 26 18 26s18-13.4 18-26C36 8.06 27.94 0 18 0z" fill="#2563EB"/><circle cx="18" cy="17" r="10" fill="rgba(255,255,255,0.25)"/></svg>
+          <div style="position:absolute;top:7px;left:9px"><span class="ms text-white" style="font-size:18px">local_shipping</span></div>
+        </div>
+        <div class="pin" style="top:32%;left:52%">
+          <svg width="36" height="44" viewBox="0 0 36 44"><path d="M18 0C8.06 0 0 8.06 0 18c0 12.6 18 26 18 26s18-13.4 18-26C36 8.06 27.94 0 18 0z" fill="#E31B23"/><circle cx="18" cy="17" r="10" fill="rgba(255,255,255,0.25)"/></svg>
+          <div style="position:absolute;top:7px;left:9px"><span class="ms text-white" style="font-size:18px">cleaning_services</span></div>
+        </div>
+        <div class="pin" style="top:25%;left:72%">
+          <svg width="36" height="44" viewBox="0 0 36 44"><path d="M18 0C8.06 0 0 8.06 0 18c0 12.6 18 26 18 26s18-13.4 18-26C36 8.06 27.94 0 18 0z" fill="#16A34A"/><circle cx="18" cy="17" r="10" fill="rgba(255,255,255,0.25)"/></svg>
+          <div style="position:absolute;top:7px;left:9px"><span class="ms text-white" style="font-size:18px">yard</span></div>
+        </div>
+        <div class="pin" style="top:55%;left:35%">
+          <svg width="36" height="44" viewBox="0 0 36 44"><path d="M18 0C8.06 0 0 8.06 0 18c0 12.6 18 26 18 26s18-13.4 18-26C36 8.06 27.94 0 18 0z" fill="#0891B2"/><circle cx="18" cy="17" r="10" fill="rgba(255,255,255,0.25)"/></svg>
+          <div style="position:absolute;top:7px;left:9px"><span class="ms text-white" style="font-size:18px">plumbing</span></div>
+        </div>
+
+        <!-- Current location -->
+        <div class="absolute z-10" style="top:42%;left:48%">
+          <div class="w-3.5 h-3.5 rounded-full bg-blue-500 border-[2.5px] border-white shadow-lg"></div>
+        </div>
+
+        <!-- Recenter -->
+        <div class="absolute bottom-28 right-3 w-9 h-9 rounded-full bg-white shadow-md flex items-center justify-center z-10">
+          <span class="ms text-neutral-500" style="font-size:18px">my_location</span>
+        </div>
+
+        <!-- V1: Image card preview -->
+        <div class="absolute bottom-3 left-3 right-3 z-10">
+          <div class="bg-white rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.12)] overflow-hidden flex">
+            <img src="https://images.unsplash.com/photo-1581574209460-7bdd93839a0b?q=80&w=200&auto=format&fit=crop" class="w-[80px] h-[80px] object-cover" />
+            <div class="flex-1 p-2.5 flex flex-col justify-between">
+              <div>
+                <p class="text-[13px] font-bold text-black leading-tight">Deep clean before move-out</p>
+                <p class="text-[11px] text-neutral-400 mt-0.5">Cleaning · 0.3 km</p>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-[14px] font-bold text-brand">€50</span>
+                <div class="flex items-center gap-0.5">
+                  <span class="text-[11px] font-semibold text-brand">Open →</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab bar -->
+      <div class="px-3 pb-2">
+        <div class="bg-white rounded-full px-2 py-1.5 flex items-center justify-between shadow-[0_2px_20px_rgba(0,0,0,0.08)]">
+          <div class="flex-1 flex flex-col items-center gap-0.5 py-1.5 rounded-full bg-red-50"><span class="ms text-brand" style="font-size:20px">explore</span><span class="text-[9px] font-semibold text-brand">Discover</span></div>
+          <div class="flex-1 flex flex-col items-center gap-0.5 py-1.5"><span class="ms text-neutral-400" style="font-size:20px">search</span><span class="text-[9px] text-neutral-400">Search</span></div>
+          <div class="flex items-center justify-center mx-1"><div class="w-11 h-11 rounded-full bg-brand flex items-center justify-center shadow-[0_4px_12px_rgba(227,27,35,0.3)]"><span class="ms text-white" style="font-size:22px">add</span></div></div>
+          <div class="flex-1 flex flex-col items-center gap-0.5 py-1.5"><span class="ms text-neutral-400" style="font-size:20px">chat_bubble_outline</span><span class="text-[9px] text-neutral-400">Inbox</span></div>
+          <div class="flex-1 flex flex-col items-center gap-0.5 py-1.5"><span class="ms text-neutral-400" style="font-size:20px">person_outline</span><span class="text-[9px] text-neutral-400">Profile</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ V2: Bottom sheet mini-list ============ -->
+<div>
+  <p class="text-[11px] font-semibold text-neutral-400 mb-2 text-center uppercase tracking-wider">V2 — Bottom Sheet</p>
+  <p class="text-[10px] text-neutral-400 mb-2 text-center max-w-[375px]">Uber/Wolt style peek sheet showing selected + nearby tasks</p>
+  <div class="ph">
+    <div class="flex flex-col h-full pt-[42px]">
+      <div class="flex justify-between px-6 py-1 text-[12px] font-semibold text-black">
+        <span>9:41</span>
+        <div class="flex gap-1 items-center"><span class="ms" style="font-size:15px">signal_cellular_alt</span><span class="ms" style="font-size:15px">wifi</span><span class="ms" style="font-size:16px">battery_full</span></div>
+      </div>
+
+      <div class="px-4 py-2 flex items-center gap-2.5">
+        <div class="w-7 h-7 rounded-full bg-red-100 flex items-center justify-center"><span class="ms text-brand" style="font-size:16px">location_on</span></div>
+        <span class="text-[14px] font-bold text-black flex-1">Praha 9</span>
+        <div class="flex gap-1.5">
+          <div class="px-3 py-1.5 rounded-full border border-neutral-200"><span class="text-[11px] font-semibold text-neutral-400">List</span></div>
+          <div class="px-3 py-1.5 rounded-full bg-brand"><span class="text-[11px] font-bold text-white">Map</span></div>
+        </div>
+      </div>
+
+      <div class="flex-1 map-bg relative">
+        <!-- Pins (same drop shape) -->
+        <div class="pin" style="top:15%;left:30%">
+          <svg width="36" height="44" viewBox="0 0 36 44"><path d="M18 0C8.06 0 0 8.06 0 18c0 12.6 18 26 18 26s18-13.4 18-26C36 8.06 27.94 0 18 0z" fill="#2563EB"/><circle cx="18" cy="17" r="10" fill="rgba(255,255,255,0.25)"/></svg>
+          <div style="position:absolute;top:7px;left:9px"><span class="ms text-white" style="font-size:18px">local_shipping</span></div>
+        </div>
+        <!-- Selected pin (larger, pulsing ring) -->
+        <div class="pin" style="top:28%;left:55%">
+          <div class="absolute -inset-2 rounded-full bg-brand/15 animate-ping" style="animation-duration:2s"></div>
+          <svg width="42" height="50" viewBox="0 0 36 44"><path d="M18 0C8.06 0 0 8.06 0 18c0 12.6 18 26 18 26s18-13.4 18-26C36 8.06 27.94 0 18 0z" fill="#E31B23"/><circle cx="18" cy="17" r="10" fill="rgba(255,255,255,0.25)"/></svg>
+          <div style="position:absolute;top:7px;left:12px"><span class="ms text-white" style="font-size:18px">cleaning_services</span></div>
+        </div>
+        <div class="pin" style="top:45%;left:70%">
+          <svg width="36" height="44" viewBox="0 0 36 44"><path d="M18 0C8.06 0 0 8.06 0 18c0 12.6 18 26 18 26s18-13.4 18-26C36 8.06 27.94 0 18 0z" fill="#D97706"/><circle cx="18" cy="17" r="10" fill="rgba(255,255,255,0.25)"/></svg>
+          <div style="position:absolute;top:7px;left:9px"><span class="ms text-white" style="font-size:18px">bolt</span></div>
+        </div>
+
+        <div class="absolute z-10" style="top:38%;left:45%">
+          <div class="w-3.5 h-3.5 rounded-full bg-blue-500 border-[2.5px] border-white shadow-lg"></div>
+        </div>
+
+        <div class="absolute bottom-[220px] right-3 w-9 h-9 rounded-full bg-white shadow-md flex items-center justify-center z-10">
+          <span class="ms text-neutral-500" style="font-size:18px">my_location</span>
+        </div>
+
+        <!-- V2: Bottom sheet with selected task + nearby list -->
+        <div class="absolute bottom-0 left-0 right-0 z-10">
+          <div class="bg-white rounded-t-[20px] shadow-[0_-2px_20px_rgba(0,0,0,0.08)] pt-2 pb-3">
+            <div class="w-10 h-1 bg-neutral-200 rounded-full mx-auto mb-3"></div>
+
+            <!-- Selected task (highlighted) -->
+            <div class="mx-3 p-3 rounded-xl bg-red-50 border border-red-100 flex items-center gap-3 mb-2">
+              <div class="w-10 h-10 rounded-xl bg-brand flex items-center justify-center">
+                <span class="ms text-white" style="font-size:18px">cleaning_services</span>
+              </div>
+              <div class="flex-1">
+                <p class="text-[13px] font-bold text-black">Deep clean before move-out</p>
+                <p class="text-[11px] text-neutral-400">0.3 km · Cash</p>
+              </div>
+              <div class="text-right">
+                <p class="text-[15px] font-bold text-brand">€50</p>
+              </div>
+              <span class="ms text-neutral-300" style="font-size:18px">chevron_right</span>
+            </div>
+
+            <!-- Nearby tasks -->
+            <div class="mx-3 flex items-center gap-3 py-2 border-b border-neutral-100">
+              <div class="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center"><span class="ms text-blue-500" style="font-size:16px">local_shipping</span></div>
+              <div class="flex-1">
+                <p class="text-[12px] font-semibold text-black">Help me move a sofa</p>
+                <p class="text-[10px] text-neutral-400">0.5 km</p>
+              </div>
+              <span class="text-[13px] font-bold text-neutral-500">€35</span>
+            </div>
+            <div class="mx-3 flex items-center gap-3 py-2">
+              <div class="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center"><span class="ms text-amber-500" style="font-size:16px">bolt</span></div>
+              <div class="flex-1">
+                <p class="text-[12px] font-semibold text-black">Install ceiling lights</p>
+                <p class="text-[10px] text-neutral-400">0.8 km</p>
+              </div>
+              <span class="text-[13px] font-bold text-neutral-500">€40</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab bar -->
+      <div class="px-3 pb-2">
+        <div class="bg-white rounded-full px-2 py-1.5 flex items-center justify-between shadow-[0_2px_20px_rgba(0,0,0,0.08)]">
+          <div class="flex-1 flex flex-col items-center gap-0.5 py-1.5 rounded-full bg-red-50"><span class="ms text-brand" style="font-size:20px">explore</span><span class="text-[9px] font-semibold text-brand">Discover</span></div>
+          <div class="flex-1 flex flex-col items-center gap-0.5 py-1.5"><span class="ms text-neutral-400" style="font-size:20px">search</span><span class="text-[9px] text-neutral-400">Search</span></div>
+          <div class="flex items-center justify-center mx-1"><div class="w-11 h-11 rounded-full bg-brand flex items-center justify-center shadow-[0_4px_12px_rgba(227,27,35,0.3)]"><span class="ms text-white" style="font-size:22px">add</span></div></div>
+          <div class="flex-1 flex flex-col items-center gap-0.5 py-1.5"><span class="ms text-neutral-400" style="font-size:20px">chat_bubble_outline</span><span class="text-[9px] text-neutral-400">Inbox</span></div>
+          <div class="flex-1 flex flex-col items-center gap-0.5 py-1.5"><span class="ms text-neutral-400" style="font-size:20px">person_outline</span><span class="text-[9px] text-neutral-400">Profile</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ V3: Bubble callout ============ -->
+<div>
+  <p class="text-[11px] font-semibold text-neutral-400 mb-2 text-center uppercase tracking-wider">V3 — Bubble Callout</p>
+  <p class="text-[10px] text-neutral-400 mb-2 text-center max-w-[375px]">Google Maps style callout bubble that appears above the selected pin</p>
+  <div class="ph">
+    <div class="flex flex-col h-full pt-[42px]">
+      <div class="flex justify-between px-6 py-1 text-[12px] font-semibold text-black">
+        <span>9:41</span>
+        <div class="flex gap-1 items-center"><span class="ms" style="font-size:15px">signal_cellular_alt</span><span class="ms" style="font-size:15px">wifi</span><span class="ms" style="font-size:16px">battery_full</span></div>
+      </div>
+
+      <div class="px-4 py-2 flex items-center gap-2.5">
+        <div class="w-7 h-7 rounded-full bg-red-100 flex items-center justify-center"><span class="ms text-brand" style="font-size:16px">location_on</span></div>
+        <span class="text-[14px] font-bold text-black flex-1">Praha 9</span>
+        <div class="flex gap-1.5">
+          <div class="px-3 py-1.5 rounded-full border border-neutral-200"><span class="text-[11px] font-semibold text-neutral-400">List</span></div>
+          <div class="px-3 py-1.5 rounded-full bg-brand"><span class="text-[11px] font-bold text-white">Map</span></div>
+        </div>
+      </div>
+
+      <div class="flex-1 map-bg relative">
+        <!-- Pins -->
+        <div class="pin" style="top:20%;left:25%">
+          <svg width="36" height="44" viewBox="0 0 36 44"><path d="M18 0C8.06 0 0 8.06 0 18c0 12.6 18 26 18 26s18-13.4 18-26C36 8.06 27.94 0 18 0z" fill="#16A34A"/><circle cx="18" cy="17" r="10" fill="rgba(255,255,255,0.25)"/></svg>
+          <div style="position:absolute;top:7px;left:9px"><span class="ms text-white" style="font-size:18px">yard</span></div>
+        </div>
+        <div class="pin" style="top:60%;left:30%">
+          <svg width="36" height="44" viewBox="0 0 36 44"><path d="M18 0C8.06 0 0 8.06 0 18c0 12.6 18 26 18 26s18-13.4 18-26C36 8.06 27.94 0 18 0z" fill="#7C3AED"/><circle cx="18" cy="17" r="10" fill="rgba(255,255,255,0.25)"/></svg>
+          <div style="position:absolute;top:7px;left:9px"><span class="ms text-white" style="font-size:18px">school</span></div>
+        </div>
+
+        <!-- Selected pin + callout bubble -->
+        <div class="absolute z-20" style="top:30%;left:50%">
+          <!-- Callout bubble -->
+          <div class="absolute bottom-[52px] left-1/2 -translate-x-1/2 w-[220px]">
+            <div class="bg-white rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.15)] p-3 relative">
+              <p class="text-[12px] font-bold text-black leading-tight">Fix a leaking kitchen faucet</p>
+              <div class="flex items-center justify-between mt-1.5">
+                <span class="text-[11px] text-neutral-400">Plumbing · 0.2 km</span>
+                <span class="text-[13px] font-bold text-brand">€25</span>
+              </div>
+              <!-- Arrow pointing down -->
+              <div class="absolute -bottom-[6px] left-1/2 -translate-x-1/2 w-3 h-3 bg-white transform rotate-45 shadow-[2px_2px_4px_rgba(0,0,0,0.05)]"></div>
+            </div>
+          </div>
+          <!-- The pin itself -->
+          <svg width="42" height="50" viewBox="0 0 36 44"><path d="M18 0C8.06 0 0 8.06 0 18c0 12.6 18 26 18 26s18-13.4 18-26C36 8.06 27.94 0 18 0z" fill="#0891B2"/><circle cx="18" cy="17" r="10" fill="rgba(255,255,255,0.25)"/></svg>
+          <div style="position:absolute;top:8px;left:12px"><span class="ms text-white" style="font-size:18px">plumbing</span></div>
+        </div>
+
+        <div class="pin" style="top:50%;left:75%">
+          <svg width="36" height="44" viewBox="0 0 36 44"><path d="M18 0C8.06 0 0 8.06 0 18c0 12.6 18 26 18 26s18-13.4 18-26C36 8.06 27.94 0 18 0z" fill="#E11D48"/><circle cx="18" cy="17" r="10" fill="rgba(255,255,255,0.25)"/></svg>
+          <div style="position:absolute;top:7px;left:9px"><span class="ms text-white" style="font-size:18px">directions_car</span></div>
+        </div>
+
+        <div class="absolute z-10" style="top:42%;left:45%">
+          <div class="w-3.5 h-3.5 rounded-full bg-blue-500 border-[2.5px] border-white shadow-lg"></div>
+        </div>
+
+        <div class="absolute bottom-24 right-3 w-9 h-9 rounded-full bg-white shadow-md flex items-center justify-center z-10">
+          <span class="ms text-neutral-500" style="font-size:18px">my_location</span>
+        </div>
+      </div>
+
+      <!-- Tab bar -->
+      <div class="px-3 pb-2">
+        <div class="bg-white rounded-full px-2 py-1.5 flex items-center justify-between shadow-[0_2px_20px_rgba(0,0,0,0.08)]">
+          <div class="flex-1 flex flex-col items-center gap-0.5 py-1.5 rounded-full bg-red-50"><span class="ms text-brand" style="font-size:20px">explore</span><span class="text-[9px] font-semibold text-brand">Discover</span></div>
+          <div class="flex-1 flex flex-col items-center gap-0.5 py-1.5"><span class="ms text-neutral-400" style="font-size:20px">search</span><span class="text-[9px] text-neutral-400">Search</span></div>
+          <div class="flex items-center justify-center mx-1"><div class="w-11 h-11 rounded-full bg-brand flex items-center justify-center shadow-[0_4px_12px_rgba(227,27,35,0.3)]"><span class="ms text-white" style="font-size:22px">add</span></div></div>
+          <div class="flex-1 flex flex-col items-center gap-0.5 py-1.5"><span class="ms text-neutral-400" style="font-size:20px">chat_bubble_outline</span><span class="text-[9px] text-neutral-400">Inbox</span></div>
+          <div class="flex-1 flex flex-col items-center gap-0.5 py-1.5"><span class="ms text-neutral-400" style="font-size:20px">person_outline</span><span class="text-[9px] text-neutral-400">Profile</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+</body>
+</html>

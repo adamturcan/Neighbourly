@@ -21,6 +21,7 @@ import JobCard from "../../tasks/components/JobCard";
 import LocationBar from "../../../shared/components/LocationBar";
 import LocationPickerSheet from "../../../shared/components/LocationPickerSheet";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import { Image } from "expo-image";
 import { COLORS } from "../../../shared/lib/constants";
 import DiscoverMapView from "../../map/components/DiscoverMapView";
 
@@ -262,6 +263,23 @@ export default function HomeScreen() {
               showsVerticalScrollIndicator={false}
               refreshControl={<RefreshControl refreshing={false} onRefresh={refetchServices} tintColor={COLORS.red} />}
             >
+              {/* Hero banner */}
+              <View style={{ marginHorizontal: 16, marginTop: 8, marginBottom: 4, borderRadius: 16, overflow: "hidden", height: 140 }}>
+                <Image
+                  source={{ uri: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?q=80&w=800&auto=format&fit=crop" }}
+                  style={{ width: "100%", height: "100%" }}
+                  contentFit="cover"
+                />
+                <View style={{ position: "absolute", inset: 0, backgroundColor: "rgba(0,0,0,0.35)", padding: 16, justifyContent: "flex-end" }}>
+                  <Text style={{ color: "#fff", fontSize: 18, fontWeight: "800", lineHeight: 22 }}>
+                    Find trusted help{"\n"}in your neighbourhood
+                  </Text>
+                  <Text style={{ color: "rgba(255,255,255,0.7)", fontSize: 12, marginTop: 4 }}>
+                    Browse services from local helpers
+                  </Text>
+                </View>
+              </View>
+
               {providerCategorySections.map((section) => (
                 <View key={section.key} className="mt-3">
                   <Text className="text-xl font-extrabold text-black px-4 mb-2.5">
