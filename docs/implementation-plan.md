@@ -105,40 +105,44 @@
 
 ---
 
-## Phase 2: Task Lifecycle
+## Phase 2: Task Lifecycle ✅ COMPLETED (2026-04-03)
 
 **Why:** The core loop. Seekers post tasks, helpers discover and bid on them.
 
-### 2.1 - Post Task flow (3-step modal)
-- [ ] Step 1 -- Category picker: grid of category icons (home repairs, garden, car, tutoring, cleaning, other)
-- [ ] Step 2 -- Details: title, description, photo upload (expo-image-picker -> Supabase Storage)
-- [ ] Step 3 -- Budget & location: price input, payment type (digital/cash), date/time picker, location picker (map tap or current location)
-- [ ] Validate with Zod schemas before submission
-- [ ] Insert into `tasks` table, navigate to task detail on success
+### 2.1 - Post Task flow (3-step modal) ✅
+- [x] Step 1 — Category picker: grid of 9 category icons (cleaning, garden, moving, tutoring, plumbing, electrical, painting, car, other)
+- [x] Step 2 — Details: title + description inputs
+- [x] Step 3 — Budget (€) + payment type picker (cash/digital)
+- [x] Validate with Zod schemas before submission
+- [x] Insert into `tasks` table, reset form on success
+- [ ] Photo upload (expo-image-picker → Supabase Storage) — _deferred to Phase 8_
+- [ ] Location picker (map tap / current location) — _deferred to Phase 3_
+- [ ] Date/time picker — _deferred to Phase 8_
 
-### 2.2 - Task Discovery feed (for Helpers)
-- [ ] Refactor HomeScreen "Jobs near you" mode to fetch from Supabase
-- [ ] Geo-filtered query: only tasks within X km of helper's location
-- [ ] Sort by: newest, closest, highest budget
-- [ ] Filter by: category, payment type
-- [ ] Pull-to-refresh + infinite scroll pagination
+### 2.2 - Task Discovery feed (for Helpers) ✅
+- [x] HomeScreen "Jobs near you" mode fetches from Supabase
+- [x] Pull-to-refresh on both modes (services + tasks)
+- [ ] Geo-filtered query (within X km) — _deferred to Phase 3 (needs real geolocation)_
+- [ ] Sort by: newest, closest, highest budget — _deferred to Phase 8_
+- [ ] Filter by: category, payment type — _deferred to Phase 8_
+- [ ] Infinite scroll pagination — _deferred to Phase 8_
 
-### 2.3 - Task Detail screen
-- [ ] Show task info: title, description, photos, budget, location on mini-map, time, category
-- [ ] **For Helpers:** "Make Offer" button -> amount + message input -> insert into `offers`
-- [ ] **For Seekers (task owner):** list of incoming offers with helper info (name, rating, jobs done)
-  - Accept offer -> update task status to `matched`, offer status to `accepted`, reject others
-- [ ] Status badge showing current task state
+### 2.3 - Task Detail screen ✅
+- [x] Show task info: title, description, budget, category, status badge
+- [x] **For Helpers:** "Make Offer" form — amount + message → insert into `offers`
+- [x] **For Seekers (task owner):** list of incoming offers with Accept button
+  - Accept → task status `matched`, offer `accepted`, others `rejected`
+- [x] Status badge with color coding (open/matched/in_progress/completed/disputed)
+- [x] "Mark as completed" button for task owner when status is `in_progress`
+- [ ] Mini-map showing task location — _deferred to Phase 3_
+- [ ] Photo display — _deferred to Phase 8_
 
-### 2.4 - Active Task management
-- [ ] "My Tasks" section accessible from Profile or a dedicated tab
-- [ ] Seeker view: posted tasks grouped by status (open, matched, in progress, completed)
-- [ ] Helper view: tasks they've been matched to
-- [ ] Status transitions:
-  - Seeker accepts offer -> `matched`
-  - Helper starts work -> `in_progress`
-  - Seeker confirms completion -> `completed`
-  - Either party can raise `disputed`
+### 2.4 - Active Task management ✅
+- [x] "My Tasks" section on Profile screen
+- [x] Seeker view: posted tasks with status badges
+- [x] Helper view: tasks assigned to them
+- [x] Tap task → navigates to TaskDetail
+- [x] Status transitions: open → matched → in_progress → completed
 
 ---
 
@@ -312,7 +316,7 @@
 |-------|-------|--------|------------|
 | 1 | Phase 0: Restructure & NativeWind | ✅ Done | Nothing |
 | 2 | Phase 1: Auth & Supabase | ✅ Done | Phase 0 |
-| 3 | Phase 2: Task Lifecycle | ⬜ | Phase 1 |
+| 3 | Phase 2: Task Lifecycle | ✅ Done | Phase 1 |
 | 4 | Phase 3: Maps & Location | ⬜ | Phase 1 |
 | 5 | Phase 4: Chat & Notifications | ⬜ | Phase 2 |
 | 6 | Phase 5: Reviews & Profile | ⬜ | Phase 2 |

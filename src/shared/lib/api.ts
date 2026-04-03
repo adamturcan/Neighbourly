@@ -119,6 +119,22 @@ export async function listTasks(): Promise<Task[]> {
   return (data ?? []).map((row: any) => mapTask(row));
 }
 
+export async function listMyTasks(): Promise<Task[]> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return [];
+
+  const { data, error } = await supabase
+    .from("tasks")
+    .select("*")
+    .or(`creator_id.eq.${user.id},helper_id.eq.${user.id}`)
+    .order("created_at", { ascending: false });
+
+  if (error) throw error;
+  return (data ?? []).map((row: any) => mapTask(row));
+}
+
 export async function getTask(taskId: string): Promise<Task | undefined> {
   const { data, error } = await supabase
     .from("tasks")

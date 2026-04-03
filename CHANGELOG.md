@@ -8,6 +8,23 @@ Format: [Keep a Changelog](https://keepachangelog.com/)
 
 ## [2026-04-03] — Phase 1: Supabase Foundation & Auth
 
+## [2026-04-03] — Phase 2: Task Lifecycle
+
+### Added
+- 3-step Post Task flow: Category picker (9 categories with icons) → Details (title, description) → Budget & payment type (cash/digital)
+- Zod validation on task form submission
+- Task Detail screen with role-aware UI:
+  - Helpers see "Make an offer" form (amount + message)
+  - Seekers see incoming offers with Accept button
+  - Owner can "Mark as completed" when task is in progress
+- Status badges with color coding (open/matched/in_progress/completed/disputed)
+- "My Tasks" section on Profile screen (posted tasks + tasks helping on)
+- `listMyTasks()` API function for fetching user's own tasks
+- Pull-to-refresh on both Discover modes (services + tasks)
+- Task cards in Profile link to TaskDetail screen
+
+---
+
 ### Changed
 - All screens now use Supabase API (`api.ts`) instead of mock repo
 - PostTaskScreen creates real tasks in Supabase

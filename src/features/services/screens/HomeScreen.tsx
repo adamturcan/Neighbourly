@@ -9,6 +9,7 @@ import {
   useWindowDimensions,
   Text,
   Pressable,
+  RefreshControl,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { listServices, listTasks } from "../../../shared/lib/api";
@@ -217,6 +218,7 @@ export default function HomeScreen() {
               scrollEventThrottle={16}
               contentContainerStyle={{ paddingBottom: 16 }}
               showsVerticalScrollIndicator={false}
+              refreshControl={<RefreshControl refreshing={false} onRefresh={refetchServices} tintColor={COLORS.red} />}
             >
               {providerCategorySections.map((section) => (
                 <View key={section.key} className="mt-3">
@@ -251,6 +253,7 @@ export default function HomeScreen() {
             scrollEventThrottle={16}
             sections={requestSections}
             keyExtractor={(_, index) => `req-section-${index}`}
+            refreshControl={<RefreshControl refreshing={false} onRefresh={refetchTasks} tintColor={COLORS.red} />}
             renderSectionHeader={({ section: { title } }) => (
               <Text className="text-xl font-extrabold text-black px-4 mt-3.5 mb-2">
                 {title}
