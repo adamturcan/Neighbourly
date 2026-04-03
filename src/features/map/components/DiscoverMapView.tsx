@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { View, Text, Pressable, StyleSheet, ScrollView } from "react-native";
+import { View, Text, Pressable, StyleSheet, PanResponder, Animated } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import { useQuery } from "@tanstack/react-query";
 import { listTasks } from "../../../shared/lib/api";
@@ -30,6 +30,28 @@ export default function DiscoverMapView({
     queryKey: ["tasks", "open"],
     queryFn: () => listTasks(),
   });
+
+  const sheetY = useRef(new Animated.Value(0)).current;
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: (_, g) => Math.abs(g.dy) > 5 && g.dy > 0,
+      onPanResponderMove: (_, g) => {
+        if (g.dy > 0) sheetY.setValue(g.dy);
+      },
+      onPanResponderRelease: (_, g) => {
+        if (g.dy > 60 || g.vy > 0.5) {
+          // Dismiss
+          Animated.timing(sheetY, { toValue: 400, duration: 200, useNativeDriver: true }).start(() => {
+            setSelectedId(null);
+            sheetY.setValue(0);
+          });
+        } else {
+          Animated.spring(sheetY, { toValue: 0, useNativeDriver: true, bounciness: 8 }).start();
+        }
+      },
+    }),
+  ).current;
 
   const validTasks = tasks.filter((t) => t.lat !== 0 && t.lng !== 0);
   const selected = validTasks.find((t) => t.id === selectedId);
@@ -71,6 +93,7 @@ export default function DiscoverMapView({
             coordinate={{ latitude: task.lat, longitude: task.lng }}
             onPress={(e) => {
               e.stopPropagation();
+              sheetY.setValue(0);
               setSelectedId(task.id);
             }}
             tracksViewChanges={false}
@@ -89,61 +112,32 @@ export default function DiscoverMapView({
         <MaterialCommunityIcons name="crosshairs-gps" size={18} color="#3B82F6" />
       </Pressable>
 
-      {/* V2: Bottom sheet */}
-      <View style={s.sheet}>
-        <View style={s.sheetInner}>
-          <View style={s.grabber} />
+      {/* V2: Bottom sheet — only shows when a pin is selected */}
+      {selected && (
+        <Animated.View style={[s.sheet, { transform: [{ translateY: sheetY }] }]}>
+          <View style={s.sheetInner} {...panResponder.panHandlers}>
+            <View style={s.grabber} />
 
-          {selected ? (
-            <>
-              {/* Selected task (highlighted) */}
-              <Pressable onPress={() => onTaskPress(selected.id)} style={s.selectedRow}>
-                <View style={[s.iconBox, { backgroundColor: CATEGORY_COLORS[selected.category] ?? "#6B7280" }]}>
-                  <MaterialCommunityIcons
-                    name={(CATEGORY_ICONS[selected.category] as any) ?? "help-circle-outline"}
-                    size={18} color="#fff"
-                  />
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={s.selectedTitle} numberOfLines={1}>{selected.title}</Text>
-                  <Text style={s.selectedSub}>
-                    {km(location, { lat: selected.lat, lng: selected.lng }).toFixed(1)} km · {selected.category}
-                  </Text>
-                </View>
-                <Text style={s.selectedPrice}>€{selected.budget}</Text>
-                <MaterialCommunityIcons name="chevron-right" size={18} color="#D1D1D6" />
-              </Pressable>
+            {/* Selected task (highlighted) */}
+            <Pressable onPress={() => onTaskPress(selected.id)} style={s.selectedRow}>
+              <View style={[s.iconBox, { backgroundColor: CATEGORY_COLORS[selected.category] ?? "#6B7280" }]}>
+                <MaterialCommunityIcons
+                  name={(CATEGORY_ICONS[selected.category] as any) ?? "help-circle-outline"}
+                  size={18} color="#fff"
+                />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={s.selectedTitle} numberOfLines={1}>{selected.title}</Text>
+                <Text style={s.selectedSub}>
+                  {km(location, { lat: selected.lat, lng: selected.lng }).toFixed(1)} km · {selected.category}
+                </Text>
+              </View>
+              <Text style={s.selectedPrice}>€{selected.budget}</Text>
+              <MaterialCommunityIcons name="chevron-right" size={18} color="#D1D1D6" />
+            </Pressable>
 
-              {/* Other nearby */}
-              {otherNearby.map((t) => (
-                <Pressable
-                  key={t.id}
-                  onPress={() => {
-                    setSelectedId(t.id);
-                    mapRef.current?.animateToRegion({
-                      latitude: t.lat, longitude: t.lng,
-                      latitudeDelta: 0.02, longitudeDelta: 0.02,
-                    });
-                  }}
-                  style={s.nearbyRow}
-                >
-                  <View style={[s.nearbyIcon, { backgroundColor: (CATEGORY_COLORS[t.category] ?? "#6B7280") + "15" }]}>
-                    <MaterialCommunityIcons
-                      name={(CATEGORY_ICONS[t.category] as any) ?? "help-circle-outline"}
-                      size={16} color={CATEGORY_COLORS[t.category] ?? "#6B7280"}
-                    />
-                  </View>
-                  <View style={{ flex: 1 }}>
-                    <Text style={s.nearbyTitle} numberOfLines={1}>{t.title}</Text>
-                    <Text style={s.nearbySub}>{t.dist.toFixed(1)} km</Text>
-                  </View>
-                  <Text style={s.nearbyPrice}>€{t.budget}</Text>
-                </Pressable>
-              ))}
-            </>
-          ) : (
-            /* No selection — show nearby list */
-            nearby.slice(0, 4).map((t) => (
+            {/* Other nearby */}
+            {otherNearby.map((t) => (
               <Pressable
                 key={t.id}
                 onPress={() => {
@@ -167,10 +161,10 @@ export default function DiscoverMapView({
                 </View>
                 <Text style={s.nearbyPrice}>€{t.budget}</Text>
               </Pressable>
-            ))
-          )}
-        </View>
-      </View>
+            ))}
+          </View>
+        </Animated.View>
+      )}
     </View>
   );
 }
