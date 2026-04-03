@@ -12,10 +12,10 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigation, useFocusEffect, CommonActions } from "@react-navigation/native";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import { listMyServices, deleteService } from "../../../shared/lib/api";
+import { listMyServices, deleteService, listTasks } from "../../../shared/lib/api";
 import { useAuth } from "../../auth/store/useAuth";
 import { COLORS, CATEGORY_COLORS } from "../../../shared/lib/constants";
-import type { Service } from "../../../shared/types";
+import type { Service, Task } from "../../../shared/types";
 
 const FALLBACK_IMAGES: Record<string, string> = {
   cleaning: "https://images.unsplash.com/photo-1628177142898-93e36e4e3a50?q=80&w=400&fit=crop",
@@ -36,10 +36,29 @@ export default function MyServicesScreen() {
     placeholderData: (prev: any) => prev,
   });
 
+  // Fetch open tasks that match our service categories (booking requests)
+  const { data: allOpenTasks = [], refetch: refetchTasks } = useQuery({
+    queryKey: ["tasks", "open"],
+    queryFn: listTasks,
+    staleTime: 30000,
+    placeholderData: (prev: any) => prev,
+  });
+
+  // Filter to booking requests matching our categories
+  const myCategories = new Set(services.flatMap((s) => s.categories));
+  const bookingRequests = allOpenTasks.filter(
+    (t) => t.title.startsWith("Booking:") && myCategories.has(t.category) && t.requesterId !== profile?.id,
+  );
+  // Also show general tasks matching our skills
+  const matchingTasks = allOpenTasks.filter(
+    (t) => !t.title.startsWith("Booking:") && myCategories.has(t.category) && t.requesterId !== profile?.id,
+  );
+
   useFocusEffect(
     React.useCallback(() => {
       refetch();
-    }, [refetch]),
+      refetchTasks();
+    }, [refetch, refetchTasks]),
   );
 
   const totalBookings = services.reduce((sum, s) => sum + s.jobsDone, 0);
@@ -80,6 +99,48 @@ export default function MyServicesScreen() {
             <Text style={s.statLabel}>Avg Rating</Text>
           </View>
         </View>
+
+        {/* Booking Requests */}
+        {bookingRequests.length > 0 && (
+          <View style={s.section}>
+            <Text style={s.sectionTitle}>Booking Requests ({bookingRequests.length})</Text>
+            {bookingRequests.map((task) => (
+              <RequestCard
+                key={task.id}
+                task={task}
+                onPress={() =>
+                  nav.dispatch(
+                    CommonActions.navigate({
+                      name: "TaskDetail",
+                      params: { taskId: task.id },
+                    }),
+                  )
+                }
+              />
+            ))}
+          </View>
+        )}
+
+        {/* Matching Tasks */}
+        {matchingTasks.length > 0 && (
+          <View style={s.section}>
+            <Text style={s.sectionTitle}>Tasks You Could Help With ({matchingTasks.length})</Text>
+            {matchingTasks.slice(0, 5).map((task) => (
+              <RequestCard
+                key={task.id}
+                task={task}
+                onPress={() =>
+                  nav.dispatch(
+                    CommonActions.navigate({
+                      name: "TaskDetail",
+                      params: { taskId: task.id },
+                    }),
+                  )
+                }
+              />
+            ))}
+          </View>
+        )}
 
         {/* Services List */}
         <View style={s.section}>
@@ -192,6 +253,42 @@ function ServiceCard({
   );
 }
 
+function RequestCard({ task, onPress }: { task: Task; onPress: () => void }) {
+  const isBooking = task.title.startsWith("Booking:");
+  const displayTitle = isBooking ? task.title.replace("Booking: ", "") : task.title;
+  const catColor = CATEGORY_COLORS[task.category] ?? "#6B7280";
+  const scheduledDate = task.when
+    ? new Date(task.when).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })
+    : null;
+
+  return (
+    <Pressable style={s.requestCard} onPress={onPress}>
+      <View style={[s.requestDot, { backgroundColor: isBooking ? COLORS.red : catColor }]} />
+      <View style={{ flex: 1 }}>
+        <View style={s.requestTop}>
+          <Text style={s.requestTitle} numberOfLines={1}>{displayTitle}</Text>
+          <Text style={s.requestBudget}>€{task.budget}</Text>
+        </View>
+        <View style={s.requestMeta}>
+          <View style={[s.requestCat, { backgroundColor: catColor + "18" }]}>
+            <Text style={[s.requestCatText, { color: catColor }]}>{task.category}</Text>
+          </View>
+          {scheduledDate && (
+            <Text style={s.requestDate}>{scheduledDate}</Text>
+          )}
+        </View>
+        {isBooking && (
+          <View style={s.requestBadge}>
+            <MaterialCommunityIcons name="calendar-clock" size={14} color={COLORS.red} />
+            <Text style={s.requestBadgeText}>Booking request</Text>
+          </View>
+        )}
+      </View>
+      <MaterialCommunityIcons name="chevron-right" size={20} color="#D1D5DB" />
+    </Pressable>
+  );
+}
+
 const s = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#F9FAFB" },
   // Stats
@@ -270,6 +367,34 @@ const s = StyleSheet.create({
   scEditText: { fontSize: 13, fontWeight: "600", color: "#374151" },
   scDeleteBtn: { backgroundColor: "#FEF2F2" },
   scDeleteText: { fontSize: 13, fontWeight: "600", color: "#EF4444" },
+  // Request Card
+  requestCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F3F4F6",
+  },
+  requestDot: { width: 10, height: 10, borderRadius: 5 },
+  requestTop: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  requestTitle: { fontSize: 14, fontWeight: "600", color: "#000", flex: 1, marginRight: 8 },
+  requestBudget: { fontSize: 14, fontWeight: "700", color: "#000" },
+  requestMeta: { flexDirection: "row", alignItems: "center", gap: 8, marginTop: 4 },
+  requestCat: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8 },
+  requestCatText: { fontSize: 11, fontWeight: "600", textTransform: "capitalize" },
+  requestDate: { fontSize: 12, color: "#9CA3AF" },
+  requestBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    marginTop: 6,
+  },
+  requestBadgeText: { fontSize: 11, color: COLORS.red, fontWeight: "600" },
   // Add button
   addBtn: {
     flexDirection: "row",
