@@ -1,7 +1,7 @@
 # Neighborly - Feature-by-Feature Implementation Plan
 
 > **Target:** React Native (Expo) on macOS M4, testing via Xcode iPhone Simulator
-> **Current state:** Feature-based structure with NativeWind, mock data, no backend
+> **Current state:** Phases 0–3 complete. Supabase backend, auth, task lifecycle, maps all working.
 > **Goal:** Fully functional MVP matching the vision in `context.md`
 
 ---
@@ -14,7 +14,7 @@
 - [x] Updated all Expo SDK deps to latest compatible versions
 - [x] Installed missing peer deps (`expo-font`, `react-native-worklets`)
 - [x] All 17/17 `expo-doctor` checks pass
-- [ ] Set up environment variables file (`.env`) for Supabase/Stripe/Maps keys — _deferred to Phase 1_
+- [x] Set up environment variables file (`.env`) for Supabase keys — _done in Phase 1_
 
 ### 0.2 - Migrate to feature-based folder structure ✅
 - [x] Restructure `src/` from screen-based to feature-based:
@@ -59,7 +59,7 @@
 **Why:** Everything depends on user identity. No auth = no task ownership, no chat, no payments.
 
 ### 1.1 - Supabase project setup ✅
-- [ ] Create Supabase project — _waiting for user to create project and provide credentials_
+- [x] Create Supabase project — _done, connected to jnlgcgvvokoncszvvwup.supabase.co_
 - [x] Install `@supabase/supabase-js` + `expo-secure-store` + `react-native-url-polyfill`
 - [x] Create `src/shared/lib/supabase.ts` client singleton (with SecureStore adapter)
 - [x] Create `.env.example` with `EXPO_PUBLIC_SUPABASE_URL` / `EXPO_PUBLIC_SUPABASE_ANON_KEY`
@@ -134,7 +134,7 @@
   - Accept → task status `matched`, offer `accepted`, others `rejected`
 - [x] Status badge with color coding (open/matched/in_progress/completed/disputed)
 - [x] "Mark as completed" button for task owner when status is `in_progress`
-- [ ] Mini-map showing task location — _deferred to Phase 3_
+- [x] Mini-map showing task location — _done in Phase 3_
 - [ ] Photo display — _deferred to Phase 8_
 
 ### 2.4 - Active Task management ✅
