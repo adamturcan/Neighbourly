@@ -52,12 +52,21 @@ function formatTime(dateStr: string): string {
 export default function ChatScreen() {
   const route = useRoute<any>();
   const navigation = useNavigation();
+  const parentNav = navigation.getParent?.();
   const { taskId, otherName } = route.params as {
     taskId: string;
     otherName: string;
   };
   const { user } = useAuth();
   const queryClient = useQueryClient();
+
+  // Hide tab bar when chat is open
+  useEffect(() => {
+    parentNav?.setOptions({ tabBarStyle: { display: "none" } });
+    return () => {
+      parentNav?.setOptions({ tabBarStyle: undefined });
+    };
+  }, [parentNav]);
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
   const flatListRef = useRef<FlatList>(null);
