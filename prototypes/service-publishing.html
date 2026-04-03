@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Service Publishing Flow - 3 Variants</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Inter', sans-serif; background: #F3F4F6; display: flex; gap: 32px; padding: 40px; flex-wrap: wrap; justify-content: center; }
+h2.variant-label { width: 100%; text-align: center; font-size: 14px; color: #6B7280; text-transform: uppercase; letter-spacing: 2px; margin-top: 20px; }
+.phone { width: 393px; height: 852px; background: #fff; border-radius: 40px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.15); position: relative; border: 8px solid #1a1a1a; }
+.phone-screen { width: 100%; height: 100%; overflow-y: auto; position: relative; }
+.phone-screen::-webkit-scrollbar { display: none; }
+.notch { width: 160px; height: 34px; background: #1a1a1a; border-radius: 0 0 20px 20px; position: absolute; top: 0; left: 50%; transform: translateX(-50%); z-index: 10; }
+
+/* ======================== V1 — Multi-Step Wizard (Wolt-style) ======================== */
+.v1 .page { min-height: 100%; background: #fff; padding: 50px 0 40px; }
+.v1 .top-bar { display: flex; align-items: center; justify-content: space-between; padding: 0 20px 16px; }
+.v1 .back-btn { font-size: 24px; color: #000; cursor: pointer; }
+.v1 .step-text { font-size: 13px; color: #9CA3AF; font-weight: 500; }
+.v1 .close-btn { font-size: 24px; color: #6B7280; cursor: pointer; }
+.v1 .progress-bar { height: 3px; background: #F3F4F6; margin: 0 20px 24px; border-radius: 2px; }
+.v1 .progress-fill { height: 100%; background: #E31B23; border-radius: 2px; width: 66%; }
+.v1 .step-title { font-size: 24px; font-weight: 800; color: #000; padding: 0 20px; margin-bottom: 8px; }
+.v1 .step-sub { font-size: 14px; color: #6B7280; padding: 0 20px; margin-bottom: 24px; line-height: 1.5; }
+
+.v1 .form-group { padding: 0 20px; margin-bottom: 20px; }
+.v1 .label { font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 8px; }
+.v1 .input { width: 100%; border: 1.5px solid #E5E7EB; border-radius: 14px; padding: 14px 16px; font-size: 15px; color: #000; font-family: inherit; }
+.v1 .input:focus { border-color: #E31B23; outline: none; }
+.v1 .textarea { min-height: 100px; resize: none; }
+
+.v1 .cat-grid { display: flex; flex-wrap: wrap; gap: 10px; padding: 0 20px; }
+.v1 .cat-opt { display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-radius: 14px; border: 1.5px solid #E5E7EB; cursor: pointer; min-width: 45%; }
+.v1 .cat-opt.selected { border-color: #E31B23; background: #FEF2F2; }
+.v1 .cat-dot { width: 12px; height: 12px; border-radius: 6px; }
+.v1 .cat-name { font-size: 14px; font-weight: 600; color: #374151; }
+.v1 .cat-opt.selected .cat-name { color: #E31B23; }
+.v1 .cat-check { margin-left: auto; font-size: 18px; color: #E31B23; }
+
+.v1 .price-row { display: flex; gap: 12px; padding: 0 20px; }
+.v1 .price-input { flex: 1; display: flex; align-items: center; border: 1.5px solid #E5E7EB; border-radius: 14px; padding: 0 16px; }
+.v1 .price-input.focused { border-color: #E31B23; }
+.v1 .euro { font-size: 16px; font-weight: 700; color: #374151; margin-right: 8px; }
+.v1 .price-input input { border: none; padding: 14px 0; font-size: 18px; font-weight: 700; width: 100%; font-family: inherit; outline: none; }
+.v1 .price-label { font-size: 11px; color: #9CA3AF; text-align: center; margin-top: 4px; }
+
+.v1 .photo-area { margin: 0 20px; border: 2px dashed #E5E7EB; border-radius: 16px; padding: 32px; text-align: center; cursor: pointer; }
+.v1 .photo-area .material-icons-round { font-size: 40px; color: #D1D5DB; }
+.v1 .photo-area p { font-size: 14px; color: #9CA3AF; margin-top: 8px; }
+.v1 .photo-area small { font-size: 12px; color: #D1D5DB; }
+
+.v1 .photo-preview { display: flex; gap: 10px; padding: 0 20px; overflow-x: auto; }
+.v1 .photo-thumb { width: 80px; height: 80px; border-radius: 12px; background: #F3F4F6; object-fit: cover; position: relative; }
+.v1 .photo-add { width: 80px; height: 80px; border-radius: 12px; border: 2px dashed #D1D5DB; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+
+.v1 .bottom-bar { padding: 20px; position: sticky; bottom: 0; background: #fff; border-top: 1px solid #F3F4F6; }
+.v1 .next-btn { width: 100%; padding: 16px; border-radius: 14px; background: #E31B23; color: #fff; font-size: 16px; font-weight: 700; border: none; cursor: pointer; text-align: center; }
+
+/* ======================== V2 — Single Page Form ======================== */
+.v2 .page { min-height: 100%; background: #fff; padding: 50px 0 40px; }
+.v2 .header { padding: 8px 20px 20px; }
+.v2 .title { font-size: 28px; font-weight: 800; color: #000; }
+.v2 .subtitle { font-size: 14px; color: #6B7280; margin-top: 4px; }
+
+.v2 .section { padding: 0 20px; margin-bottom: 24px; }
+.v2 .section-title { font-size: 15px; font-weight: 700; color: #000; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+.v2 .section-title .material-icons-round { font-size: 20px; color: #E31B23; }
+.v2 .input { width: 100%; border: 1.5px solid #E5E7EB; border-radius: 14px; padding: 14px 16px; font-size: 15px; color: #000; font-family: inherit; outline: none; }
+.v2 .input:focus { border-color: #E31B23; }
+.v2 .textarea { min-height: 80px; resize: none; }
+
+.v2 .cat-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.v2 .cat-chip { padding: 10px 16px; border-radius: 14px; border: 1.5px solid #E5E7EB; font-size: 13px; font-weight: 600; color: #374151; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+.v2 .cat-chip.sel { border-color: #E31B23; background: #FEF2F2; color: #E31B23; }
+.v2 .cat-chip .material-icons-round { font-size: 18px; }
+
+.v2 .price-section { display: flex; align-items: center; gap: 12px; }
+.v2 .price-box { flex: 1; display: flex; align-items: center; border: 1.5px solid #E5E7EB; border-radius: 14px; padding: 0 16px; }
+.v2 .price-box .euro { font-size: 18px; font-weight: 700; color: #374151; margin-right: 8px; }
+.v2 .price-box input { border: none; padding: 14px 0; font-size: 18px; font-weight: 700; width: 100%; font-family: inherit; outline: none; }
+.v2 .price-type { font-size: 13px; color: #9CA3AF; }
+
+.v2 .photo-upload { display: flex; gap: 10px; overflow-x: auto; }
+.v2 .photo-slot { width: 90px; height: 90px; border-radius: 14px; background: #F9FAFB; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; border: 1.5px dashed #D1D5DB; cursor: pointer; flex-shrink: 0; }
+.v2 .photo-slot .material-icons-round { font-size: 24px; color: #9CA3AF; }
+.v2 .photo-slot span { font-size: 10px; color: #9CA3AF; font-weight: 500; }
+.v2 .photo-filled { width: 90px; height: 90px; border-radius: 14px; background: #E5E7EB; object-fit: cover; flex-shrink: 0; }
+
+.v2 .location-row { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border: 1.5px solid #E5E7EB; border-radius: 14px; cursor: pointer; }
+.v2 .location-row .material-icons-round { font-size: 22px; color: #E31B23; }
+.v2 .location-text { flex: 1; }
+.v2 .location-text .loc-title { font-size: 14px; font-weight: 600; color: #000; }
+.v2 .location-text .loc-sub { font-size: 12px; color: #9CA3AF; }
+.v2 .location-arrow { font-size: 20px; color: #D1D5DB; }
+
+.v2 .preview-card { margin: 0 20px 20px; background: #F9FAFB; border-radius: 16px; overflow: hidden; }
+.v2 .preview-img { width: 100%; height: 120px; background: #E5E7EB; display: flex; align-items: center; justify-content: center; }
+.v2 .preview-img .material-icons-round { font-size: 40px; color: #D1D5DB; }
+.v2 .preview-body { padding: 14px; }
+.v2 .preview-title { font-size: 15px; font-weight: 700; color: #000; }
+.v2 .preview-cats { display: flex; gap: 6px; margin-top: 6px; }
+.v2 .preview-cat { padding: 3px 10px; border-radius: 10px; background: #FEF2F2; color: #E31B23; font-size: 11px; font-weight: 600; }
+.v2 .preview-price { font-size: 14px; font-weight: 700; color: #000; margin-top: 8px; }
+
+.v2 .publish-btn { margin: 0 20px 40px; padding: 16px; border-radius: 14px; background: #E31B23; color: #fff; font-size: 16px; font-weight: 700; border: none; cursor: pointer; text-align: center; width: calc(100% - 40px); }
+
+/* ======================== V3 — My Services Dashboard + Create ======================== */
+.v3 .page { min-height: 100%; background: #F9FAFB; padding: 50px 0 100px; }
+.v3 .header { padding: 8px 20px 20px; background: #fff; }
+.v3 .title { font-size: 28px; font-weight: 800; color: #000; }
+.v3 .subtitle { font-size: 14px; color: #6B7280; margin-top: 4px; }
+
+.v3 .stats-row { display: flex; gap: 10px; padding: 16px 20px; background: #fff; border-bottom: 1px solid #F3F4F6; }
+.v3 .stat-card { flex: 1; background: #F9FAFB; border-radius: 14px; padding: 14px; text-align: center; }
+.v3 .stat-num { font-size: 22px; font-weight: 800; color: #000; }
+.v3 .stat-label { font-size: 11px; color: #9CA3AF; margin-top: 2px; }
+
+.v3 .section { padding: 20px; }
+.v3 .section-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+.v3 .section-title { font-size: 16px; font-weight: 700; color: #000; }
+
+.v3 .service-card { background: #fff; border-radius: 16px; overflow: hidden; margin-bottom: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+.v3 .sc-img { width: 100%; height: 120px; background: #E5E7EB; position: relative; }
+.v3 .sc-img img { width: 100%; height: 100%; object-fit: cover; }
+.v3 .sc-status { position: absolute; top: 10px; right: 10px; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 600; }
+.v3 .sc-status.live { background: #DCFCE7; color: #16A34A; }
+.v3 .sc-status.draft { background: #FEF3C7; color: #D97706; }
+.v3 .sc-body { padding: 14px; }
+.v3 .sc-title { font-size: 15px; font-weight: 700; color: #000; }
+.v3 .sc-meta { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
+.v3 .sc-price { font-size: 14px; font-weight: 700; color: #000; }
+.v3 .sc-stats { font-size: 12px; color: #9CA3AF; }
+.v3 .sc-actions { display: flex; gap: 8px; margin-top: 10px; }
+.v3 .sc-action { flex: 1; padding: 8px; border-radius: 10px; text-align: center; font-size: 13px; font-weight: 600; cursor: pointer; }
+.v3 .sc-edit { background: #F3F4F6; color: #374151; }
+.v3 .sc-boost { background: #FEF2F2; color: #E31B23; }
+
+.v3 .add-service-btn { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 16px; background: #E31B23; border-radius: 14px; margin: 0 20px; cursor: pointer; }
+.v3 .add-service-btn .material-icons-round { font-size: 20px; color: #fff; }
+.v3 .add-service-btn span { color: #fff; font-size: 16px; font-weight: 700; }
+
+.v3 .earnings-card { background: #fff; border-radius: 16px; padding: 20px; margin-bottom: 12px; }
+.v3 .earnings-title { font-size: 14px; font-weight: 700; color: #000; margin-bottom: 12px; }
+.v3 .earnings-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; }
+.v3 .earnings-label { font-size: 13px; color: #6B7280; }
+.v3 .earnings-value { font-size: 15px; font-weight: 700; color: #000; }
+.v3 .earnings-value.green { color: #16A34A; }
+</style>
+</head>
+<body>
+
+<!-- ======================== V1 — Multi-Step Wizard ======================== -->
+<div>
+<h2 class="variant-label">V1 — Step-by-Step Wizard</h2>
+<div class="phone">
+<div class="notch"></div>
+<div class="phone-screen v1">
+<div class="page">
+  <div class="top-bar">
+    <span class="material-icons-round back-btn">arrow_back</span>
+    <span class="step-text">Step 2 of 3</span>
+    <span class="material-icons-round close-btn">close</span>
+  </div>
+  <div class="progress-bar"><div class="progress-fill"></div></div>
+
+  <div class="step-title">What do you offer?</div>
+  <div class="step-sub">Select the categories that best describe your service.</div>
+
+  <div class="cat-grid">
+    <div class="cat-opt selected">
+      <div class="cat-dot" style="background:#16A34A;"></div>
+      <span class="cat-name">Gardening</span>
+      <span class="material-icons-round cat-check">check_circle</span>
+    </div>
+    <div class="cat-opt selected">
+      <div class="cat-dot" style="background:#EA580C;"></div>
+      <span class="cat-name">Painting</span>
+      <span class="material-icons-round cat-check">check_circle</span>
+    </div>
+    <div class="cat-opt">
+      <div class="cat-dot" style="background:#E31B23;"></div>
+      <span class="cat-name">Cleaning</span>
+    </div>
+    <div class="cat-opt">
+      <div class="cat-dot" style="background:#2563EB;"></div>
+      <span class="cat-name">Moving</span>
+    </div>
+    <div class="cat-opt">
+      <div class="cat-dot" style="background:#D97706;"></div>
+      <span class="cat-name">Handyman</span>
+    </div>
+    <div class="cat-opt">
+      <div class="cat-dot" style="background:#7C3AED;"></div>
+      <span class="cat-name">Tutoring</span>
+    </div>
+    <div class="cat-opt">
+      <div class="cat-dot" style="background:#0891B2;"></div>
+      <span class="cat-name">Plumbing</span>
+    </div>
+    <div class="cat-opt">
+      <div class="cat-dot" style="background:#4B5563;"></div>
+      <span class="cat-name">Electrical</span>
+    </div>
+  </div>
+
+  <div style="height:24px;"></div>
+
+  <div class="form-group">
+    <div class="label">Starting Price</div>
+  </div>
+  <div class="price-row">
+    <div class="price-input focused">
+      <span class="euro">€</span>
+      <input value="20" />
+    </div>
+    <div class="price-input">
+      <span class="euro">€</span>
+      <input placeholder="Max" />
+    </div>
+  </div>
+  <div style="display:flex;gap:12px;padding:0 20px;margin-top:4px;">
+    <div class="price-label" style="flex:1;">From</div>
+    <div class="price-label" style="flex:1;">To (optional)</div>
+  </div>
+
+  <div style="height:40px;"></div>
+
+  <div class="bottom-bar">
+    <div class="next-btn">Next: Add Photos</div>
+  </div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- ======================== V2 — Single Page Form ======================== -->
+<div>
+<h2 class="variant-label">V2 — Single Page Form</h2>
+<div class="phone">
+<div class="notch"></div>
+<div class="phone-screen v2">
+<div class="page">
+  <div class="header">
+    <div class="title">Create Service</div>
+    <div class="subtitle">List your skills and start earning</div>
+  </div>
+
+  <div class="section">
+    <div class="section-title"><span class="material-icons-round">edit</span> Service Details</div>
+    <input class="input" placeholder="Service title" value="Garden Maintenance & Cleanup" style="margin-bottom:10px;" />
+    <textarea class="input textarea" placeholder="Describe what you offer...">Professional garden maintenance including lawn mowing, hedge trimming, flower bed care, and seasonal cleanup. Reliable and detail-oriented.</textarea>
+  </div>
+
+  <div class="section">
+    <div class="section-title"><span class="material-icons-round">category</span> Categories</div>
+    <div class="cat-chips">
+      <div class="cat-chip sel"><span class="material-icons-round">check</span> Gardening</div>
+      <div class="cat-chip sel"><span class="material-icons-round">check</span> Landscaping</div>
+      <div class="cat-chip">Cleaning</div>
+      <div class="cat-chip">Moving</div>
+      <div class="cat-chip">Handyman</div>
+      <div class="cat-chip">Painting</div>
+      <div class="cat-chip">Plumbing</div>
+      <div class="cat-chip">Electrical</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title"><span class="material-icons-round">euro</span> Pricing</div>
+    <div class="price-section">
+      <div class="price-box">
+        <span class="euro">€</span>
+        <input value="20" />
+      </div>
+      <div class="price-type">per hour</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title"><span class="material-icons-round">photo_camera</span> Photos</div>
+    <div class="photo-upload">
+      <img class="photo-filled" src="https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?w=200&fit=crop" />
+      <div class="photo-slot">
+        <span class="material-icons-round">add_photo_alternate</span>
+        <span>Add photo</span>
+      </div>
+      <div class="photo-slot">
+        <span class="material-icons-round">add_photo_alternate</span>
+        <span>Add photo</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title"><span class="material-icons-round">place</span> Service Area</div>
+    <div class="location-row">
+      <span class="material-icons-round">my_location</span>
+      <div class="location-text">
+        <div class="loc-title">Bratislava, Old Town</div>
+        <div class="loc-sub">Within 5 km radius</div>
+      </div>
+      <span class="material-icons-round location-arrow">chevron_right</span>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title"><span class="material-icons-round">visibility</span> Preview</div>
+  </div>
+  <div class="preview-card">
+    <div class="preview-img">
+      <img src="https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?w=400&fit=crop" style="width:100%;height:100%;object-fit:cover;" />
+    </div>
+    <div class="preview-body">
+      <div class="preview-title">Garden Maintenance & Cleanup</div>
+      <div class="preview-cats">
+        <span class="preview-cat">gardening</span>
+        <span class="preview-cat">landscaping</span>
+      </div>
+      <div class="preview-price">From €20/hr</div>
+    </div>
+  </div>
+
+  <button class="publish-btn">Publish Service</button>
+</div>
+</div>
+</div>
+</div>
+
+<!-- ======================== V3 — My Services Dashboard ======================== -->
+<div>
+<h2 class="variant-label">V3 — Services Dashboard</h2>
+<div class="phone">
+<div class="notch"></div>
+<div class="phone-screen v3">
+<div class="page">
+  <div class="header">
+    <div class="title">My Services</div>
+    <div class="subtitle">Manage and publish your offerings</div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-num">3</div>
+      <div class="stat-label">Active Services</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num">28</div>
+      <div class="stat-label">Total Bookings</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num">4.8</div>
+      <div class="stat-label">Avg Rating</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head">
+      <span class="section-title">Your Services</span>
+    </div>
+
+    <div class="service-card">
+      <div class="sc-img">
+        <img src="https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?w=400&fit=crop" />
+        <div class="sc-status live">● Live</div>
+      </div>
+      <div class="sc-body">
+        <div class="sc-title">Garden Maintenance & Cleanup</div>
+        <div class="sc-meta">
+          <span class="sc-price">From €20/hr</span>
+          <span class="sc-stats">★ 4.9 · 15 bookings</span>
+        </div>
+        <div class="sc-actions">
+          <div class="sc-action sc-edit">Edit</div>
+          <div class="sc-action sc-boost">Boost</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="service-card">
+      <div class="sc-img">
+        <img src="https://images.unsplash.com/photo-1628177142898-93e36e4e3a50?w=400&fit=crop" />
+        <div class="sc-status live">● Live</div>
+      </div>
+      <div class="sc-body">
+        <div class="sc-title">Deep House Cleaning</div>
+        <div class="sc-meta">
+          <span class="sc-price">From €25/hr</span>
+          <span class="sc-stats">★ 4.7 · 10 bookings</span>
+        </div>
+        <div class="sc-actions">
+          <div class="sc-action sc-edit">Edit</div>
+          <div class="sc-action sc-boost">Boost</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="service-card">
+      <div class="sc-img" style="background:#FEF3C7;display:flex;align-items:center;justify-content:center;">
+        <span class="material-icons-round" style="font-size:40px;color:#D97706;">image</span>
+        <div class="sc-status draft">Draft</div>
+      </div>
+      <div class="sc-body">
+        <div class="sc-title">Furniture Assembly</div>
+        <div class="sc-meta">
+          <span class="sc-price">From €15/hr</span>
+          <span class="sc-stats">No bookings yet</span>
+        </div>
+        <div class="sc-actions">
+          <div class="sc-action sc-edit">Complete & Publish</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="add-service-btn">
+    <span class="material-icons-round">add</span>
+    <span>Add New Service</span>
+  </div>
+
+  <div class="section" style="margin-top:24px;">
+    <div class="section-head">
+      <span class="section-title">Earnings</span>
+    </div>
+    <div class="earnings-card">
+      <div class="earnings-row">
+        <span class="earnings-label">This month</span>
+        <span class="earnings-value green">€340</span>
+      </div>
+      <div class="earnings-row">
+        <span class="earnings-label">All time</span>
+        <span class="earnings-value">€1,280</span>
+      </div>
+      <div class="earnings-row">
+        <span class="earnings-label">Pending payout</span>
+        <span class="earnings-value">€85</span>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+</div>
+
+</body>
+</html>

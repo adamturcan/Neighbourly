@@ -238,6 +238,38 @@
 
 ---
 
+## Phase 5.5: Service Publishing & Provider Dashboard
+
+**Why:** Helpers need to publish their services so seekers can discover and hire them. This completes the two-sided marketplace.
+
+### 5.5.1 - My Services Dashboard
+- [ ] New tab/screen accessible from Profile for helpers
+- [ ] Stats row: active services count, total bookings, avg rating
+- [ ] Service cards with Live/Draft status badges
+- [ ] Edit and manage existing services
+- [ ] "+ Add New Service" button → opens creation wizard
+
+### 5.5.2 - Create Service Wizard (step-by-step)
+- [ ] Step 1: Title + Description
+- [ ] Step 2: Categories (multi-select grid) + Pricing (from price)
+- [ ] Step 3: Photos (upload to Supabase Storage) + Location/service area
+- [ ] Progress bar + animated slide transitions
+- [ ] Insert into `services` table via API
+- [ ] Success screen with "View Service" or "Add Another"
+
+### 5.5.3 - API functions
+- [ ] `createService()` — insert new service
+- [ ] `updateService()` — edit existing service
+- [ ] `deleteService()` — remove service
+- [ ] `listMyServices()` — fetch services for current user
+
+### 5.5.4 - Navigation
+- [ ] "My Services" row on Profile screen → dashboard
+- [ ] MyServicesScreen registered in HomeStack
+- [ ] CreateServiceScreen registered as modal in HomeStack
+
+---
+
 ## Phase 6: Payments (Escrow Lite)
 
 **Why:** Digital payments with escrow build trust and keep transactions on-platform.

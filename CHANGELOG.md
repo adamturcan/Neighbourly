@@ -4,6 +4,18 @@ All notable changes to the Neighborly project will be documented in this file.
 
 Format: [Keep a Changelog](https://keepachangelog.com/)
 
+## [2026-04-03] — Phase 5.5: Service Publishing & Provider Dashboard
+
+### Added
+- My Services Dashboard — stats (active services, bookings, rating), service cards with Live status, Edit/Remove actions
+- Create Service Wizard — 3-step flow: title+description → categories+pricing → review & publish
+- Success screen with green checkmark after publishing
+- API functions: listMyServices, createService, updateService, deleteService
+- "My Services" entry point on Profile screen settings section
+- MyServicesScreen and CreateServiceScreen registered in navigation
+
+---
+
 ## [2026-04-03] — Search Screen Redesign (V2 Explore)
 
 ### Changed

@@ -231,6 +231,25 @@ export default function ProfileScreen() {
 
         {/* Settings Card */}
         <View style={s.card}>
+          <Pressable
+            style={s.settingsRow}
+            onPress={() =>
+              nav.dispatch(
+                CommonActions.navigate({
+                  name: "Discover",
+                  params: { screen: "MyServices" },
+                }),
+              )
+            }
+          >
+            <View style={s.settingsLeft}>
+              <View style={[s.settingsIcon, { backgroundColor: "#FEF2F2" }]}>
+                <MaterialCommunityIcons name="briefcase-outline" size={20} color={COLORS.red} />
+              </View>
+              <Text style={s.settingsLabel}>My Services</Text>
+            </View>
+            <MaterialCommunityIcons name="chevron-right" size={20} color="#D1D5DB" />
+          </Pressable>
           <SettingsRow
             icon="bell-outline"
             iconBg="#F3F4F6"

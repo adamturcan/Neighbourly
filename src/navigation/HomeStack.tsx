@@ -9,6 +9,8 @@ import ChatScreen from "../features/chat/screens/ChatScreen";
 import ReviewSubmitScreen from "../features/profile/screens/ReviewSubmitScreen";
 import EditProfileScreen from "../features/profile/screens/EditProfileScreen";
 import PublicProfileScreen from "../features/profile/screens/PublicProfileScreen";
+import MyServicesScreen from "../features/services/screens/MyServicesScreen";
+import CreateServiceScreen from "../features/services/screens/CreateServiceScreen";
 
 export type HomeStackParamList = {
   HomeMain: undefined;
@@ -20,6 +22,8 @@ export type HomeStackParamList = {
   ReviewSubmit: { taskId: string; revieweeId: string; revieweeName: string; taskTitle: string };
   EditProfile: undefined;
   PublicProfile: { userId: string };
+  MyServices: undefined;
+  CreateService: { editId?: string } | undefined;
 };
 
 const Stack = createNativeStackNavigator<HomeStackParamList>();
@@ -66,6 +70,16 @@ export default function HomeStack() {
         name="PublicProfile"
         component={PublicProfileScreen}
         options={{ headerShown: true, title: "Profile" }}
+      />
+      <Stack.Screen
+        name="MyServices"
+        component={MyServicesScreen}
+        options={{ headerShown: true, title: "My Services" }}
+      />
+      <Stack.Screen
+        name="CreateService"
+        component={CreateServiceScreen}
+        options={{ presentation: "modal", headerShown: false }}
       />
     </Stack.Navigator>
   );

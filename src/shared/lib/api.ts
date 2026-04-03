@@ -58,6 +58,84 @@ export async function listServices(params?: {
   return services;
 }
 
+export async function listMyServices(): Promise<Service[]> {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+  const user = session?.user;
+  if (!user) return [];
+
+  const { data, error } = await supabase
+    .from("services")
+    .select("*")
+    .eq("provider_id", user.id)
+    .order("created_at", { ascending: false });
+
+  if (error) throw error;
+  return (data ?? []).map(mapService);
+}
+
+export async function createService(input: {
+  title: string;
+  description?: string;
+  categories: string[];
+  priceFrom: number;
+  photoUrl?: string;
+  lat?: number;
+  lng?: number;
+}): Promise<Service> {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+  const user = session?.user;
+  if (!user) throw new Error("Not authenticated");
+
+  const { data, error } = await supabase
+    .from("services")
+    .insert({
+      provider_id: user.id,
+      title: input.title,
+      categories: input.categories,
+      price_from: input.priceFrom,
+      photo_url: input.photoUrl ?? null,
+      lat: input.lat ?? null,
+      lng: input.lng ?? null,
+    })
+    .select()
+    .single();
+
+  if (error) throw error;
+  return mapService(data);
+}
+
+export async function updateService(
+  id: string,
+  updates: Partial<{
+    title: string;
+    categories: string[];
+    priceFrom: number;
+    photoUrl: string;
+    lat: number;
+    lng: number;
+  }>,
+): Promise<void> {
+  const dbUpdates: any = {};
+  if (updates.title !== undefined) dbUpdates.title = updates.title;
+  if (updates.categories !== undefined) dbUpdates.categories = updates.categories;
+  if (updates.priceFrom !== undefined) dbUpdates.price_from = updates.priceFrom;
+  if (updates.photoUrl !== undefined) dbUpdates.photo_url = updates.photoUrl;
+  if (updates.lat !== undefined) dbUpdates.lat = updates.lat;
+  if (updates.lng !== undefined) dbUpdates.lng = updates.lng;
+
+  const { error } = await supabase.from("services").update(dbUpdates).eq("id", id);
+  if (error) throw error;
+}
+
+export async function deleteService(id: string): Promise<void> {
+  const { error } = await supabase.from("services").delete().eq("id", id);
+  if (error) throw error;
+}
+
 export async function getService(id: string): Promise<Service | undefined> {
   const { data, error } = await supabase
     .from("services")
