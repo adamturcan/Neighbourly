@@ -12,7 +12,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { listServices, listTasks } from "../../../shared/lib/api";
 import { TAB_BAR_HEIGHT } from "../../../navigation/RootNavigator";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import ServiceCard from "../components/ServiceCard";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import JobCard from "../../tasks/components/JobCard";
@@ -50,12 +50,11 @@ export default function HomeScreen() {
     refetch: refetchTasks,
   } = useQuery({ queryKey: ["tasks", "open"], queryFn: () => listTasks() });
 
-  const qc = useQueryClient();
   useFocusEffect(
     React.useCallback(() => {
-      qc.invalidateQueries({ queryKey: ["services"] });
-      qc.invalidateQueries({ queryKey: ["tasks", "open"] });
-    }, [qc]),
+      refetchServices();
+      refetchTasks();
+    }, [refetchServices, refetchTasks]),
   );
 
   const BASIC_SECTIONS = [
