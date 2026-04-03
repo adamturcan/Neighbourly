@@ -190,35 +190,37 @@ export default function ChatScreen() {
       const isMine = item.senderId === user?.id;
       const showSeen = item.id === lastSeenMessageId;
       return (
-        <View
-          style={[
-            styles.messageBubbleWrap,
-            isMine ? styles.messageBubbleWrapRight : styles.messageBubbleWrapLeft,
-          ]}
-        >
+        <>
           <View
             style={[
-              styles.messageBubble,
-              isMine ? styles.messageBubbleMine : styles.messageBubbleOther,
+              styles.messageBubbleWrap,
+              isMine ? styles.messageBubbleWrapRight : styles.messageBubbleWrapLeft,
             ]}
           >
-            <Text
+            <View
               style={[
-                styles.messageText,
-                isMine ? styles.messageTextMine : styles.messageTextOther,
+                styles.messageBubble,
+                isMine ? styles.messageBubbleMine : styles.messageBubbleOther,
               ]}
             >
-              {item.content}
+              <Text
+                style={[
+                  styles.messageText,
+                  isMine ? styles.messageTextMine : styles.messageTextOther,
+                ]}
+              >
+                {item.content}
+              </Text>
+            </View>
+            <Text
+              style={[
+                styles.timestamp,
+                isMine ? styles.timestampRight : styles.timestampLeft,
+              ]}
+            >
+              {formatTime(item.createdAt)}
             </Text>
           </View>
-          <Text
-            style={[
-              styles.timestamp,
-              isMine ? styles.timestampRight : styles.timestampLeft,
-            ]}
-          >
-            {formatTime(item.createdAt)}
-          </Text>
           {showSeen && (
             <View style={styles.seenRow}>
               <View style={[styles.seenAvatar, { backgroundColor: avatarColor }]}>
@@ -226,7 +228,7 @@ export default function ChatScreen() {
               </View>
             </View>
           )}
-        </View>
+        </>
       );
     },
     [user?.id, lastSeenMessageId, avatarColor, otherName],
@@ -552,8 +554,11 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   seenRow: {
-    alignItems: "flex-end",
-    marginTop: 2,
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    marginTop: -4,
+    marginBottom: 8,
+    paddingRight: 4,
   },
   seenAvatar: {
     width: 14,
