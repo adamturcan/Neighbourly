@@ -4,6 +4,19 @@ All notable changes to the Neighborly project will be documented in this file.
 
 Format: [Keep a Changelog](https://keepachangelog.com/)
 
+## [2026-04-03] — Search Screen Redesign (V2 Explore)
+
+### Changed
+- Search screen redesigned with Uber-style explore layout
+- Browse Categories grid with colored icons (8 categories)
+- Popular Near You section showing top-rated services
+- Open Tasks Nearby section with category dots
+- Recent searches with history and clear button
+- Search results show as horizontal cards with thumbnails, ratings, distance
+- Active category filter pill with dismiss
+
+---
+
 ## [2026-04-03] — Message Reactions
 
 ### Added

@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Search Screen - 3 Variants</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Inter', sans-serif; background: #F3F4F6; display: flex; gap: 32px; padding: 40px; flex-wrap: wrap; justify-content: center; }
+h2.variant-label { width: 100%; text-align: center; font-size: 14px; color: #6B7280; text-transform: uppercase; letter-spacing: 2px; margin-top: 20px; }
+.phone { width: 393px; height: 852px; background: #fff; border-radius: 40px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.15); position: relative; border: 8px solid #1a1a1a; }
+.phone-screen { width: 100%; height: 100%; overflow-y: auto; position: relative; }
+.phone-screen::-webkit-scrollbar { display: none; }
+.notch { width: 160px; height: 34px; background: #1a1a1a; border-radius: 0 0 20px 20px; position: absolute; top: 0; left: 50%; transform: translateX(-50%); z-index: 10; }
+
+/* ======================== V1 — Tabbed Search with Category Chips ======================== */
+.v1 .search-page { padding: 50px 0 100px; min-height: 100%; background: #fff; }
+.v1 .search-header { padding: 8px 20px 0; }
+.v1 .search-title { font-size: 28px; font-weight: 800; color: #000; margin-bottom: 14px; }
+.v1 .search-bar { display: flex; align-items: center; background: #F3F4F6; border-radius: 14px; padding: 0 14px; gap: 10px; }
+.v1 .search-bar .material-icons-round { font-size: 20px; color: #9CA3AF; }
+.v1 .search-bar input { flex: 1; border: none; background: none; padding: 14px 0; font-size: 15px; font-family: inherit; outline: none; color: #000; }
+.v1 .search-bar input::placeholder { color: #9CA3AF; }
+
+.v1 .tabs { display: flex; padding: 16px 20px 0; gap: 0; border-bottom: 2px solid #F3F4F6; }
+.v1 .tab { padding: 10px 0; margin-right: 24px; font-size: 14px; font-weight: 600; color: #9CA3AF; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; }
+.v1 .tab.active { color: #E31B23; border-color: #E31B23; }
+
+.v1 .chips-scroll { display: flex; gap: 8px; padding: 14px 20px; overflow-x: auto; }
+.v1 .chip { padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; white-space: nowrap; cursor: pointer; border: 1.5px solid #E5E7EB; color: #374151; background: #fff; }
+.v1 .chip.active { background: #E31B23; color: #fff; border-color: #E31B23; }
+
+.v1 .results { padding: 0 20px; }
+.v1 .result-card { display: flex; gap: 14px; padding: 14px 0; border-bottom: 1px solid #F3F4F6; }
+.v1 .result-img { width: 80px; height: 80px; border-radius: 14px; object-fit: cover; background: #F3F4F6; }
+.v1 .result-info { flex: 1; }
+.v1 .result-title { font-size: 15px; font-weight: 700; color: #000; }
+.v1 .result-cat { display: inline-flex; padding: 2px 8px; border-radius: 10px; background: #FEF2F2; color: #E31B23; font-size: 11px; font-weight: 600; margin-top: 4px; }
+.v1 .result-meta { font-size: 12px; color: #9CA3AF; margin-top: 6px; display: flex; align-items: center; gap: 4px; }
+.v1 .result-price { font-size: 14px; font-weight: 700; color: #000; margin-top: 4px; }
+.v1 .result-stars { color: #FBBF24; font-size: 12px; }
+
+/* ======================== V2 — Uber-Style with Recent + Suggestions ======================== */
+.v2 .search-page { padding: 50px 0 100px; min-height: 100%; background: #fff; }
+.v2 .search-header { padding: 8px 20px 16px; }
+.v2 .search-title { font-size: 28px; font-weight: 800; color: #000; margin-bottom: 14px; }
+.v2 .search-bar { display: flex; align-items: center; background: #F3F4F6; border-radius: 14px; padding: 0 14px; gap: 10px; }
+.v2 .search-bar .material-icons-round { font-size: 20px; color: #9CA3AF; }
+.v2 .search-bar input { flex: 1; border: none; background: none; padding: 14px 0; font-size: 15px; font-family: inherit; outline: none; color: #000; }
+
+.v2 .section { padding: 0 20px; margin-bottom: 24px; }
+.v2 .section-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.v2 .section-title { font-size: 16px; font-weight: 700; color: #000; }
+.v2 .section-link { font-size: 13px; color: #E31B23; font-weight: 600; }
+
+.v2 .recent-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #F3F4F6; }
+.v2 .recent-icon { width: 40px; height: 40px; border-radius: 12px; background: #F3F4F6; display: flex; align-items: center; justify-content: center; }
+.v2 .recent-icon .material-icons-round { font-size: 20px; color: #6B7280; }
+.v2 .recent-text { flex: 1; font-size: 14px; color: #374151; }
+.v2 .recent-arrow { font-size: 18px; color: #D1D5DB; }
+
+.v2 .cat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.v2 .cat-item { display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; }
+.v2 .cat-icon { width: 56px; height: 56px; border-radius: 16px; display: flex; align-items: center; justify-content: center; }
+.v2 .cat-icon .material-icons-round { font-size: 24px; color: #fff; }
+.v2 .cat-label { font-size: 11px; font-weight: 600; color: #374151; text-align: center; }
+
+.v2 .popular-card { display: flex; gap: 12px; padding: 12px; background: #F9FAFB; border-radius: 16px; margin-bottom: 10px; }
+.v2 .popular-img { width: 64px; height: 64px; border-radius: 12px; object-fit: cover; background: #E5E7EB; }
+.v2 .popular-info { flex: 1; }
+.v2 .popular-title { font-size: 14px; font-weight: 700; color: #000; }
+.v2 .popular-sub { font-size: 12px; color: #6B7280; margin-top: 2px; }
+.v2 .popular-bottom { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+.v2 .popular-price { font-size: 13px; font-weight: 700; color: #000; }
+.v2 .popular-rating { font-size: 12px; color: #9CA3AF; }
+
+/* ======================== V3 — Full Search with Filters ======================== */
+.v3 .search-page { padding: 50px 0 100px; min-height: 100%; background: #F9FAFB; }
+.v3 .search-header { padding: 8px 20px 0; background: #fff; padding-bottom: 16px; }
+.v3 .search-title { font-size: 28px; font-weight: 800; color: #000; margin-bottom: 14px; }
+.v3 .search-row { display: flex; gap: 10px; }
+.v3 .search-input-wrap { flex: 1; display: flex; align-items: center; background: #F3F4F6; border-radius: 14px; padding: 0 14px; gap: 10px; }
+.v3 .search-input-wrap .material-icons-round { font-size: 20px; color: #9CA3AF; }
+.v3 .search-input-wrap input { flex: 1; border: none; background: none; padding: 13px 0; font-size: 15px; font-family: inherit; outline: none; }
+.v3 .filter-btn { width: 48px; height: 48px; border-radius: 14px; background: #E31B23; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.v3 .filter-btn .material-icons-round { font-size: 22px; color: #fff; }
+
+.v3 .filter-chips { display: flex; gap: 8px; padding: 12px 20px; background: #fff; overflow-x: auto; border-bottom: 1px solid #F3F4F6; }
+.v3 .fchip { display: flex; align-items: center; gap: 4px; padding: 8px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; white-space: nowrap; cursor: pointer; border: 1.5px solid #E5E7EB; color: #374151; background: #fff; }
+.v3 .fchip .material-icons-round { font-size: 16px; }
+.v3 .fchip.active { background: #000; color: #fff; border-color: #000; }
+
+.v3 .results-header { padding: 16px 20px 8px; display: flex; justify-content: space-between; align-items: center; }
+.v3 .results-count { font-size: 14px; color: #6B7280; }
+.v3 .sort-btn { display: flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 600; color: #374151; }
+
+.v3 .results { padding: 0 20px; }
+.v3 .r-card { background: #fff; border-radius: 16px; overflow: hidden; margin-bottom: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+.v3 .r-card-img { width: 100%; height: 140px; object-fit: cover; background: #E5E7EB; position: relative; }
+.v3 .r-card-badge { position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.6); color: #fff; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 600; }
+.v3 .r-card-fav { position: absolute; top: 10px; right: 10px; width: 32px; height: 32px; border-radius: 16px; background: rgba(255,255,255,0.9); display: flex; align-items: center; justify-content: center; }
+.v3 .r-card-fav .material-icons-round { font-size: 18px; color: #9CA3AF; }
+.v3 .r-card-body { padding: 14px; }
+.v3 .r-card-top { display: flex; justify-content: space-between; align-items: flex-start; }
+.v3 .r-card-title { font-size: 15px; font-weight: 700; color: #000; flex: 1; }
+.v3 .r-card-rating { display: flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 600; color: #000; }
+.v3 .r-card-rating .material-icons-round { font-size: 14px; color: #FBBF24; }
+.v3 .r-card-cats { display: flex; gap: 6px; margin-top: 8px; }
+.v3 .r-card-cat { padding: 3px 10px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+.v3 .r-card-bottom { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
+.v3 .r-card-price { font-size: 15px; font-weight: 800; color: #000; }
+.v3 .r-card-dist { font-size: 12px; color: #9CA3AF; display: flex; align-items: center; gap: 3px; }
+.v3 .r-card-dist .material-icons-round { font-size: 14px; }
+</style>
+</head>
+<body>
+
+<!-- ======================== V1 — Tabbed Search + Category Chips ======================== -->
+<div>
+<h2 class="variant-label">V1 — Tabbed Search + Chips</h2>
+<div class="phone">
+<div class="notch"></div>
+<div class="phone-screen v1">
+<div class="search-page">
+  <div class="search-header">
+    <div class="search-title">Search</div>
+    <div class="search-bar">
+      <span class="material-icons-round">search</span>
+      <input placeholder="What do you need help with?" value="cleaning" />
+      <span class="material-icons-round" style="color:#E31B23;cursor:pointer;">close</span>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active">Services</div>
+    <div class="tab">Tasks</div>
+    <div class="tab">Helpers</div>
+  </div>
+
+  <div class="chips-scroll">
+    <div class="chip active">All</div>
+    <div class="chip">Cleaning</div>
+    <div class="chip">Gardening</div>
+    <div class="chip">Moving</div>
+    <div class="chip">Plumbing</div>
+    <div class="chip">Tutoring</div>
+  </div>
+
+  <div class="results">
+    <div class="result-card">
+      <img class="result-img" src="https://images.unsplash.com/photo-1628177142898-93e36e4e3a50?w=200&fit=crop" />
+      <div class="result-info">
+        <div class="result-title">Deep House Cleaning</div>
+        <span class="result-cat">cleaning</span>
+        <div class="result-meta">
+          <span class="result-stars">★★★★★</span> 4.9 · 28 jobs · 1.2 km
+        </div>
+        <div class="result-price">From €25</div>
+      </div>
+    </div>
+    <div class="result-card">
+      <img class="result-img" src="https://images.unsplash.com/photo-1628177142898-93e36e4e3a50?w=200&fit=crop" />
+      <div class="result-info">
+        <div class="result-title">Office Cleaning Service</div>
+        <span class="result-cat">cleaning</span>
+        <div class="result-meta">
+          <span class="result-stars">★★★★☆</span> 4.5 · 15 jobs · 2.8 km
+        </div>
+        <div class="result-price">From €30</div>
+      </div>
+    </div>
+    <div class="result-card">
+      <img class="result-img" src="https://images.unsplash.com/photo-1628177142898-93e36e4e3a50?w=200&fit=crop" />
+      <div class="result-info">
+        <div class="result-title">Window Cleaning Pro</div>
+        <span class="result-cat">cleaning</span>
+        <div class="result-meta">
+          <span class="result-stars">★★★★★</span> 5.0 · 42 jobs · 0.8 km
+        </div>
+        <div class="result-price">From €15</div>
+      </div>
+    </div>
+    <div class="result-card">
+      <img class="result-img" src="https://images.unsplash.com/photo-1628177142898-93e36e4e3a50?w=200&fit=crop" />
+      <div class="result-info">
+        <div class="result-title">Move-Out Cleaning</div>
+        <span class="result-cat">cleaning</span>
+        <div class="result-meta">
+          <span class="result-stars">★★★★☆</span> 4.7 · 19 jobs · 3.1 km
+        </div>
+        <div class="result-price">From €45</div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- ======================== V2 — Uber-Style Explore ======================== -->
+<div>
+<h2 class="variant-label">V2 — Explore with Recents & Categories</h2>
+<div class="phone">
+<div class="notch"></div>
+<div class="phone-screen v2">
+<div class="search-page">
+  <div class="search-header">
+    <div class="search-title">Search</div>
+    <div class="search-bar">
+      <span class="material-icons-round">search</span>
+      <input placeholder="Search services, tasks, helpers…" />
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head">
+      <span class="section-title">Recent Searches</span>
+      <span class="section-link">Clear</span>
+    </div>
+    <div class="recent-row">
+      <div class="recent-icon"><span class="material-icons-round">history</span></div>
+      <span class="recent-text">Garden cleanup</span>
+      <span class="material-icons-round recent-arrow">north_west</span>
+    </div>
+    <div class="recent-row">
+      <div class="recent-icon"><span class="material-icons-round">history</span></div>
+      <span class="recent-text">Deep cleaning service</span>
+      <span class="material-icons-round recent-arrow">north_west</span>
+    </div>
+    <div class="recent-row">
+      <div class="recent-icon"><span class="material-icons-round">history</span></div>
+      <span class="recent-text">Furniture assembly</span>
+      <span class="material-icons-round recent-arrow">north_west</span>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head">
+      <span class="section-title">Browse Categories</span>
+    </div>
+    <div class="cat-grid">
+      <div class="cat-item">
+        <div class="cat-icon" style="background:#E31B23;"><span class="material-icons-round">cleaning_services</span></div>
+        <span class="cat-label">Cleaning</span>
+      </div>
+      <div class="cat-item">
+        <div class="cat-icon" style="background:#16A34A;"><span class="material-icons-round">yard</span></div>
+        <span class="cat-label">Garden</span>
+      </div>
+      <div class="cat-item">
+        <div class="cat-icon" style="background:#2563EB;"><span class="material-icons-round">local_shipping</span></div>
+        <span class="cat-label">Moving</span>
+      </div>
+      <div class="cat-item">
+        <div class="cat-icon" style="background:#D97706;"><span class="material-icons-round">build</span></div>
+        <span class="cat-label">Handyman</span>
+      </div>
+      <div class="cat-item">
+        <div class="cat-icon" style="background:#7C3AED;"><span class="material-icons-round">school</span></div>
+        <span class="cat-label">Tutoring</span>
+      </div>
+      <div class="cat-item">
+        <div class="cat-icon" style="background:#0891B2;"><span class="material-icons-round">plumbing</span></div>
+        <span class="cat-label">Plumbing</span>
+      </div>
+      <div class="cat-item">
+        <div class="cat-icon" style="background:#EA580C;"><span class="material-icons-round">format_paint</span></div>
+        <span class="cat-label">Painting</span>
+      </div>
+      <div class="cat-item">
+        <div class="cat-icon" style="background:#4B5563;"><span class="material-icons-round">electrical_services</span></div>
+        <span class="cat-label">Electrical</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head">
+      <span class="section-title">Popular Near You</span>
+      <span class="section-link">See all</span>
+    </div>
+    <div class="popular-card">
+      <img class="popular-img" src="https://images.unsplash.com/photo-1628177142898-93e36e4e3a50?w=200&fit=crop" />
+      <div class="popular-info">
+        <div class="popular-title">Deep House Cleaning</div>
+        <div class="popular-sub">Professional cleaning service</div>
+        <div class="popular-bottom">
+          <span class="popular-price">From €25</span>
+          <span class="popular-rating">★ 4.9 · 28 jobs</span>
+        </div>
+      </div>
+    </div>
+    <div class="popular-card">
+      <img class="popular-img" src="https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?w=200&fit=crop" />
+      <div class="popular-info">
+        <div class="popular-title">Garden Maintenance</div>
+        <div class="popular-sub">Lawn, hedges & flower beds</div>
+        <div class="popular-bottom">
+          <span class="popular-price">From €20</span>
+          <span class="popular-rating">★ 4.8 · 35 jobs</span>
+        </div>
+      </div>
+    </div>
+    <div class="popular-card">
+      <img class="popular-img" src="https://images.unsplash.com/photo-1516383607781-913a19294fd1?w=200&fit=crop" />
+      <div class="popular-info">
+        <div class="popular-title">Furniture Moving</div>
+        <div class="popular-sub">Local moves & heavy lifting</div>
+        <div class="popular-bottom">
+          <span class="popular-price">From €35</span>
+          <span class="popular-rating">★ 4.7 · 22 jobs</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- ======================== V3 — Full Search with Filters & Cards ======================== -->
+<div>
+<h2 class="variant-label">V3 — Filter Bar + Rich Cards</h2>
+<div class="phone">
+<div class="notch"></div>
+<div class="phone-screen v3">
+<div class="search-page">
+  <div class="search-header">
+    <div class="search-title">Search</div>
+    <div class="search-row">
+      <div class="search-input-wrap">
+        <span class="material-icons-round">search</span>
+        <input placeholder="Search services, tasks…" value="garden" />
+      </div>
+      <div class="filter-btn">
+        <span class="material-icons-round">tune</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="filter-chips">
+    <div class="fchip active"><span class="material-icons-round">sort</span> Nearest</div>
+    <div class="fchip"><span class="material-icons-round">euro</span> Under €30</div>
+    <div class="fchip"><span class="material-icons-round">star</span> 4.5+</div>
+    <div class="fchip">Gardening</div>
+    <div class="fchip">Cleaning</div>
+  </div>
+
+  <div class="results-header">
+    <span class="results-count">12 results</span>
+    <div class="sort-btn">
+      <span class="material-icons-round" style="font-size:16px;">swap_vert</span> Sort by
+    </div>
+  </div>
+
+  <div class="results">
+    <div class="r-card">
+      <div class="r-card-img" style="background-image:url(https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?w=400&fit=crop);background-size:cover;">
+        <div class="r-card-badge">⚡ Top Rated</div>
+        <div class="r-card-fav"><span class="material-icons-round">favorite_border</span></div>
+      </div>
+      <div class="r-card-body">
+        <div class="r-card-top">
+          <div class="r-card-title">Garden Maintenance & Cleanup</div>
+          <div class="r-card-rating"><span class="material-icons-round">star</span> 4.9</div>
+        </div>
+        <div class="r-card-cats">
+          <span class="r-card-cat" style="background:#DCFCE7;color:#16A34A;">gardening</span>
+          <span class="r-card-cat" style="background:#FEF2F2;color:#E31B23;">landscaping</span>
+        </div>
+        <div class="r-card-bottom">
+          <span class="r-card-price">From €20</span>
+          <span class="r-card-dist"><span class="material-icons-round">place</span> 0.8 km</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="r-card">
+      <div class="r-card-img" style="background-image:url(https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?w=400&fit=crop);background-size:cover;">
+        <div class="r-card-fav"><span class="material-icons-round">favorite_border</span></div>
+      </div>
+      <div class="r-card-body">
+        <div class="r-card-top">
+          <div class="r-card-title">Hedge Trimming & Lawn Mowing</div>
+          <div class="r-card-rating"><span class="material-icons-round">star</span> 4.7</div>
+        </div>
+        <div class="r-card-cats">
+          <span class="r-card-cat" style="background:#DCFCE7;color:#16A34A;">gardening</span>
+        </div>
+        <div class="r-card-bottom">
+          <span class="r-card-price">From €15</span>
+          <span class="r-card-dist"><span class="material-icons-round">place</span> 1.5 km</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="r-card">
+      <div class="r-card-img" style="background-image:url(https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?w=400&fit=crop);background-size:cover;">
+        <div class="r-card-badge">New</div>
+        <div class="r-card-fav"><span class="material-icons-round" style="color:#E31B23;">favorite</span></div>
+      </div>
+      <div class="r-card-body">
+        <div class="r-card-top">
+          <div class="r-card-title">Tree Pruning & Removal</div>
+          <div class="r-card-rating"><span class="material-icons-round">star</span> 5.0</div>
+        </div>
+        <div class="r-card-cats">
+          <span class="r-card-cat" style="background:#DCFCE7;color:#16A34A;">gardening</span>
+          <span class="r-card-cat" style="background:#DBEAFE;color:#2563EB;">tree care</span>
+        </div>
+        <div class="r-card-bottom">
+          <span class="r-card-price">From €40</span>
+          <span class="r-card-dist"><span class="material-icons-round">place</span> 2.3 km</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+</div>
+
+</body>
+</html>
