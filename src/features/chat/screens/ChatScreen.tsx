@@ -11,7 +11,6 @@ import {
   ActivityIndicator,
   Animated,
   Modal,
-  Keyboard,
 } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRoute, useNavigation, useIsFocused } from "@react-navigation/native";
@@ -125,7 +124,6 @@ export default function ChatScreen() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const insets = useSafeAreaInsets();
-  const [keyboardVisible, setKeyboardVisible] = useState(false);
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
   const [otherTyping, setOtherTyping] = useState(false);
@@ -214,19 +212,6 @@ export default function ChatScreen() {
     });
     return () => { unsub(); if (typingTimeout.current) clearTimeout(typingTimeout.current); };
   }, [taskId, user]);
-
-  // Track keyboard visibility to remove bottom safe area padding when keyboard is up
-  useEffect(() => {
-    const showSub = Keyboard.addListener(
-      Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow",
-      () => setKeyboardVisible(true),
-    );
-    const hideSub = Keyboard.addListener(
-      Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide",
-      () => setKeyboardVisible(false),
-    );
-    return () => { showSub.remove(); hideSub.remove(); };
-  }, []);
 
   const doBroadcastTyping = useCallback(() => {
     if (user?.id && taskId) broadcastTyping(taskId, user.id);
@@ -334,19 +319,23 @@ export default function ChatScreen() {
 
     // Upload to Supabase Storage
     try {
-      const ext = asset.uri.split(".").pop() ?? "jpg";
+      const ext = asset.uri.split(".").pop()?.toLowerCase() ?? "jpg";
       const fileName = `chat/${taskId}/${Date.now()}.${ext}`;
 
+      // React Native compatible upload using arraybuffer
       const response = await fetch(asset.uri);
-      const blob = await response.blob();
+      const arrayBuffer = await response.arrayBuffer();
 
       const { error: uploadError } = await supabase.storage
         .from("chat-images")
-        .upload(fileName, blob, { contentType: `image/${ext}` });
+        .upload(fileName, arrayBuffer, {
+          contentType: `image/${ext === "jpg" ? "jpeg" : ext}`,
+          upsert: true,
+        });
 
       if (uploadError) {
-        // Bucket might not exist — send as a local URI message instead
-        await sendMessage(taskId, `📷 [Photo]`);
+        console.warn("Upload error:", uploadError.message);
+        await sendMessage(taskId, `📷 Photo`);
         refetch();
         return;
       }
@@ -355,12 +344,11 @@ export default function ChatScreen() {
         .from("chat-images")
         .getPublicUrl(fileName);
 
-      // Send the image URL as a message with a marker prefix
       await sendMessage(taskId, `[img]${urlData.publicUrl}`);
       refetch();
-    } catch (e) {
-      // Fallback: send as text
-      await sendMessage(taskId, `📷 [Photo]`);
+    } catch (e: any) {
+      console.warn("Image send error:", e.message);
+      await sendMessage(taskId, `📷 Photo`);
       refetch();
     }
   }, [taskId, refetch]);
@@ -487,7 +475,7 @@ export default function ChatScreen() {
   const categoryIcon = CATEGORY_ICONS[task?.category ?? ""] ?? "help-circle-outline";
 
   return (
-    <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
+    <SafeAreaView style={styles.container} edges={["top"]}>
       {/* Header */}
       <View style={styles.header}>
         <Pressable onPress={() => {
@@ -529,7 +517,7 @@ export default function ChatScreen() {
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        keyboardVerticalOffset={insets.bottom}
+        keyboardVerticalOffset={0}
       >
         {/* Messages */}
         <FlatList
@@ -557,7 +545,7 @@ export default function ChatScreen() {
         )}
 
         {/* Input bar */}
-        <View style={styles.inputBarSafe}>
+        <SafeAreaView edges={["bottom"]} style={styles.inputBarSafe}>
           <View style={styles.inputBar}>
             <Pressable style={styles.attachBtn} onPress={handleAttach}>
               <MaterialCommunityIcons name="plus" size={20} color={COLORS.textMuted} />
@@ -583,7 +571,7 @@ export default function ChatScreen() {
               )}
             </Pressable>
           </View>
-        </View>
+        </SafeAreaView>
       </KeyboardAvoidingView>
 
       {/* Reaction picker modal */}
