@@ -101,7 +101,6 @@ export default function DiscoverMapView({
             <MapPin
               color={CATEGORY_COLORS[task.category] ?? CATEGORY_COLORS.other}
               category={task.category}
-              selected={task.id === selectedId}
             />
           </Marker>
         ))}

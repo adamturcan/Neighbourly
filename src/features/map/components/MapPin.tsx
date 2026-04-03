@@ -17,48 +17,20 @@ const CATEGORY_ICONS: Record<string, string> = {
 export default function MapPin({
   color,
   category,
-  selected,
 }: {
   color: string;
   category: string;
-  selected?: boolean;
 }) {
-  const size = selected ? 42 : 34;
-  const iconSize = selected ? 18 : 15;
-
   return (
-    <View style={[s.wrap, { width: size, height: size + 10 }]}>
-      {/* Drop shape */}
-      <View
-        style={[
-          s.head,
-          {
-            width: size,
-            height: size,
-            borderRadius: size / 2,
-            backgroundColor: color,
-            borderWidth: selected ? 3 : 2.5,
-          },
-        ]}
-      >
+    <View style={s.wrap}>
+      <View style={[s.head, { backgroundColor: color }]}>
         <MaterialCommunityIcons
           name={(CATEGORY_ICONS[category] as any) ?? "help-circle-outline"}
-          size={iconSize}
+          size={15}
           color="#fff"
         />
       </View>
-      {/* Triangle pointer */}
-      <View
-        style={[
-          s.pointer,
-          {
-            borderLeftWidth: selected ? 7 : 5,
-            borderRightWidth: selected ? 7 : 5,
-            borderTopWidth: selected ? 9 : 7,
-            borderTopColor: color,
-          },
-        ]}
-      />
+      <View style={[s.pointer, { borderTopColor: color }]} />
     </View>
   );
 }
@@ -66,10 +38,16 @@ export default function MapPin({
 const s = StyleSheet.create({
   wrap: {
     alignItems: "center",
+    width: 34,
+    height: 44,
   },
   head: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
     alignItems: "center",
     justifyContent: "center",
+    borderWidth: 2.5,
     borderColor: "#fff",
     shadowColor: "#000",
     shadowOpacity: 0.25,
@@ -80,6 +58,9 @@ const s = StyleSheet.create({
   pointer: {
     width: 0,
     height: 0,
+    borderLeftWidth: 5,
+    borderRightWidth: 5,
+    borderTopWidth: 7,
     borderLeftColor: "transparent",
     borderRightColor: "transparent",
     marginTop: -2,
