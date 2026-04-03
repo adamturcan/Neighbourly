@@ -72,7 +72,7 @@ export default function InboxScreen() {
 
     // Typing channels
     conversations.forEach((conv) => {
-      const ch = supabase.channel(`typing-inbox-${conv.taskId}`);
+      const ch = supabase.channel(`typing-${conv.taskId}`);
       ch.on("broadcast", { event: "typing" }, ({ payload }) => {
         if (payload.userId !== user.id) {
           setTypingTasks((prev) => new Set(prev).add(conv.taskId));
@@ -93,29 +93,28 @@ export default function InboxScreen() {
       channels.push(ch);
     });
 
-    // Listen for any new messages across all conversations
-    const msgChannel = supabase
-      .channel("inbox-messages")
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "messages" },
-        (payload: any) => {
-          // Clear typing indicator for this conversation since they sent a message
-          const msgTaskId = payload.new?.task_id;
-          if (msgTaskId) {
-            const existing = typingTimeouts.current.get(msgTaskId);
+    // Listen for new messages on each conversation
+    conversations.forEach((conv) => {
+      const msgCh = supabase
+        .channel(`inbox-msg-${conv.taskId}`)
+        .on(
+          "postgres_changes",
+          { event: "INSERT", schema: "public", table: "messages", filter: `task_id=eq.${conv.taskId}` },
+          () => {
+            // Clear typing for this conversation
+            const existing = typingTimeouts.current.get(conv.taskId);
             if (existing) clearTimeout(existing);
             setTypingTasks((prev) => {
               const next = new Set(prev);
-              next.delete(msgTaskId);
+              next.delete(conv.taskId);
               return next;
             });
-          }
-          refetch();
-        },
-      )
-      .subscribe();
-    channels.push(msgChannel);
+            refetch();
+          },
+        )
+        .subscribe();
+      channels.push(msgCh);
+    });
 
     return () => {
       channels.forEach((ch) => supabase.removeChannel(ch));
