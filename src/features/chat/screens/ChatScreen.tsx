@@ -18,6 +18,7 @@ import { listMessages, sendMessage, getTask, markAsRead, getOtherReadReceipt } f
 import type { Message } from "../../../shared/lib/api";
 import { useAuth } from "../../auth/store/useAuth";
 import { supabase } from "../../../shared/lib/supabase";
+import { onTyping, broadcastTyping } from "../../../shared/lib/typingService";
 import { COLORS, CATEGORY_COLORS } from "../../../shared/lib/constants";
 
 const CATEGORY_ICONS: Record<string, string> = {
@@ -66,7 +67,6 @@ export default function ChatScreen() {
   const [otherSeenAt, setOtherSeenAt] = useState<string | null>(null);
   const flatListRef = useRef<FlatList>(null);
   const typingTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const typingChannelRef = useRef<any>(null);
 
   const { data: messages = [], refetch } = useQuery({
     queryKey: ["messages", taskId],
@@ -132,39 +132,27 @@ export default function ChatScreen() {
     };
   }, [taskId, refetch]);
 
-  // Typing indicator — use a global channel so both chat + inbox can receive
+  // Typing indicator via shared service
   useEffect(() => {
     if (!taskId || !user) return;
-
-    const ch = supabase.channel("global-typing", { config: { broadcast: { self: true } } });
-    ch.on("broadcast", { event: "typing" }, ({ payload }) => {
-      if (payload.taskId === taskId && payload.userId !== user.id) {
+    const unsub = onTyping((tId, uId) => {
+      if (tId === taskId && uId !== user.id) {
         setOtherTyping(true);
         if (typingTimeout.current) clearTimeout(typingTimeout.current);
         typingTimeout.current = setTimeout(() => setOtherTyping(false), 3000);
       }
-    }).subscribe();
-
-    typingChannelRef.current = ch;
-
-    return () => {
-      supabase.removeChannel(ch);
-      if (typingTimeout.current) clearTimeout(typingTimeout.current);
-    };
+    });
+    return () => { unsub(); if (typingTimeout.current) clearTimeout(typingTimeout.current); };
   }, [taskId, user]);
 
-  const broadcastTyping = useCallback(() => {
-    typingChannelRef.current?.send({
-      type: "broadcast",
-      event: "typing",
-      payload: { userId: user?.id, taskId },
-    });
+  const doBroadcastTyping = useCallback(() => {
+    if (user?.id && taskId) broadcastTyping(taskId, user.id);
   }, [user, taskId]);
 
   const handleTextChange = useCallback((val: string) => {
     setText(val);
-    broadcastTyping();
-  }, [broadcastTyping]);
+    doBroadcastTyping();
+  }, [doBroadcastTyping]);
 
   const handleSend = useCallback(async () => {
     const trimmed = text.trim();

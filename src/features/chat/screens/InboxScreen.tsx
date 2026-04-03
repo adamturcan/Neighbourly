@@ -17,6 +17,7 @@ import { COLORS, CATEGORY_COLORS } from "../../../shared/lib/constants";
 import { TAB_BAR_HEIGHT } from "../../../navigation/RootNavigator";
 import { useAuth } from "../../auth/store/useAuth";
 import { supabase } from "../../../shared/lib/supabase";
+import { onTyping } from "../../../shared/lib/typingService";
 
 const AVATAR_COLORS = [
   "#E31B23",
@@ -64,35 +65,34 @@ export default function InboxScreen() {
     }, [refetch]),
   );
 
-  // Subscribe to typing indicators + new messages for all conversations
+  // Typing indicators via shared service
   useEffect(() => {
-    if (!conversations.length || !user) return;
-
-    const channels: any[] = [];
-
-    // Single global typing channel for all conversations
+    if (!user) return;
     const taskIds = new Set(conversations.map((c) => c.taskId));
-    const typingCh = supabase.channel("global-typing");
-    typingCh.on("broadcast", { event: "typing" }, ({ payload }) => {
-      if (payload.userId !== user.id && taskIds.has(payload.taskId)) {
-        setTypingTasks((prev) => new Set(prev).add(payload.taskId));
-        const existing = typingTimeouts.current.get(payload.taskId);
+    const unsub = onTyping((tId, uId) => {
+      if (uId !== user.id && taskIds.has(tId)) {
+        setTypingTasks((prev) => new Set(prev).add(tId));
+        const existing = typingTimeouts.current.get(tId);
         if (existing) clearTimeout(existing);
         typingTimeouts.current.set(
-          payload.taskId,
+          tId,
           setTimeout(() => {
             setTypingTasks((prev) => {
               const next = new Set(prev);
-              next.delete(payload.taskId);
+              next.delete(tId);
               return next;
             });
           }, 3000),
         );
       }
-    }).subscribe();
-    channels.push(typingCh);
+    });
+    return () => { unsub(); typingTimeouts.current.forEach((t) => clearTimeout(t)); };
+  }, [conversations.length, user]);
 
-    // Listen for new messages on each conversation
+  // Listen for new messages
+  useEffect(() => {
+    if (!conversations.length) return;
+    const channels: any[] = [];
     conversations.forEach((conv) => {
       const msgCh = supabase
         .channel(`inbox-msg-${conv.taskId}`)
@@ -100,7 +100,6 @@ export default function InboxScreen() {
           "postgres_changes",
           { event: "INSERT", schema: "public", table: "messages", filter: `task_id=eq.${conv.taskId}` },
           () => {
-            // Clear typing for this conversation
             const existing = typingTimeouts.current.get(conv.taskId);
             if (existing) clearTimeout(existing);
             setTypingTasks((prev) => {
@@ -114,11 +113,7 @@ export default function InboxScreen() {
         .subscribe();
       channels.push(msgCh);
     });
-
-    return () => {
-      channels.forEach((ch) => supabase.removeChannel(ch));
-      typingTimeouts.current.forEach((t) => clearTimeout(t));
-    };
+    return () => { channels.forEach((ch) => supabase.removeChannel(ch)); };
   }, [conversations.length, user, refetch]);
 
   const handlePress = useCallback(
