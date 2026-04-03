@@ -387,3 +387,137 @@ export async function leaveReview(input: {
     createdAt: data.created_at,
   };
 }
+
+// ============================================================
+// MESSAGES / CHAT
+// ============================================================
+
+export type Conversation = {
+  taskId: string;
+  taskTitle: string;
+  taskCategory: string;
+  taskStatus: string;
+  taskBudget: number;
+  otherUserId: string;
+  otherUserName: string;
+  lastMessage: string | null;
+  lastMessageAt: string | null;
+};
+
+export type Message = {
+  id: string;
+  taskId: string;
+  senderId: string;
+  content: string;
+  createdAt: string;
+};
+
+export async function listConversations(): Promise<Conversation[]> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return [];
+
+  // Get tasks where user is creator or helper with relevant statuses
+  const { data: tasks, error } = await supabase
+    .from("tasks")
+    .select("id, title, category, status, budget, creator_id, helper_id")
+    .or(`creator_id.eq.${user.id},helper_id.eq.${user.id}`)
+    .in("status", ["matched", "in_progress", "completed"])
+    .order("created_at", { ascending: false });
+
+  if (error) throw error;
+  if (!tasks || tasks.length === 0) return [];
+
+  // Get the other party's profile for each task
+  const otherIds = tasks.map((t: any) =>
+    t.creator_id === user.id ? t.helper_id : t.creator_id,
+  ).filter(Boolean);
+
+  const { data: profiles } = await supabase
+    .from("profiles")
+    .select("id, full_name, username")
+    .in("id", otherIds);
+
+  const profileMap = new Map(
+    (profiles ?? []).map((p: any) => [p.id, p.full_name ?? p.username ?? "User"]),
+  );
+
+  // Get the latest message for each task
+  const taskIds = tasks.map((t: any) => t.id);
+  const { data: messages } = await supabase
+    .from("messages")
+    .select("task_id, content, created_at")
+    .in("task_id", taskIds)
+    .order("created_at", { ascending: false });
+
+  const latestMessageMap = new Map<string, { content: string; created_at: string }>();
+  for (const msg of messages ?? []) {
+    if (!latestMessageMap.has(msg.task_id)) {
+      latestMessageMap.set(msg.task_id, { content: msg.content, created_at: msg.created_at });
+    }
+  }
+
+  return tasks.map((t: any) => {
+    const otherId = t.creator_id === user.id ? t.helper_id : t.creator_id;
+    const latest = latestMessageMap.get(t.id);
+    return {
+      taskId: t.id,
+      taskTitle: t.title,
+      taskCategory: t.category,
+      taskStatus: t.status,
+      taskBudget: t.budget ?? 0,
+      otherUserId: otherId ?? "",
+      otherUserName: profileMap.get(otherId) ?? "User",
+      lastMessage: latest?.content ?? null,
+      lastMessageAt: latest?.created_at ?? t.created_at ?? null,
+    } as Conversation;
+  }).sort((a, b) => {
+    const aTime = a.lastMessageAt ?? "";
+    const bTime = b.lastMessageAt ?? "";
+    return bTime.localeCompare(aTime);
+  });
+}
+
+export async function listMessages(taskId: string): Promise<Message[]> {
+  const { data, error } = await supabase
+    .from("messages")
+    .select("*")
+    .eq("task_id", taskId)
+    .order("created_at", { ascending: true });
+
+  if (error) throw error;
+  return (data ?? []).map((row: any) => ({
+    id: row.id,
+    taskId: row.task_id,
+    senderId: row.sender_id,
+    content: row.content,
+    createdAt: row.created_at,
+  }));
+}
+
+export async function sendMessage(taskId: string, content: string): Promise<Message> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Not authenticated");
+
+  const { data, error } = await supabase
+    .from("messages")
+    .insert({
+      task_id: taskId,
+      sender_id: user.id,
+      content,
+    })
+    .select()
+    .single();
+
+  if (error) throw error;
+  return {
+    id: data.id,
+    taskId: data.task_id,
+    senderId: data.sender_id,
+    content: data.content,
+    createdAt: data.created_at,
+  };
+}

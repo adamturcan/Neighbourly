@@ -8,6 +8,21 @@ Format: [Keep a Changelog](https://keepachangelog.com/)
 
 ## [2026-04-03] — Phase 1: Supabase Foundation & Auth
 
+## [2026-04-03] — Phase 4: Chat & Inbox
+
+### Added
+- Inbox screen: conversation list with avatar, name, last message, task context badge, time ago
+- ChatScreen: real-time messaging with Supabase Realtime subscription
+  - Incoming (gray) and outgoing (red) message bubbles with timestamps
+  - Task context banner at top (category icon, title, price, status)
+  - Input bar with attachment button, text field, send button
+- API: listConversations(), listMessages(), sendMessage()
+- "Message" button on TaskDetail when task is matched/in_progress
+- Auto-refetch inbox on tab focus
+- Empty state for inbox when no conversations
+
+---
+
 ## [2026-04-03] — Phase 3: Maps & Location
 
 ### Added

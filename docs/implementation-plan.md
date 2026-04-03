@@ -186,30 +186,30 @@
 
 ---
 
-## Phase 4: Communication & Chat
+## Phase 4: Communication & Chat ✅ COMPLETED (2026-04-03)
 
 **Why:** Seekers and helpers need to coordinate before, during, and after a task.
 
-### 4.1 - Real-time chat
-- [ ] Supabase Realtime subscription on `messages` table filtered by `task_id`
-- [ ] Chat screen: message bubbles, input bar, send button
-- [ ] Navigate to chat from TaskDetail (once task is `matched`)
-- [ ] Show last message preview in task list / inbox
+### 4.1 - Real-time chat ✅
+- [x] Supabase Realtime subscription on `messages` table filtered by `task_id`
+- [x] Chat screen: incoming (gray) / outgoing (red) message bubbles with timestamps
+- [x] Task context banner at top of chat (category icon, title, price, status)
+- [x] Input bar with attachment button, text field, send button
+- [x] Navigate to chat from TaskDetail ("Message" button when matched/in_progress)
+- [x] Show last message preview in inbox
 
-### 4.2 - Inbox screen (replace stub)
-- [ ] List of active conversations grouped by task
-- [ ] Each row: task title, other party's name/avatar, last message, unread badge
-- [ ] Tap -> opens chat for that task
+### 4.2 - Inbox screen ✅
+- [x] Conversation list with avatar, name, last message, time ago
+- [x] Task context badge (category + title) on each row
+- [x] Tap → opens ChatScreen
+- [x] Auto-refetch on tab focus
+- [x] Empty state when no conversations
 
 ### 4.3 - Push notifications
-- [ ] Install `expo-notifications`
-- [ ] Supabase Edge Function to send push on:
-  - New offer on your task
-  - Offer accepted
-  - New chat message
-  - Task status change
-- [ ] Store push tokens in `profiles` table
-- [ ] Notification tap deep-links to relevant screen
+- [ ] Install `expo-notifications` — _deferred to Phase 8_
+- [ ] Supabase Edge Function for push — _deferred to Phase 8_
+- [ ] Push token storage — _deferred to Phase 8_
+- [ ] Deep-link on notification tap — _deferred to Phase 8_
 
 ---
 
@@ -330,7 +330,7 @@
 | 2 | Phase 1: Auth & Supabase | ✅ Done | Phase 0 |
 | 3 | Phase 2: Task Lifecycle | ✅ Done | Phase 1 |
 | 4 | Phase 3: Maps & Location | ✅ Done | Phase 1 |
-| 5 | Phase 4: Chat & Notifications | ⬜ | Phase 2 |
+| 5 | Phase 4: Chat & Notifications | ✅ Done | Phase 2 |
 | 6 | Phase 5: Reviews & Profile | ⬜ | Phase 2 |
 | 7 | Phase 6: Payments | ⬜ | Phase 2 |
 | 8 | Phase 7: AI Agents | ⬜ | Phase 2, 4 |

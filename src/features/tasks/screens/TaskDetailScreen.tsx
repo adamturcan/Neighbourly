@@ -7,7 +7,7 @@ import {
   TextInput,
   ScrollView,
 } from "react-native";
-import { useRoute, useFocusEffect } from "@react-navigation/native";
+import { useRoute, useFocusEffect, useNavigation } from "@react-navigation/native";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   getTask,
@@ -32,6 +32,7 @@ const STATUS_COLORS: Record<string, string> = {
 
 export default function TaskDetailScreen() {
   const route = useRoute<any>();
+  const navigation = useNavigation<any>();
   const taskId = route.params?.taskId as string;
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -46,6 +47,23 @@ export default function TaskDetailScreen() {
     queryKey: ["offers", taskId],
     queryFn: () => listOffers(taskId),
     enabled: !!taskId,
+  });
+
+  // Get other party's name for chat
+  const { data: otherPartyName } = useQuery({
+    queryKey: ["otherPartyName", taskId],
+    queryFn: async () => {
+      if (!task) return "User";
+      const otherId = task.requesterId === user?.id ? task.helperId : task.requesterId;
+      if (!otherId) return "User";
+      const { data } = await supabase
+        .from("profiles")
+        .select("full_name, username")
+        .eq("id", otherId)
+        .single();
+      return data?.full_name ?? data?.username ?? "User";
+    },
+    enabled: !!task && (task.status === "matched" || task.status === "in_progress"),
   });
 
   // Refetch on focus
@@ -267,6 +285,30 @@ export default function TaskDetailScreen() {
               </View>
             )}
           </View>
+        )}
+
+        {/* Message button */}
+        {(task.status === "matched" || task.status === "in_progress") && (
+          <Pressable
+            onPress={() =>
+              navigation.navigate("ChatScreen", {
+                taskId: task.id,
+                otherName: otherPartyName ?? "User",
+              })
+            }
+            style={{
+              backgroundColor: COLORS.red,
+              borderRadius: 14,
+              paddingVertical: 16,
+              alignItems: "center",
+              flexDirection: "row",
+              justifyContent: "center",
+              gap: 8,
+            }}
+          >
+            <MaterialCommunityIcons name="chat-outline" size={18} color="#fff" />
+            <Text style={{ color: "#fff", fontWeight: "600", fontSize: 15 }}>Message</Text>
+          </Pressable>
         )}
 
         {/* Complete button */}

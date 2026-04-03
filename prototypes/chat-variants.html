@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Phase 4 — Chat & Inbox Prototypes</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Rounded:opsz,wght,FILL@20..48,100..700,0..1" rel="stylesheet">
+  <script>tailwind.config={theme:{extend:{colors:{brand:'#E31B23'},fontFamily:{sans:['Inter','system-ui']}}}}</script>
+  <style>
+    body{font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased}
+    .ph{width:375px;height:812px;border-radius:50px;border:10px solid #1d1d1f;overflow:hidden;position:relative;background:#fff;box-shadow:0 40px 80px -20px rgba(0,0,0,.3),inset 0 0 0 2px #3a3a3c}
+    .ph::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:150px;height:30px;background:#1d1d1f;border-radius:0 0 20px 20px;z-index:10}
+    .ms{font-family:'Material Symbols Rounded';font-size:24px;line-height:1;display:inline-block;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24}
+  </style>
+</head>
+<body class="bg-neutral-200 min-h-screen flex flex-col items-center gap-6 p-6">
+
+<h1 class="text-sm font-bold text-neutral-400 uppercase tracking-[.15em]">Phase 4 — Chat & Inbox</h1>
+
+<div class="flex gap-8 flex-wrap justify-center">
+
+<!-- ============ INBOX ============ -->
+<div>
+  <p class="text-[11px] font-semibold text-neutral-400 mb-2 text-center uppercase tracking-wider">Inbox — Conversations</p>
+  <div class="ph">
+    <div class="flex flex-col h-full pt-[42px]">
+      <div class="flex justify-between px-6 py-1 text-[12px] font-semibold text-black"><span>9:41</span><div class="flex gap-1 items-center"><span class="ms" style="font-size:15px">signal_cellular_alt</span><span class="ms" style="font-size:15px">wifi</span><span class="ms" style="font-size:16px">battery_full</span></div></div>
+
+      <div class="px-4 pt-2 pb-3">
+        <p class="text-[26px] font-extrabold text-black">Inbox</p>
+      </div>
+
+      <!-- Conversation list -->
+      <div class="flex-1 overflow-auto">
+        <!-- Active conversation (unread) -->
+        <div class="flex items-center gap-3 px-4 py-3 bg-red-50/50">
+          <div class="relative">
+            <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
+              <span class="ms text-blue-500" style="font-size:22px">person</span>
+            </div>
+            <div class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-green-500 border-2 border-white"></div>
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center justify-between">
+              <p class="text-[14px] font-bold text-black">Marek K.</p>
+              <span class="text-[11px] text-brand font-semibold">2 min</span>
+            </div>
+            <p class="text-[12px] text-neutral-500 font-medium truncate">Sure, I can come at 17:00. Is that ok?</p>
+            <div class="flex items-center gap-1.5 mt-0.5">
+              <div class="px-1.5 py-0.5 rounded bg-blue-100"><span class="text-[9px] font-bold text-blue-600">Moving</span></div>
+              <span class="text-[10px] text-neutral-400">Help me move a sofa</span>
+            </div>
+          </div>
+          <div class="w-5 h-5 rounded-full bg-brand flex items-center justify-center">
+            <span class="text-[10px] font-bold text-white">2</span>
+          </div>
+        </div>
+
+        <!-- Read conversation -->
+        <div class="flex items-center gap-3 px-4 py-3 border-b border-neutral-50">
+          <div class="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center">
+            <span class="ms text-purple-500" style="font-size:22px">person</span>
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center justify-between">
+              <p class="text-[14px] font-semibold text-black">Jana S.</p>
+              <span class="text-[11px] text-neutral-400">1h</span>
+            </div>
+            <p class="text-[12px] text-neutral-400 truncate">You: Great, see you tomorrow then!</p>
+            <div class="flex items-center gap-1.5 mt-0.5">
+              <div class="px-1.5 py-0.5 rounded bg-red-100"><span class="text-[9px] font-bold text-brand">Cleaning</span></div>
+              <span class="text-[10px] text-neutral-400">Deep clean before move-out</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Offer accepted -->
+        <div class="flex items-center gap-3 px-4 py-3 border-b border-neutral-50">
+          <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
+            <span class="ms text-green-600" style="font-size:22px">person</span>
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center justify-between">
+              <p class="text-[14px] font-semibold text-black">Peter V.</p>
+              <span class="text-[11px] text-neutral-400">3h</span>
+            </div>
+            <p class="text-[12px] text-neutral-400 truncate">Offer accepted · €22</p>
+            <div class="flex items-center gap-1.5 mt-0.5">
+              <div class="px-1.5 py-0.5 rounded bg-cyan-100"><span class="text-[9px] font-bold text-cyan-600">Plumbing</span></div>
+              <span class="text-[10px] text-neutral-400">Fix a leaking faucet</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Completed -->
+        <div class="flex items-center gap-3 px-4 py-3 border-b border-neutral-50 opacity-60">
+          <div class="w-12 h-12 rounded-full bg-neutral-100 flex items-center justify-center">
+            <span class="ms text-neutral-400" style="font-size:22px">person</span>
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center justify-between">
+              <p class="text-[14px] font-semibold text-neutral-500">Lucia M.</p>
+              <span class="text-[11px] text-neutral-400">2d</span>
+            </div>
+            <p class="text-[12px] text-neutral-400 truncate">Task completed ✓</p>
+            <div class="flex items-center gap-1.5 mt-0.5">
+              <div class="px-1.5 py-0.5 rounded bg-neutral-100"><span class="text-[9px] font-bold text-neutral-500">Tutoring</span></div>
+              <span class="text-[10px] text-neutral-400">Math tutoring</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab bar -->
+      <div class="px-3 pb-2">
+        <div class="bg-white rounded-full px-2 py-1.5 flex items-center justify-between shadow-[0_2px_20px_rgba(0,0,0,0.08)]">
+          <div class="flex-1 flex flex-col items-center gap-0.5 py-1.5"><span class="ms text-neutral-400" style="font-size:20px">explore</span><span class="text-[9px] text-neutral-400">Discover</span></div>
+          <div class="flex-1 flex flex-col items-center gap-0.5 py-1.5"><span class="ms text-neutral-400" style="font-size:20px">search</span><span class="text-[9px] text-neutral-400">Search</span></div>
+          <div class="flex items-center justify-center mx-1"><div class="w-11 h-11 rounded-full bg-brand flex items-center justify-center shadow-[0_4px_12px_rgba(227,27,35,0.3)]"><span class="ms text-white" style="font-size:22px">add</span></div></div>
+          <div class="flex-1 flex flex-col items-center gap-0.5 py-1.5 rounded-full bg-red-50">
+            <div class="relative"><span class="ms text-brand" style="font-size:20px">chat</span><div class="absolute -top-1 -right-1.5 w-3.5 h-3.5 rounded-full bg-brand border-2 border-white flex items-center justify-center"><span class="text-[7px] font-bold text-white">2</span></div></div>
+            <span class="text-[9px] font-semibold text-brand">Inbox</span>
+          </div>
+          <div class="flex-1 flex flex-col items-center gap-0.5 py-1.5"><span class="ms text-neutral-400" style="font-size:20px">person_outline</span><span class="text-[9px] text-neutral-400">Profile</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ CHAT ============ -->
+<div>
+  <p class="text-[11px] font-semibold text-neutral-400 mb-2 text-center uppercase tracking-wider">Chat — Conversation</p>
+  <div class="ph">
+    <div class="flex flex-col h-full pt-[42px]">
+      <div class="flex justify-between px-6 py-1 text-[12px] font-semibold text-black"><span>9:41</span><div class="flex gap-1 items-center"><span class="ms" style="font-size:15px">signal_cellular_alt</span><span class="ms" style="font-size:15px">wifi</span><span class="ms" style="font-size:16px">battery_full</span></div></div>
+
+      <!-- Chat header -->
+      <div class="flex items-center gap-3 px-4 py-2 border-b border-neutral-100">
+        <span class="ms text-black" style="font-size:22px">arrow_back_ios_new</span>
+        <div class="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center">
+          <span class="ms text-blue-500" style="font-size:18px">person</span>
+        </div>
+        <div class="flex-1">
+          <p class="text-[14px] font-bold text-black">Marek K.</p>
+          <p class="text-[11px] text-green-500 font-medium">Online</p>
+        </div>
+        <span class="ms text-neutral-400" style="font-size:20px">more_vert</span>
+      </div>
+
+      <!-- Task context banner -->
+      <div class="mx-3 mt-2 px-3 py-2 bg-neutral-50 rounded-xl flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-lg bg-blue-500 flex items-center justify-center">
+          <span class="ms text-white" style="font-size:16px">local_shipping</span>
+        </div>
+        <div class="flex-1">
+          <p class="text-[12px] font-semibold text-black">Help me move a sofa</p>
+          <p class="text-[10px] text-neutral-400">Moving · €35 · Matched</p>
+        </div>
+        <span class="ms text-neutral-300" style="font-size:16px">chevron_right</span>
+      </div>
+
+      <!-- Messages -->
+      <div class="flex-1 overflow-auto px-3 pt-4 flex flex-col gap-2">
+        <!-- System message -->
+        <div class="self-center px-3 py-1 bg-neutral-100 rounded-full mb-2">
+          <p class="text-[10px] text-neutral-400 font-medium">Offer accepted · Today 14:32</p>
+        </div>
+
+        <!-- Incoming -->
+        <div class="self-start max-w-[75%]">
+          <div class="bg-neutral-100 rounded-2xl rounded-bl-md px-3.5 py-2.5">
+            <p class="text-[14px] text-black">Hi! I accepted your offer. When can you come?</p>
+          </div>
+          <p class="text-[10px] text-neutral-400 mt-0.5 ml-1">14:33</p>
+        </div>
+
+        <!-- Outgoing -->
+        <div class="self-end max-w-[75%]">
+          <div class="bg-brand rounded-2xl rounded-br-md px-3.5 py-2.5">
+            <p class="text-[14px] text-white">Hey! I can be there at 17:00 today. Would that work?</p>
+          </div>
+          <p class="text-[10px] text-neutral-400 mt-0.5 mr-1 text-right">14:35</p>
+        </div>
+
+        <!-- Incoming -->
+        <div class="self-start max-w-[75%]">
+          <div class="bg-neutral-100 rounded-2xl rounded-bl-md px-3.5 py-2.5">
+            <p class="text-[14px] text-black">Perfect! The address is Kovanecká 14, 4th floor. Ring the bell for Novák.</p>
+          </div>
+          <p class="text-[10px] text-neutral-400 mt-0.5 ml-1">14:36</p>
+        </div>
+
+        <!-- Outgoing -->
+        <div class="self-end max-w-[75%]">
+          <div class="bg-brand rounded-2xl rounded-br-md px-3.5 py-2.5">
+            <p class="text-[14px] text-white">Got it! I'll bring my friend too so we can carry it together. See you at 5!</p>
+          </div>
+          <div class="flex items-center justify-end gap-1 mt-0.5 mr-1">
+            <p class="text-[10px] text-neutral-400">14:38</p>
+            <span class="ms text-blue-500" style="font-size:12px">done_all</span>
+          </div>
+        </div>
+
+        <!-- Incoming -->
+        <div class="self-start max-w-[75%]">
+          <div class="bg-neutral-100 rounded-2xl rounded-bl-md px-3.5 py-2.5">
+            <p class="text-[14px] text-black">Sure, I can come at 17:00. Is that ok?</p>
+          </div>
+          <p class="text-[10px] text-neutral-400 mt-0.5 ml-1">14:40</p>
+        </div>
+      </div>
+
+      <!-- Input bar -->
+      <div class="px-3 pb-8 pt-2 border-t border-neutral-100 bg-white">
+        <div class="flex items-center gap-2">
+          <div class="w-9 h-9 rounded-full bg-neutral-100 flex items-center justify-center">
+            <span class="ms text-neutral-400" style="font-size:20px">add</span>
+          </div>
+          <div class="flex-1 bg-neutral-100 rounded-full px-4 py-2.5 flex items-center">
+            <span class="text-[14px] text-neutral-400">Message…</span>
+          </div>
+          <div class="w-9 h-9 rounded-full bg-brand flex items-center justify-center">
+            <span class="ms text-white" style="font-size:18px">send</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+</body>
+</html>
