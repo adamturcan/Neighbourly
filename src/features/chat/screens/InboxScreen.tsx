@@ -11,8 +11,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { useQuery } from "@tanstack/react-query";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import { listConversations } from "../../../shared/lib/api";
+import { listConversations, listTasks } from "../../../shared/lib/api";
 import type { Conversation } from "../../../shared/lib/api";
+import type { Task } from "../../../shared/types";
 import { COLORS, CATEGORY_COLORS } from "../../../shared/lib/constants";
 import { TAB_BAR_HEIGHT } from "../../../navigation/RootNavigator";
 import { useAuth } from "../../auth/store/useAuth";
@@ -61,10 +62,30 @@ export default function InboxScreen() {
     placeholderData: (prev: any) => prev,
   });
 
+  // Fetch open tasks (booking requests + user's own pending tasks)
+  const { data: openTasks = [], refetch: refetchTasks } = useQuery({
+    queryKey: ["tasks", "open"],
+    queryFn: listTasks,
+    staleTime: 30000,
+    placeholderData: (prev: any) => prev,
+  });
+
+  // Booking requests others sent (tasks starting with "Booking:" where user has matching skills)
+  const mySkills = new Set(user ? [] : []); // We'll show all booking requests for now
+  const bookingRequests = openTasks.filter(
+    (t) => t.title.startsWith("Booking:") && t.requesterId !== user?.id,
+  );
+
+  // User's own pending tasks waiting for offers
+  const myPendingTasks = openTasks.filter(
+    (t) => t.requesterId === user?.id && t.status === "open",
+  );
+
   useFocusEffect(
     useCallback(() => {
       refetch();
-    }, [refetch]),
+      refetchTasks();
+    }, [refetch, refetchTasks]),
   );
 
   // Typing indicators via shared service
@@ -218,7 +239,7 @@ export default function InboxScreen() {
         <View style={styles.center}>
           <ActivityIndicator size="large" color={COLORS.red} />
         </View>
-      ) : conversations.length === 0 ? (
+      ) : conversations.length === 0 && bookingRequests.length === 0 && myPendingTasks.length === 0 ? (
         <View style={styles.center}>
           <MaterialCommunityIcons
             name="chat-outline"
@@ -239,6 +260,78 @@ export default function InboxScreen() {
             paddingBottom: TAB_BAR_HEIGHT + 20,
           }}
           showsVerticalScrollIndicator={false}
+          ListHeaderComponent={
+            <>
+              {/* Booking Requests */}
+              {bookingRequests.length > 0 && (
+                <View style={styles.requestSection}>
+                  <Text style={styles.requestSectionTitle}>
+                    Booking Requests ({bookingRequests.length})
+                  </Text>
+                  {bookingRequests.map((t) => (
+                    <Pressable
+                      key={t.id}
+                      style={styles.requestRow}
+                      onPress={() => navigation.navigate("Discover", {
+                        screen: "TaskDetail",
+                        params: { taskId: t.id },
+                      })}
+                    >
+                      <View style={styles.requestIcon}>
+                        <MaterialCommunityIcons name="calendar-clock" size={20} color={COLORS.red} />
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        <Text style={styles.requestTitle} numberOfLines={1}>
+                          {t.title.replace("Booking: ", "")}
+                        </Text>
+                        <Text style={styles.requestMeta}>
+                          €{t.budget} · {t.category} · {t.when ? new Date(t.when).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" }) : "ASAP"}
+                        </Text>
+                      </View>
+                      <View style={styles.requestBadge}>
+                        <Text style={styles.requestBadgeText}>View</Text>
+                      </View>
+                    </Pressable>
+                  ))}
+                </View>
+              )}
+
+              {/* My Pending Tasks */}
+              {myPendingTasks.length > 0 && (
+                <View style={styles.requestSection}>
+                  <Text style={styles.requestSectionTitle}>
+                    Awaiting Offers ({myPendingTasks.length})
+                  </Text>
+                  {myPendingTasks.map((t) => (
+                    <Pressable
+                      key={t.id}
+                      style={styles.requestRow}
+                      onPress={() => navigation.navigate("Discover", {
+                        screen: "TaskDetail",
+                        params: { taskId: t.id },
+                      })}
+                    >
+                      <View style={[styles.requestIcon, { backgroundColor: "#FEF3C7" }]}>
+                        <MaterialCommunityIcons name="clock-outline" size={20} color="#D97706" />
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        <Text style={styles.requestTitle} numberOfLines={1}>{t.title}</Text>
+                        <Text style={styles.requestMeta}>€{t.budget} · {t.category} · waiting for helpers</Text>
+                      </View>
+                      <MaterialCommunityIcons name="chevron-right" size={20} color="#D1D5DB" />
+                    </Pressable>
+                  ))}
+                </View>
+              )}
+
+              {/* Conversations header */}
+              {conversations.length > 0 && (bookingRequests.length > 0 || myPendingTasks.length > 0) && (
+                <Text style={[styles.requestSectionTitle, { paddingHorizontal: 20, paddingTop: 16 }]}>
+                  Messages
+                </Text>
+              )}
+            </>
+          }
         />
       )}
     </SafeAreaView>
@@ -381,5 +474,58 @@ const styles = StyleSheet.create({
     height: 5,
     borderRadius: 2.5,
     backgroundColor: "#22C55E",
+  },
+  // Request sections
+  requestSection: {
+    paddingBottom: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F3F4F6",
+  },
+  requestSectionTitle: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#6B7280",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: 8,
+  },
+  requestRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+  },
+  requestIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: "#FEF2F2",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  requestTitle: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#000",
+  },
+  requestMeta: {
+    fontSize: 12,
+    color: "#9CA3AF",
+    marginTop: 2,
+    textTransform: "capitalize",
+  },
+  requestBadge: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 10,
+    backgroundColor: COLORS.red,
+  },
+  requestBadgeText: {
+    color: "#fff",
+    fontSize: 12,
+    fontWeight: "600",
   },
 });
